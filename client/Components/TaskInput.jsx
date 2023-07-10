@@ -1,34 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, TextInput, Modal, Text, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, TextInput, Modal, Image } from 'react-native';
 import { Button } from 'react-native-paper';
 import DatePicker from 'react-native-modern-datepicker';
+import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
 
 function TaskInput(props) {
   const [enteredTaskText, setEnteredTaskText] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [dueDate, setDueDate] = useState(null);
   const [isStartDateSelected, setIsStartDateSelected] = useState(false);
 
   const goalInputHandler = (enteredText) => {
     setEnteredTaskText(enteredText);
   };
 
-  const addTaskHandler = () => {
+ const addTaskHandler = () => {
     if (!enteredTaskText || !selectedDate) {
       return;
     }
 
     if (!isStartDateSelected) {
-      setSelectedDate(null);
+      setStartDate(selectedDate);
       setIsStartDateSelected(true);
     } else {
-      const newTask = {
-        task: enteredTaskText,
-        startDate: selectedDate,
-        dueDate: new Date(),
-      };
-
-      props.setTasks((prevTasks) => [...prevTasks, newTask]);
+      setDueDate(selectedDate);
+      console.log(enteredTaskText, startDate, selectedDate);
+      props.onAddTask(enteredTaskText, startDate, selectedDate);
       setEnteredTaskText('');
       setSelectedDate(null);
       setIsStartDateSelected(false);
@@ -47,6 +46,13 @@ function TaskInput(props) {
   return (
     <Modal visible={props.visible} animationType="slide">
       <View style={styles.inputContainer}>
+        <Ionicons
+          name="close"
+          size={24}
+          color={COLORS.primary}
+          style={styles.iconButton}
+          onPress={handleClose}
+        />
         <Image source={require('../assets/images/task.png')} style={styles.image} />
         <TextInput
           autoFocus={true}
@@ -66,6 +72,15 @@ function TaskInput(props) {
           minDate={new Date()}
         />
         <View style={styles.buttonContainer}>
+          {isStartDateSelected && (
+            <Button
+              style={styles.button}
+              mode="outlined"
+              onPress={() => setIsStartDateSelected(false)}
+            >
+              Clear
+            </Button>
+          )}
           <Button
             style={styles.button}
             mode="contained"
@@ -75,7 +90,7 @@ function TaskInput(props) {
             {isStartDateSelected ? 'Set Due Date' : 'Set Start Date'}
           </Button>
           <Button style={styles.button} mode="outlined" onPress={handleClose}>
-            Cancel
+            Close
           </Button>
         </View>
       </View>
@@ -130,4 +145,15 @@ const styles = StyleSheet.create({
     marginTop: 8,
     width: '80%',
   },
+  iconButton: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    zIndex: 1,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    borderRadius: 8,
+    padding: 4,
+  }
+  
 });

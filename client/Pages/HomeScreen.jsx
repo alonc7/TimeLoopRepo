@@ -102,7 +102,10 @@ function HomeScreen() {
             ],
         );
     };
-
+    const handleDropdownMenuPress = () => {
+        // Implement your logic to show the dropdown menu for the specific column
+        // You can use state variables or functions to control the visibility of the dropdown menu
+    };
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.container}>
@@ -116,31 +119,40 @@ function HomeScreen() {
                     </TouchableOpacity>
                     <Text style={styles.welcomeText}>Welcome {userName}!</Text>
                 </View>
-
                 <Grid style={styles.gridContainer}>
                     <Col>
-                        <View style={styles.boxTimeRemain}>
-                            <Text>Total Time of Remaining Tasks</Text>
-                            <Text style={styles.boxText}>5 hours</Text>
-                        </View>
+                        <TouchableOpacity onPress={handleDropdownMenuPress}>
+                            <View style={styles.boxTimeRemain}>
+                                <Text>Total Time of Remaining Tasks</Text>
+                                <Text style={styles.boxText}>5 hours</Text>
+                            </View>
+                        </TouchableOpacity>
                     </Col>
                     <Col>
-                        <View style={[styles.box, { backgroundColor: '#7B1FA2' }]}>
-                            <Text>Tasks Completed</Text>
-                            <Text style={styles.boxText}>10</Text>
-                        </View>
-                        <View style={[styles.box, { backgroundColor: '#4CAF50' }]}>
-                            <Text>Tasks Remaining</Text>
-                            <Text style={styles.boxText}>5</Text>
-                        </View>
-                        <View style={[styles.box, { backgroundColor: '#FFEB3B' }]}>
-                            <Text>Tasks Completed On Time</Text>
-                            <Text style={styles.boxText}>7</Text>
-                        </View>
-                        <View style={[styles.box, { backgroundColor: '#FF9800' }]}>
-                            <Text>Tasks Completed After Due</Text>
-                            <Text style={styles.boxText}>3</Text>
-                        </View>
+                        <TouchableOpacity onPress={handleDropdownMenuPress}>
+                            <View style={[styles.box, { backgroundColor: '#7B1FA2' }]}>
+                                <Text>Tasks Completed</Text>
+                                <Text style={styles.boxText}>10</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={handleDropdownMenuPress}>
+                            <View style={[styles.box, { backgroundColor: '#4CAF50' }]}>
+                                <Text>Tasks Remaining</Text>
+                                <Text style={styles.boxText}>5</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={handleDropdownMenuPress}>
+                            <View style={[styles.box, { backgroundColor: '#FFEB3B' }]}>
+                                <Text>Tasks Completed On Time</Text>
+                                <Text style={styles.boxText}>7</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={handleDropdownMenuPress}>
+                            <View style={[styles.box, { backgroundColor: '#FF9800' }]}>
+                                <Text>Tasks Completed After Due</Text>
+                                <Text style={styles.boxText}>3</Text>
+                            </View>
+                        </TouchableOpacity>
                     </Col>
                 </Grid>
             </View>

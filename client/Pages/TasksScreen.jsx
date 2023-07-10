@@ -21,20 +21,17 @@ const TasksScreen = () => {
     setModalIsVisible(!modalIsVisible);
   }
 
-  function addTaskHandler({ task, startDate, dueDate }) {
-    console.log('it gets here addGoalHandler');
-    if (task.trim() === '' || startDate.trim() === '' || dueDate.trim() === '') {
-      return;
-    }
+  function addTaskHandler( title, startDate, dueDate ) {
     setTaskList((currentListGoals) => [
       ...currentListGoals,
       {
-        text: task,
+        text: title,
         startDate: startDate,
         dueDate: dueDate,
         key: counter,
       },
     ]);
+    console.log(counter,title,startDate,dueDate);
     setCounter((currCounter) => currCounter + 1);
     handleModalIsVisible();
   }
@@ -70,6 +67,7 @@ const TasksScreen = () => {
           onClose={handleModalIsVisible}
           toggleBtn={toggleBtn}
           setTasks={setTaskList}
+          key={counter}
         />
         <View style={styles.goalsContainer}>
           <FlatList
@@ -77,12 +75,14 @@ const TasksScreen = () => {
             data={taskList}
             renderItem={({ item }) => (
               <GoalItem
-                text={item.text}
-                startDate={item.startDate}
-                dueDate={item.dueDate}
-                id={item.key}
-                onDeleteItem={deleteGoalHandler}
-              />
+              text="Get Hair Cut"
+              startDate="2023-07-10"
+              endDate="2023-07-12"
+              startHour="10:00 AM"
+              endHour="12:00 PM"
+              totalTime="2 hours"
+              onDeleteItem={deleteGoalHandler}
+            />
             )}
             keyExtractor={(item, index) => index.toString()}
             alwaysBounceVertical={false}

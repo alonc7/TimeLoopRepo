@@ -1,43 +1,94 @@
-import { StyleSheet, View, Text, Pressable, Button } from "react-native";
-
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, Pressable, Button } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import COLORS from '../constants/colors';
 function GoalItem(props) {
+    const { text, startDate, endDate, startHour, endHour, totalTime, onDeleteItem } = props;
+    const [completed, setCompleted] = useState(false);
 
-    function handleDeleteItem(props) {
-        return () => {
-            props.onDeleteItem(props.id);
-        };
+    function handleDeleteItem() {
+        onDeleteItem(props.id);
     }
-    return (
-        < Pressable
-            android_ripple={{ color: '#8e41413c3c' }}
-        >
-            <View style={styles.goalItem}>
-                <Text style={styles.goalItem}>{(props.text)}</Text>
-                <Text style={styles.goalItem}>{(props.startDate)}</Text>
-                <Text style={styles.goalItem}>{(props.dueDate)}</Text>
-                <Button
-                    onPress={handleDeleteItem(props)}
-                    title="✖️"></Button>
-            </View>
-        </Pressable >
-    )
-};
 
-export default GoalItem;
+    function toggleCompletion() {
+        setCompleted(!completed);
+    }
+
+    return (
+        <Pressable onPress={toggleCompletion}>
+            <View style={styles.goalItem}>
+                <View style={styles.leftColumn}>
+                    <Ionicons
+                        name={completed ? 'ios-checkmark-circle' : 'ios-checkmark-circle-outline'}
+                        size={24}
+                        color={completed ? '#2ecc71' : '#white'}
+                        onPress={toggleCompletion}
+                    />
+                    <Text style={styles.taskText}>{text}</Text>
+                </View>
+                <View style={styles.rightColumn}>
+                    <View style={styles.dateContainer}>
+                        <Text>{startDate}</Text>
+                        <Text>~{endDate}</Text>
+                    </View>
+                    <View style={styles.timeContainer}>
+                        <Text>Start Hour:</Text>
+                        <Text>{startHour}</Text>
+                    </View>
+                    <View style={styles.timeContainer}>
+                        <Text>End Hour:</Text>
+                        <Text>{endHour}</Text>
+                    </View>
+                    <Text style={styles.totalTimeText}>Total Time: {totalTime}</Text>
+                </View>
+                <Button onPress={handleDeleteItem} title="✖️" />
+            </View>
+        </Pressable>
+    );
+}
 
 const styles = StyleSheet.create({
     goalItem: {
-        margin: 8,
-        padding: 2,
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 35,
+        marginVertical: 8,
+        paddingHorizontal: 16,
         borderRadius: 6,
         backgroundColor: '#5b55ab',
     },
-
-    goalText: {
-        color: 'white'
+    leftColumn: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
-    pressedItem: { // style for IOS.
-        opacity: 0.5
+    rightColumn: {
+        flex: 1,
+        marginLeft: 4,
     },
+    checkboxIcon: {
+        marginRight: 8,
+        color: COLORS.primary
+    },
+    taskText: {
+        flex: 1,
+        color: 'white',
+        paddingLeft: 10
+    },
+    timeContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    totalTimeText: {
+        marginBottom: 8,
+        color: 'white',
+    },
+    dateContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+});
 
-})
+export default GoalItem;
