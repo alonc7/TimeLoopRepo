@@ -34,27 +34,20 @@ const Login = ({ navigation }) => {
 
       if (response.ok) {
         const data = await response.json();
-        // Handle successful login
         const userData = {
-          token: data.token, // Assuming the API response includes the token
+          token: data.token,
           name: data.name,
           email: data.email,
-          // Include any other relevant user data from the API response
         };
-        setUserName(userData.name);
-        console.log('userName:', userData.name);
-        storeUserData(userData);
         setAuthenticated(true);
-        console.log(data.message);
-        // await AsyncStorage.setItem('userData', JSON.stringify(userData));
-        console.log('LoginScreen: User data saved successfully.');
+        storeUserData(userData);
+        setUserName(userData.name);
+        console.log(data.message, 'LoginScreen: User data saved successfully.');
       } else {
         const data = await response.json();
-        // Handle login error
-        console.log(data.message); // or display an error message to the user
+        console.log(data.message);
       }
     } catch (error) {
-      // Handle network errors or other exceptions
       console.error('Error logging in:', error);
     }
   };

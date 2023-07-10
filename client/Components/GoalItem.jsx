@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Pressable, Button } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
 function GoalItem(props) {
-    const { text, startDate, endDate, startHour, endHour, totalTime, onDeleteItem } = props;
+    const { text, startDate, endDate, startHour, endHour, onDeleteItem, id } = props;
     const [completed, setCompleted] = useState(false);
 
     function handleDeleteItem() {
@@ -21,7 +21,7 @@ function GoalItem(props) {
                     <Ionicons
                         name={completed ? 'ios-checkmark-circle' : 'ios-checkmark-circle-outline'}
                         size={24}
-                        color={completed ? '#2ecc71' : '#white'}
+                        color={completed ? '#2ecc71' : '#ffffff'}
                         onPress={toggleCompletion}
                     />
                     <Text style={styles.taskText}>{text}</Text>
@@ -39,10 +39,12 @@ function GoalItem(props) {
                         <Text>End Hour:</Text>
                         <Text>{endHour}</Text>
                     </View>
-                    <Text style={styles.totalTimeText}>Total Time: {totalTime}</Text>
                 </View>
-                <Button onPress={handleDeleteItem} title="✖️" />
+
             </View>
+                <View style={styles.buttonContainer}>
+                    <Button onPress={handleDeleteItem} title="✖️" />
+                </View>
         </Pressable>
     );
 }
@@ -81,14 +83,14 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginBottom: 8,
     },
-    totalTimeText: {
-        marginBottom: 8,
-        color: 'white',
-    },
     dateContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
+    buttonContainer: {
+        width: 30, // Customize the width as needed
+        height: 50, // Customize the height as needed
+      },
 });
 
 export default GoalItem;

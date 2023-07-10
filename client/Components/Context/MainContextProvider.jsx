@@ -5,7 +5,8 @@ function MainContextProvider({ children }) {
   const [authenticated, setAuthenticated] = useState(false)
   const [userName, setUserName] = useState('');
 
-  console.log('userName:', userName); // Add this line to check the value
+
+  console.log('userName:', userName);
 
   const MainContextValues = {
     setAuthenticated,

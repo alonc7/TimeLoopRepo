@@ -13,8 +13,6 @@ function HomeScreen() {
     const { userName } = useContext(MainContext);
 
     useEffect(() => {
-        console.log(userName);
-        console.log(userImage);
         retriveUserImage();
     }, []);
 

@@ -21,7 +21,7 @@ const TasksScreen = () => {
     setModalIsVisible(!modalIsVisible);
   }
 
-  function addTaskHandler( title, startDate, dueDate ) {
+  function addTaskHandler(title, startDate, dueDate) {
     setTaskList((currentListGoals) => [
       ...currentListGoals,
       {
@@ -31,7 +31,7 @@ const TasksScreen = () => {
         key: counter,
       },
     ]);
-    console.log(counter,title,startDate,dueDate);
+    console.log(counter, title, startDate, dueDate);
     setCounter((currCounter) => currCounter + 1);
     handleModalIsVisible();
   }
@@ -75,14 +75,14 @@ const TasksScreen = () => {
             data={taskList}
             renderItem={({ item }) => (
               <GoalItem
-              text="Get Hair Cut"
-              startDate="2023-07-10"
-              endDate="2023-07-12"
-              startHour="10:00 AM"
-              endHour="12:00 PM"
-              totalTime="2 hours"
-              onDeleteItem={deleteGoalHandler}
-            />
+                text={item.text}
+                startDate={item.startDate}
+                endDate={item.dueDate}
+                id={item.key}
+                startHour="10:00 AM"
+                endHour="12:00 PM"
+                onDeleteItem={deleteGoalHandler}
+              />
             )}
             keyExtractor={(item, index) => index.toString()}
             alwaysBounceVertical={false}
