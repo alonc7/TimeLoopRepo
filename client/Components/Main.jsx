@@ -17,7 +17,7 @@ export default function Main() {
                 if (userDataString !== null) {
                     const userData = JSON.parse(userDataString);
                     // Use the retrieved user data to authenticate the user
-                    console.log('User data retrieved successfully:', userData);
+                    console.log('Main: User data retrieved successfully:');
                     setAuthenticated(true);
                 } else {
                     // User data does not exist
@@ -31,7 +31,7 @@ export default function Main() {
         };
 
         retrieveUserData();
-    }, [setAuthenticated]);
+    }, []);
 
     const getContent = () => {
         if (isLoading) {

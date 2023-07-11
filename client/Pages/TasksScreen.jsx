@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, FlatList, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, Pressable, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingAction } from "react-native-floating-action";
 import { AntDesign } from '@expo/vector-icons';
@@ -8,10 +8,10 @@ import GoalItem from '../Components/GoalItem';
 import COLORS from '../constants/colors';
 
 const TasksScreen = () => {
-  const [modalIsVisible, setModalIsVisible] = useState(false);
-  const [taskList, setTaskList] = useState([]);
-  const [isHidden, setIsHidden] = useState(true);
-  const [counter, setCounter] = useState(1);
+  const [modalIsVisible, setModalIsVisible] = useState(false); // boolean for visualise of the modal ( is it visual right now?)
+  const [isHidden, setIsHidden] = useState(true); // boolean for setting the modal hidden or not. 
+  const [taskList, setTaskList] = useState([]); // array of tasks 
+  const [counter, setCounter] = useState(1); // use for id creating. 
 
   function toggleBtn() {
     setIsHidden(!isHidden);
@@ -21,14 +21,16 @@ const TasksScreen = () => {
     setModalIsVisible(!modalIsVisible);
   }
 
-  function addTaskHandler(title, startDate, dueDate) {
-    setTaskList((currentListGoals) => [
-      ...currentListGoals,
+  function addTaskHandler(title, startDate, dueDate, startTime, dueTime) {
+    setTaskList((currentListTasks) => [
+      ...currentListTasks,
       {
         text: title,
         startDate: startDate,
         dueDate: dueDate,
         key: counter,
+        startTime: startTime,
+        dueTime: dueTime
       },
     ]);
     console.log(counter, title, startDate, dueDate);
@@ -36,14 +38,14 @@ const TasksScreen = () => {
     handleModalIsVisible();
   }
 
-  function deleteAllGoals() {
+  function deleteAllTasks() {
     setTaskList([]);
     toggleBtn();
   }
 
-  function deleteGoalHandler(id) {
-    setTaskList((currentListGoals) =>
-      currentListGoals.filter((goal) => goal.key !== id)
+  function deleteTaskHandler(id) {
+    setTaskList((currentListTasks) =>
+      currentListTasks.filter((task) => task.key !== id)
     );
   }
 
@@ -69,7 +71,7 @@ const TasksScreen = () => {
           setTasks={setTaskList}
           key={counter}
         />
-        <View style={styles.goalsContainer}>
+        <View style={styles.tasksContainer}>
           <FlatList
             contentContainerStyle={{ justifyContent: 'center' }}
             data={taskList}
@@ -79,9 +81,9 @@ const TasksScreen = () => {
                 startDate={item.startDate}
                 endDate={item.dueDate}
                 id={item.key}
-                startHour="10:00 AM"
-                endHour="12:00 PM"
-                onDeleteItem={deleteGoalHandler}
+                startHour={item?.startTime}
+                endHour={item?.dueTime}
+                onDeleteItem={deleteTaskHandler}
               />
             )}
             keyExtractor={(item, index) => index.toString()}
@@ -89,7 +91,7 @@ const TasksScreen = () => {
           />
           <Pressable
             style={[styles.buttonText, isHidden && styles.btnHide]}
-            onPress={deleteAllGoals}
+            onPress={deleteAllTasks}
           >
             <Text style={styles.buttonText}>Delete All Tasks</Text>
           </Pressable>
@@ -117,7 +119,7 @@ const styles = StyleSheet.create({
   },
 
 
-  goalsContainer: {
+  tasksContainer: {
     flex: 5
   },
   buttonText: {

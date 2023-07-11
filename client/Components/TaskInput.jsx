@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, Modal, Image } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Modal, Image, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-paper';
 import DatePicker from 'react-native-modern-datepicker';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,26 +8,32 @@ import COLORS from '../constants/colors';
 function TaskInput(props) {
   const [enteredTaskText, setEnteredTaskText] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
   const [startDate, setStartDate] = useState(null);
+  const [startTime, setStartTime] = useState(null);
   const [dueDate, setDueDate] = useState(null);
+  const [dueTime, setDueTime] = useState(null);
   const [isStartDateSelected, setIsStartDateSelected] = useState(false);
+  const [isCalendarVisible, setCalendarVisible] = useState(false);
+  const [selectedPriority, setSelectedPriority] = useState(null);
 
   const goalInputHandler = (enteredText) => {
     setEnteredTaskText(enteredText);
   };
 
- const addTaskHandler = () => {
+  const addTaskHandler = () => {
     if (!enteredTaskText || !selectedDate) {
       return;
     }
 
     if (!isStartDateSelected) {
       setStartDate(selectedDate);
+      setStartTime(selectedTime);
       setIsStartDateSelected(true);
     } else {
       setDueDate(selectedDate);
-      console.log(enteredTaskText, startDate, selectedDate);
-      props.onAddTask(enteredTaskText, startDate, selectedDate);
+      setDueTime(selectedTime);
+      props.onAddTask(enteredTaskText, startDate, selectedDate, startTime, selectedTime);
       setEnteredTaskText('');
       setSelectedDate(null);
       setIsStartDateSelected(false);
@@ -39,20 +45,76 @@ function TaskInput(props) {
     setSelectedDate(date);
   };
 
+  const handleTimeChange = (time) => {
+    setSelectedTime(time.toString());
+  };
+
   const handleClose = () => {
     props.onClose();
   };
 
+  const handleToggleCalendar = () => {
+    setCalendarVisible(!isCalendarVisible);
+  };
+
+  const handlePrioritySelection = (priority) => {
+    setSelectedPriority(priority);
+  };
+  const priorityOptions = (
+    <View style={styles.priorityOptionsContainer}>
+      <TouchableOpacity
+        style={[
+          styles.priorityOption,
+          selectedPriority === 'high' && styles.selectedPriorityOption,
+        ]}
+        onPress={() => handleOptionSelection('high')}
+      >
+        <Text
+          style={[
+            styles.priorityOptionText,
+            selectedPriority === 'high' && styles.selectedPriorityOptionText,
+          ]}
+        >
+          High
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.priorityOption,
+          selectedPriority === 'medium' && styles.selectedPriorityOption,
+        ]}
+        onPress={() => handleOptionSelection('medium')}
+      >
+        <Text
+          style={[
+            styles.priorityOptionText,
+            selectedPriority === 'medium' && styles.selectedPriorityOptionText,
+          ]}
+        >
+          Medium
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.priorityOption,
+          selectedPriority === 'low' && styles.selectedPriorityOption,
+        ]}
+        onPress={() => handleOptionSelection('low')}
+      >
+        <Text
+          style={[
+            styles.priorityOptionText,
+            selectedPriority === 'low' && styles.selectedPriorityOptionText,
+          ]}
+        >
+          Low
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
   return (
     <Modal visible={props.visible} animationType="slide">
       <View style={styles.inputContainer}>
-        <Ionicons
-          name="close"
-          size={24}
-          color={COLORS.primary}
-          style={styles.iconButton}
-          onPress={handleClose}
-        />
         <Image source={require('../assets/images/task.png')} style={styles.image} />
         <TextInput
           autoFocus={true}
@@ -62,15 +124,24 @@ function TaskInput(props) {
           onChangeText={goalInputHandler}
           value={enteredTaskText}
         />
-        <DatePicker
-          style={styles.datePicker}
-          mode="datepicker"
-          onDateChange={handleDateChange}
-          placeholder={!isStartDateSelected ? "Set Start Date" : "Set Due Date"}
-          display="spinner"
-          date={selectedDate}
-          minDate={new Date()}
-        />
+
+        <View style={styles.iconContainer}>
+          <Ionicons
+            name="calendar"
+            size={40}
+            color={COLORS.black}
+            style={styles.iconButton}
+            onPress={handleToggleCalendar}
+          />
+          <Ionicons
+            name="md-options"
+            size={40}
+            color={COLORS.black}
+            style={styles.iconButton}
+            onPress={() => handlePrioritySelection({ priorityOptions })}
+          />
+        </View>
+
         <View style={styles.buttonContainer}>
           {isStartDateSelected && (
             <Button
@@ -93,6 +164,19 @@ function TaskInput(props) {
             Close
           </Button>
         </View>
+
+        {isCalendarVisible && (
+          <DatePicker
+            style={styles.datePicker}
+            mode="datepicker"
+            onDateChange={handleDateChange}
+            onTimeChange={handleTimeChange}
+            placeholder={!isStartDateSelected ? 'Set Start Date' : 'Set Due Date'}
+            display="spinner"
+            date={selectedDate}
+            minDate={new Date()}
+          />
+        )}
       </View>
     </Modal>
   );
@@ -116,12 +200,6 @@ const styles = StyleSheet.create({
   button: {
     marginHorizontal: 10,
   },
-  buttonText: {
-    color: '#cccccc',
-    fontSize: 18,
-    textDecorationLine: 'underline',
-    fontWeight: 'bold',
-  },
   textInput: {
     borderWidth: 1.5,
     borderColor: '#F6F6F6',
@@ -130,7 +208,7 @@ const styles = StyleSheet.create({
     borderColor: '#917FB3',
     borderRadius: 10,
     width: '80%',
-    marginRight: 8,
+    marginVertical: 8,
     padding: 16,
     fontWeight: 'bold',
   },
@@ -143,17 +221,51 @@ const styles = StyleSheet.create({
   },
   datePicker: {
     marginTop: 8,
+    borderWidth: 1.5,
+    color: '#E5BEEC',
+    borderColor: '#917FB3',
+    borderRadius: 10,
     width: '80%',
+    height: '50%',
+    marginVertical: 8,
   },
   iconButton: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    zIndex: 1,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
+    borderWidth: 1.5,
+    borderColor: '#917FB3',
     borderRadius: 8,
     padding: 4,
-  }
-  
+    marginHorizontal: 5
+
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    marginTop: 16,
+  },
+  priorityOptionsOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  priorityOptionsContainer: {
+    backgroundColor: COLORS.secondary,
+    borderRadius: 10,
+    padding: 16,
+  },
+  priorityOption: {
+    padding: 8,
+    marginVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+  selectedPriorityOption: {
+    backgroundColor: COLORS.primary,
+  },
+  priorityOptionText: {
+    color: COLORS.black,
+  },
+  selectedPriorityOptionText: {
+    color: COLORS.white,
+  },
 });

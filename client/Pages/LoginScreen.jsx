@@ -9,7 +9,7 @@ import Button from '../Components/UI/Button';
 import { MainContext } from '../Components/Context/MainContextProvider';
 
 const Login = ({ navigation }) => {
-  const { authenticated, setAuthenticated, setUserName } = useContext(MainContext);
+  const { authenticated, setAuthenticated} = useContext(MainContext);
   const [isPasswordShown, setIsPasswordShown] = useState(true);
   const [isChecked, setIsChecked] = useState(false);
   const [email, setEmail] = useState('');
@@ -24,25 +24,22 @@ const Login = ({ navigation }) => {
 
   const handleLogin = async (email, password) => {
     try {
-      const response = await fetch('https://time-loop-nodejs.onrender.com/api/users/login', {
+      const response = await fetch('https://timeloopserver.onrender.com/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
       });
-
       if (response.ok) {
         const data = await response.json();
         const userData = {
-          token: data.token,
-          name: data.name,
-          email: data.email,
+          token: data.user.token,
+          name: data.user.firstName,
+          email: data.user.email,
         };
-        setAuthenticated(true);
         storeUserData(userData);
-        setUserName(userData.name);
-        console.log(data.message, 'LoginScreen: User data saved successfully.');
+        setAuthenticated(true);
       } else {
         const data = await response.json();
         console.log(data.message);
@@ -66,14 +63,12 @@ const Login = ({ navigation }) => {
       const userDataString = await AsyncStorage.getItem('userData');
       if (userDataString !== null) {
         const userData = JSON.parse(userDataString);
-        // Use the retrieved user data to authenticate the user
-        console.log('User data retrieved successfully:', userData);
+        console.log('User data retrieved successfully:');
 
-        return userData; // Return the retrieved user data
+        return userData;
       } else {
-        // User data does not exist, redirect to login screen
         console.log('User data not found. Redirect to login.');
-        return null; // Return null if user data is not found
+        return null;
       }
     } catch (error) {
       console.log('Error retrieving user data:', error);
@@ -84,7 +79,7 @@ const Login = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.contentContainer}>
-        <Text style={styles.title}>Welcome!👋</Text>
+        <Text style={styles.title}> Welcome!👋</Text>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Email address</Text>

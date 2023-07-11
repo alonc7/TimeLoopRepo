@@ -10,10 +10,13 @@ import { MainContext } from '../Components/Context/MainContextProvider';
 
 function HomeScreen() {
     const [userImage, setUserImage] = useState(null);
-    const { userName } = useContext(MainContext);
+    const { userName, setUserName } = useContext(MainContext);
+
 
     useEffect(() => {
+        // removeDataFromAsyncStorage();
         retriveUserImage();
+        retrieveUserName();
     }, []);
 
     const retriveUserImage = async () => {
@@ -26,7 +29,26 @@ function HomeScreen() {
             console.log('Error retrieving user image', error);
         }
     };
-
+    const retrieveUserName = async () => {
+        try {
+          const userDataString = await AsyncStorage.getItem('userData');
+          if (userDataString !== null) {
+            const userData = JSON.parse(userDataString);
+            setUserName(userData.name);
+          }
+        } catch (error) {
+          console.log('Error retrieving user data:', error);
+        }
+      };
+  
+    const removeDataFromAsyncStorage = async () => {
+        try {
+            await AsyncStorage.removeItem('userData');
+            console.log('User data removed successfully.');
+        } catch (error) {
+            console.log('Error removing user data:', error);
+        }
+    };
     const saveUserImage = async () => {
         try {
             if (userImage) {
@@ -175,7 +197,7 @@ const styles = StyleSheet.create({
         padding: 20,
         marginLeft: 10,
         width: '90%',
-        height: '90%',
+        height: '95%',
     },
     box: {
         justifyContent: 'center',

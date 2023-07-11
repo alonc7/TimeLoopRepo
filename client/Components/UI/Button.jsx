@@ -34,3 +34,21 @@ const styles = StyleSheet.create({
     }
 })
 export default Button
+
+ {/* <Ionicons
+          name="close"
+          size={24}
+          color={COLORS.black}
+          style={styles.iconButton}
+          onPress={handleClose}
+          iconButton: {
+            position: 'absolute',
+            top: 16,
+            left: 16,
+            zIndex: 1,
+            borderWidth: 1,
+            borderColor: COLORS.primary,
+            borderRadius: 8,
+            padding: 4,
+          }
+        /> */}
