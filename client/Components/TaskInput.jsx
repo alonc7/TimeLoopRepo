@@ -8,14 +8,15 @@ import COLORS from '../constants/colors';
 function TaskInput(props) {
   const [enteredTaskText, setEnteredTaskText] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
+  const [selectedTime, setSelectedTime] = useState();
   const [startDate, setStartDate] = useState(null);
   const [startTime, setStartTime] = useState(null);
   const [dueDate, setDueDate] = useState(null);
   const [dueTime, setDueTime] = useState(null);
   const [isStartDateSelected, setIsStartDateSelected] = useState(false);
   const [isCalendarVisible, setCalendarVisible] = useState(false);
-  const [selectedPriority, setSelectedPriority] = useState(null);
+  const [selectedPriority, setSelectedPriority] = useState('low');
+  const [isPriorityVisible, setPriorityVisible] = useState(false);
 
   const goalInputHandler = (enteredText) => {
     setEnteredTaskText(enteredText);
@@ -33,7 +34,8 @@ function TaskInput(props) {
     } else {
       setDueDate(selectedDate);
       setDueTime(selectedTime);
-      props.onAddTask(enteredTaskText, startDate, selectedDate, startTime, selectedTime);
+      console.log(enteredTaskText, startDate, selectedDate, startTime, selectedTime, selectedPriority);
+      props.onAddTask(enteredTaskText, startDate, selectedDate, startTime, selectedTime, selectedPriority);
       setEnteredTaskText('');
       setSelectedDate(null);
       setIsStartDateSelected(false);
@@ -54,20 +56,31 @@ function TaskInput(props) {
   };
 
   const handleToggleCalendar = () => {
+    if (isPriorityVisible) {
+      setPriorityVisible(!isPriorityVisible);
+    }
     setCalendarVisible(!isCalendarVisible);
+  };
+  const handleTogglePriority = () => {
+    if (isCalendarVisible) {
+      setCalendarVisible(!isCalendarVisible);
+    }
+    setPriorityVisible(!isPriorityVisible);
   };
 
   const handlePrioritySelection = (priority) => {
     setSelectedPriority(priority);
   };
+
   const priorityOptions = (
     <View style={styles.priorityOptionsContainer}>
       <TouchableOpacity
         style={[
           styles.priorityOption,
-          selectedPriority === 'high' && styles.selectedPriorityOption,
+          styles.highPriorityOption,
+          selectedPriority === 'high' && styles.priorityOption,
         ]}
-        onPress={() => handleOptionSelection('high')}
+        onPress={() => handlePrioritySelection('high')}
       >
         <Text
           style={[
@@ -81,9 +94,10 @@ function TaskInput(props) {
       <TouchableOpacity
         style={[
           styles.priorityOption,
-          selectedPriority === 'medium' && styles.selectedPriorityOption,
+          styles.mediumPriorityOption,
+          selectedPriority === 'medium' && styles.selectedPriority,
         ]}
-        onPress={() => handleOptionSelection('medium')}
+        onPress={() => handlePrioritySelection('medium')}
       >
         <Text
           style={[
@@ -97,9 +111,10 @@ function TaskInput(props) {
       <TouchableOpacity
         style={[
           styles.priorityOption,
-          selectedPriority === 'low' && styles.selectedPriorityOption,
+          styles.lowPriorityOption,
+          selectedPriority === 'low' && styles.selectedPriority,
         ]}
-        onPress={() => handleOptionSelection('low')}
+        onPress={() => handlePrioritySelection('low')}
       >
         <Text
           style={[
@@ -112,6 +127,7 @@ function TaskInput(props) {
       </TouchableOpacity>
     </View>
   );
+
   return (
     <Modal visible={props.visible} animationType="slide">
       <View style={styles.inputContainer}>
@@ -138,10 +154,9 @@ function TaskInput(props) {
             size={40}
             color={COLORS.black}
             style={styles.iconButton}
-            onPress={() => handlePrioritySelection({ priorityOptions })}
+            onPress={handleTogglePriority}
           />
         </View>
-
         <View style={styles.buttonContainer}>
           {isStartDateSelected && (
             <Button
@@ -177,6 +192,7 @@ function TaskInput(props) {
             minDate={new Date()}
           />
         )}
+        {isPriorityVisible && priorityOptions}
       </View>
     </Modal>
   );
@@ -248,24 +264,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   priorityOptionsContainer: {
-    backgroundColor: COLORS.secondary,
     borderRadius: 10,
     padding: 16,
   },
   priorityOption: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     padding: 8,
     marginVertical: 8,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.primary,
   },
-  selectedPriorityOption: {
-    backgroundColor: COLORS.primary,
+  highPriorityOption: {
+    backgroundColor: 'red',
+  },
+  mediumPriorityOption: {
+    backgroundColor: 'orange',
+  },
+  lowPriorityOption: {
+    backgroundColor: '#dad5d5',
   },
   priorityOptionText: {
     color: COLORS.black,
   },
   selectedPriorityOptionText: {
+    borderRadius: 8,
     color: COLORS.white,
   },
 });

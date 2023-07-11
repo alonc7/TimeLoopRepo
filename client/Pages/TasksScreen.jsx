@@ -21,7 +21,7 @@ const TasksScreen = () => {
     setModalIsVisible(!modalIsVisible);
   }
 
-  function addTaskHandler(title, startDate, dueDate, startTime, dueTime) {
+  function addTaskHandler(title, startDate, dueDate, startTime, dueTime, priority) {
     setTaskList((currentListTasks) => [
       ...currentListTasks,
       {
@@ -30,7 +30,8 @@ const TasksScreen = () => {
         dueDate: dueDate,
         key: counter,
         startTime: startTime,
-        dueTime: dueTime
+        dueTime: dueTime,
+        priority: priority
       },
     ]);
     console.log(counter, title, startDate, dueDate);
@@ -84,6 +85,7 @@ const TasksScreen = () => {
                 startHour={item?.startTime}
                 endHour={item?.dueTime}
                 onDeleteItem={deleteTaskHandler}
+                priority={item.priority}
               />
             )}
             keyExtractor={(item, index) => index.toString()}
