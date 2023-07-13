@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingAction } from "react-native-floating-action";
@@ -6,12 +6,51 @@ import { AntDesign } from '@expo/vector-icons';
 import TaskInput from '../Components/TaskInput';
 import GoalItem from '../Components/GoalItem';
 import COLORS from '../constants/colors';
+import { MainContext } from '../Components/Context/MainContextProvider';
+import { v4 as uuidv4 } from 'uuid';
 
 const TasksScreen = () => {
   const [modalIsVisible, setModalIsVisible] = useState(false); // boolean for visualise of the modal ( is it visual right now?)
   const [isHidden, setIsHidden] = useState(true); // boolean for setting the modal hidden or not. 
   const [taskList, setTaskList] = useState([]); // array of tasks 
-  const [counter, setCounter] = useState(1); // use for id creating. 
+  const [taskCounter, setTaskCounter] = useState(1); // use for id creating. 
+  const { userId, setUserId } = useContext(MainContext);
+
+
+  useEffect(() => {
+    retrieveUserId();
+  }, []);
+
+  const retrieveUserId = async () => {
+    try {
+      const userDataString = await AsyncStorage.getItem('userData');
+      if (userDataString !== null) {
+        const userData = JSON.parse(userDataString);
+        setUserId(userData.id);
+      }
+    } catch (error) {
+      console.log('Error retrieving user data:', error);
+    }
+  };
+
+  const displayUserTasks = async (userId) => {
+    try {
+      const response = await fetch(' ${Server_path}/api/${{userId}}.', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        const tasksData = await response.json();
+        setTaskList(tasksData);
+      }
+    } catch (err) {
+      throw new Error(err);
+    }
+
+  };
+
 
   function toggleBtn() {
     setIsHidden(!isHidden);
@@ -23,19 +62,19 @@ const TasksScreen = () => {
 
   function addTaskHandler(title, startDate, dueDate, startTime, dueTime, priority) {
     setTaskList((currentListTasks) => [
-      ...currentListTasks,
       {
         text: title,
         startDate: startDate,
         dueDate: dueDate,
-        key: counter,
+        key: uuidv4(),
         startTime: startTime,
         dueTime: dueTime,
         priority: priority
       },
+      ...currentListTasks
     ]);
-    console.log(counter, title, startDate, dueDate);
-    setCounter((currCounter) => currCounter + 1);
+    console.log(title, startDate, dueDate, startTime, dueTime, priority);
+    // setTaskCounter((currTaskCounter) => currTaskCounter + 1);
     handleModalIsVisible();
   }
 
@@ -70,7 +109,7 @@ const TasksScreen = () => {
           onClose={handleModalIsVisible}
           toggleBtn={toggleBtn}
           setTasks={setTaskList}
-          key={counter}
+          key={taskCounter}
         />
         <View style={styles.tasksContainer}>
           <FlatList
@@ -88,7 +127,7 @@ const TasksScreen = () => {
                 priority={item.priority}
               />
             )}
-            keyExtractor={(item, index) => index.toString()}
+            keyExtractor={(item, key) => key.toString()}
             alwaysBounceVertical={false}
           />
           <Pressable
@@ -104,9 +143,9 @@ const TasksScreen = () => {
             overrideWithAction={true}
             showBackground={false}
             actions={actions}
-            onPressItem={name => {
-              handleModalIsVisible();
-            }}
+            onPressItem={handleModalIsVisible}
+
+
           />
         </View>
       </View>

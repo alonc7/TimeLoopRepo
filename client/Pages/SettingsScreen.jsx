@@ -4,6 +4,7 @@ import { StyleSheet, View, Text, Switch } from 'react-native';
 const SettingsScreen = () => {
   const [isNotificationEnabled, setIsNotificationEnabled] = React.useState(false);
   const [isDarkModeEnabled, setIsDarkModeEnabled] = React.useState(false);
+  const [isDarkFunEnabled, setIsDarkFunEnabled] = React.useState(false);
 
   const handleNotificationToggle = () => {
     setIsNotificationEnabled((prevValue) => !prevValue);
@@ -12,6 +13,10 @@ const SettingsScreen = () => {
 
   const handleDarkModeToggle = () => {
     setIsDarkModeEnabled((prevValue) => !prevValue);
+  };
+
+  const handleFunModeToggle = () => {
+    setIsDarkFunEnabled((prevValue) => !prevValue);
   };
 
   return (
@@ -31,6 +36,10 @@ const SettingsScreen = () => {
         <View style={styles.setting}>
           <Text style={styles.settingText}>Dark Mode</Text>
           <Switch value={isDarkModeEnabled} onValueChange={handleDarkModeToggle} />
+        </View>
+        <View style={styles.setting}>
+          <Text style={styles.settingText}>FUN Mode</Text>
+          <Switch value={isDarkFunEnabled} onValueChange={handleFunModeToggle} />
         </View>
       </View>
     </View>

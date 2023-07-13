@@ -31,6 +31,7 @@
     "mongodb": "^5.5.0",
     "react": "18.2.0",
     "react-native": "0.71.8",
+    "react-native-dropdownalert": "^4.5.1",
     "react-native-easy-grid": "^0.2.2",
     "react-native-floating-action": "^1.22.0",
     "react-native-modal-datetime-picker": "^17.0.0",

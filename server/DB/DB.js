@@ -41,6 +41,17 @@ class DB {
             await this.client.close();
         }
     }
+    async FindOne(collection, query = {}, project = {}) {
+        try {
+            await this.client.connect();
+            const document = await this.client.db(this.db_name).collection(collection).findOne(query, project);
+            console.log(document);
+            return document;
+        } catch (error) {
+            console.error('Failed to retrieve document:', error);
+            throw error;
+        }
+    }
 
     //Update
     async UpdateById(collection, id, doc) {
@@ -71,6 +82,7 @@ class DB {
         }
         finally {
             await this.client.close();
+
         }
     }
 

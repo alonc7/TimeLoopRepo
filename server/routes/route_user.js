@@ -50,7 +50,6 @@ router.get('/users', async (req, res) => {
     res.status(500).json({ error });
   }
 })
-module.exports = router;
 
 router.put('/changePassword', async (req, res) => {
   try {
@@ -72,3 +71,4 @@ router.put('/changePassword', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+module.exports = router;

@@ -4,12 +4,15 @@ export const MainContext = createContext()
 function MainContextProvider({ children }) {
   const [authenticated, setAuthenticated] = useState(false)
   const [userName, setUserName] = useState('');
+  const [userId, setUserId] = useState('');
 
   const MainContextValues = {
     setAuthenticated,
     authenticated,
     setUserName,
     userName,
+    userId,
+    setUserId
   }
   return (
     <MainContext.Provider value={MainContextValues}>

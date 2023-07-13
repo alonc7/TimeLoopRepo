@@ -23,6 +23,9 @@ server.use(express.static(path.join(__dirname, '../client', 'dist')));
 // // Define routes for handling user-related requests
 server.use('/api/users', require('./routes/route_user'));
 
+// // Define routes for handling task-related requests
+server.use('/api/tasks', require('./routes/route_task'));
+
 // Serve the index.html file for all other routes
 server.get('/*', async (req, res) => {
   res.sendFile(path.join(__dirname, '../client', 'dist', 'index.html'));

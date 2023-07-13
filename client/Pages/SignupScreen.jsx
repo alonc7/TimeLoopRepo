@@ -40,10 +40,10 @@ const Signup = ({ navigation }) => {
             values.password,
             values.birthdate)
     };
-
+ // modify security with server name.
     const handleSignUp = async (email, firstName, lastName, password, birthdate) => {
         try {
-            const response = await fetch('https://time-loop-nodejs.onrender.com/api/users/signup', {
+            const response = await fetch('https://timeloopserver.onrender.com/api/users/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,7 +52,6 @@ const Signup = ({ navigation }) => {
             });
 
             if (response.ok) {
-                console.log("getshereTOELSE");
                 navigation.navigate('Login');
             } else {
                 // const data = await response.json();

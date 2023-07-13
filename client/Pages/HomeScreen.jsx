@@ -225,7 +225,6 @@ const styles = StyleSheet.create({
         borderRadius: 40,
     },
     welcomeText: {
-        fontFamily:'',
         marginLeft: 10,
         fontSize: 18,
     },

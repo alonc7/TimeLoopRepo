@@ -7,9 +7,11 @@ import { Ionicons } from "@expo/vector-icons";
 import Checkbox from "expo-checkbox";
 import Button from '../Components/UI/Button';
 import { MainContext } from '../Components/Context/MainContextProvider';
+import { AlertContext } from '../Components/DropDown/AlertContext';
 
 const Login = ({ navigation }) => {
-  const { authenticated, setAuthenticated} = useContext(MainContext);
+  const { setAuthenticated } = useContext(MainContext);
+  const dropDownAlertRef = useContext(AlertContext);
   const [isPasswordShown, setIsPasswordShown] = useState(true);
   const [isChecked, setIsChecked] = useState(false);
   const [email, setEmail] = useState('');
@@ -34,18 +36,21 @@ const Login = ({ navigation }) => {
       if (response.ok) {
         const data = await response.json();
         const userData = {
+          id: data.user.id,
           token: data.user.token,
           name: data.user.firstName,
           email: data.user.email,
         };
         storeUserData(userData);
         setAuthenticated(true);
+        dropDownAlertRef.current.alertWithType('success', 'Success', 'Logged in successfully.');
       } else {
         const data = await response.json();
-        console.log(data.message);
+        dropDownAlertRef.alertWithType('error', 'Ops..', 'Somthing went wrong.. check that password maybe?')
       }
     } catch (error) {
-      console.error('Error logging in:', error);
+      dropDownAlertRef.current.alertWithType('error', 'Ops..', 'User not found.. Check mail & password')
+
     }
   };
 

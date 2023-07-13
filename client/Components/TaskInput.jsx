@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { StyleSheet, View, Text, TextInput, Modal, Image, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-paper';
 import DatePicker from 'react-native-modern-datepicker';
@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
 
 function TaskInput(props) {
+ 
+
   const [enteredTaskText, setEnteredTaskText] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState();
@@ -17,7 +19,9 @@ function TaskInput(props) {
   const [isCalendarVisible, setCalendarVisible] = useState(false);
   const [selectedPriority, setSelectedPriority] = useState('low');
   const [isPriorityVisible, setPriorityVisible] = useState(false);
+  // const dropDownAlertRef = useContext(AlertContext);
 
+ 
   const goalInputHandler = (enteredText) => {
     setEnteredTaskText(enteredText);
   };
@@ -34,8 +38,9 @@ function TaskInput(props) {
     } else {
       setDueDate(selectedDate);
       setDueTime(selectedTime);
-      console.log(enteredTaskText, startDate, selectedDate, startTime, selectedTime, selectedPriority);
       props.onAddTask(enteredTaskText, startDate, selectedDate, startTime, selectedTime, selectedPriority);
+      // dropDownAlertRef.current.alertWithType('success', 'Success', 'Task added successfully.');
+
       setEnteredTaskText('');
       setSelectedDate(null);
       setIsStartDateSelected(false);
@@ -70,10 +75,12 @@ function TaskInput(props) {
 
   const handlePrioritySelection = (priority) => {
     setSelectedPriority(priority);
+    setPriorityVisible(false);
   };
 
   const priorityOptions = (
     <View style={styles.priorityOptionsContainer}>
+      <Text style={styles.instructionText}>Set priority of task</Text>
       <TouchableOpacity
         style={[
           styles.priorityOption,
@@ -129,7 +136,9 @@ function TaskInput(props) {
   );
 
   return (
-    <Modal visible={props.visible} animationType="slide">
+    <Modal visible={props.visible} animationType="slide" 
+    // onShow={info}
+    >
       <View style={styles.inputContainer}>
         <Image source={require('../assets/images/task.png')} style={styles.image} />
         <TextInput
@@ -197,7 +206,7 @@ function TaskInput(props) {
     </Modal>
   );
 }
-
+// completed pending 
 export default TaskInput;
 
 const styles = StyleSheet.create({
@@ -289,5 +298,12 @@ const styles = StyleSheet.create({
   selectedPriorityOptionText: {
     borderRadius: 8,
     color: COLORS.white,
+  },
+  instructionText: {
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
   },
 });

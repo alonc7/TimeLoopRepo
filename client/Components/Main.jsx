@@ -31,11 +31,11 @@ export default function Main() {
         };
 
         retrieveUserData();
-    }, []);
+    }, [setAuthenticated]);
 
     const getContent = () => {
         if (isLoading) {
-            return <ActivityIndicator size="large" />;
+            return <ActivityIndicator size="large"/>;
         }
     }
     return (

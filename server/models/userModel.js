@@ -1,7 +1,5 @@
 const db = require('../DB/DB');
-// const argon2 = require('argon2');
 const bcrypt = require('bcrypt');
-const mongodb = require('mongodb');
 
 class User {
     static collection = 'users';
@@ -43,6 +41,15 @@ class User {
             throw new Error('Failed to find user');
         }
     };
+    // get user by its id if exists 
+    static async findUserById(userId) {
+        try {
+            const query = { userId };
+            return await new db().FindOne(User.collection, query);
+        } catch (error) {
+            throw new Error('Failed to find user');
+        }
+    }
     // login user according to email and pass if match.
     static async LoginUser(email, password) {
         const existingUser = await new db().FindAll('users', { email }); // finding the user withthe matching email.
@@ -66,17 +73,17 @@ class User {
     // change current password with new one.
     static async changePassword(email, newPassword) {
         try {
-          const user = await User.findUserByEmail(email);
-          if (!user) {
-            throw new Error('User not found.');
-          }
-          const hashedPassword = await bcrypt.hash(newPassword, 10);
-          user.hashedPassword = hashedPassword; // setting password as new hashed password. or at least it should it .
-          return user;
+            const user = await User.findUserByEmail(email);
+            if (!user) {
+                throw new Error('User not found.');
+            }
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            user.hashedPassword = hashedPassword; // setting password as new hashed password. or at least it should it .
+            return user;
         } catch (error) {
-          throw new Error('Failed to change password');
+            throw new Error('Failed to change password');
         }
-      }
+    }
 }
 
 module.exports = User;

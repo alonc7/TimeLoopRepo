@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     buttonContainer: {
-        width: 30, // Customize the width as needed
-        height: 50, // Customize the height as needed
+        width: 30, 
+        height: 50,
     },
     x: {
         borderWidth: 1,
