@@ -27,18 +27,23 @@ class Task {
     // insert task into tasks field. 
     static async createTask(userEmail, task) {
         try {
-            const user = await new db().FindOne(User.collection, { email: userEmail.email });
-            if (!user) {
-                throw new Error('User not found');
-            }
-            task._id = new mongodb.ObjectId();
-            user.Tasks.push(task);
-            await new db().EditByEmail(User.collection, userEmail.email, { Tasks: user.Tasks });
-            return task;
+          const user = await new db().FindOne(User.collection, { email: userEmail.email });
+          if (!user) {
+            throw new Error('User not found');
+          }
+          task._id = new mongodb.ObjectId();
+          user.Tasks.push(task); // Push the task into the Tasks array
+      
+          await new db().EditByEmail(User.collection, userEmail.email, user); // Update the user document with the updated Tasks array
+      
+          return task;
         } catch (error) {
-            throw new Error('Failed to create task in createTask');
+          throw new Error('Failed to create task in createTask');
         }
-    }
+      }
+      
+      
+
 
 
 

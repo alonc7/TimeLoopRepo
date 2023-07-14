@@ -9,7 +9,7 @@ class User {
         this.lastName = lastName;
         this.password = password;
         this.birthdate = birthdate;
-        this.tasks = []; // Initialize the tasks field as an empty array
+        this.Tasks = []; // Initialize the tasks field as an empty array
     }
 
 

@@ -44,11 +44,13 @@ class DB {
         try {
             await this.client.connect();
             const document = await this.client.db(this.db_name).collection(collection).findOne(query, project);
-            console.log(document);
             return document;
         } catch (error) {
             console.error('Failed to retrieve document:', error);
             throw error;
+        }
+        finally{
+            await this.client.close();
         }
     }
 
