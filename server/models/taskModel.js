@@ -1,5 +1,6 @@
 const db = require('../DB/DB');
 const mongodb = require('mongodb');
+const User = require('./userModel');
 
 class Task {
     static collection = 'Tasks';
@@ -13,7 +14,7 @@ class Task {
         this.dueTime = dueTime;
         this.priority = priority;
         this.status = 'pending'; // Add the status field with the default value 'pending'
-    }
+    };
     // GET list of all tasks.
     static async getAllTasks(userEmail) {
         try {
@@ -22,16 +23,26 @@ class Task {
         } catch (error) {
             throw new Error('Failed to retrieve tasks');
         }
-    }
-    // insert task into tasks collection. 
+    };
+    // insert task into tasks field. 
     static async createTask(userEmail, task) {
         try {
-            task.userEmail = userEmail; // Assign the userEmail to the task object
-            return await new db().Insert(Task.collection, task);
+            const user = await new db().FindOne(User.collection, { email: userEmail.email });
+            if (!user) {
+                throw new Error('User not found');
+            }
+            task._id = new mongodb.ObjectId();
+            user.Tasks.push(task);
+            await new db().EditByEmail(User.collection, userEmail.email, { Tasks: user.Tasks });
+            return task;
         } catch (error) {
-            throw new Error('Failed to create task');
+            throw new Error('Failed to create task in createTask');
         }
     }
+
+
+
+
     // get task by its key if exists
     static async findTaskByKey(key) {
         try {

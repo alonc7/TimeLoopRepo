@@ -1,6 +1,5 @@
 const { MongoClient, ObjectId } = require('mongodb');
 
-
 class DB {
     client;
     db_name;
@@ -10,7 +9,7 @@ class DB {
     }
 
     //Create
-    async Insert(collection, docs) {
+    async Insert(collection, docs) { 
         try {
             await this.client.connect();
             if (docs.length)
@@ -83,6 +82,21 @@ class DB {
         finally {
             await this.client.close();
 
+        }
+    }
+    async EditByEmail(collection, email, doc) {
+        try {
+            await this.client.connect();
+            await this.client.db(this.db_name).collection(collection).updateOne(
+                { email: (email) },
+                { $set: { Tasks: { ...doc } } } // using push to add instaed of set to replace.
+            );
+
+        } catch (error) {
+            return error;
+        }
+        finally {
+            await this.client.close();
         }
     }
 

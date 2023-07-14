@@ -5,12 +5,11 @@ const Task = require('../models/taskModel');
 
 // POST create task
 
-
 // Get all tasks for a user
 router.get('/:userEmail', async (req, res) => {
     try {
         const userEmail = req.params.userEmail;
-        const result = await Task.findUserById( userEmail );
+        const result = await Task.findUserById(userEmail);
         console.log(result);
         if (!result) {
             return res.status(404).json({ message: 'No Tasks Found' });
@@ -27,11 +26,17 @@ router.get('/:userEmail', async (req, res) => {
 router.post('/addTask', async (req, res) => {
     const { userEmail, title, startDate, dueDate, key, startTime, dueTime, priority } = req.body;
     try {
-        const task = new Task(title, startDate, dueDate, key, startTime, dueTime, priority);
-        const createdTask = await Task.createTask(userEmail, task); // Pass the userEmail when creating a task
-        res.status(201).json(createdTask);
+        const task = new Task(title, startDate, dueDate, key, startTime, dueTime, priority); //
+        const authUser = await User.findUserByEmail(userEmail);
+        if (authUser) {
+            const createdTask = await Task.createTask(authUser, task); // Pass the object user and object task.
+            res.status(201).json(createdTask);
+        }
+        else (
+            res.status(403).json('You are unauthorized')
+        )
     } catch (error) {
-        res.status(500).json({ error: 'Failed to create task' });
+        res.status(500).json({ error: 'Failed to create task in addTask' });
     }
 });
 
