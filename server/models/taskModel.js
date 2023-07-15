@@ -14,6 +14,7 @@ class Task {
         this.dueTime = dueTime;
         this.priority = priority;
         this.status = 'pending'; // Add the status field with the default value 'pending'
+
     };
     // GET list of all tasks.
     static async getAllTasks(userEmail) {
@@ -25,27 +26,25 @@ class Task {
         }
     };
     // insert task into tasks field. 
-    static async createTask(userEmail, task) {
+    static async createTask(user, task) {
         try {
-            const user = await new db().FindOne(User.collection, { email: userEmail.email });
-            if (!user) {
-                throw new Error('User not found');
-            }
-            task._id = new mongodb.ObjectId();
-            if (!user.Tasks) {
-                user.Tasks = []; // Initialize Tasks as an empty array if it doesn't exist
-            }
-            user.Tasks.push(task); // Push the task into the Tasks array
+            const query = user;
 
-            await new db().EditByEmail(User.collection, userEmail.email, { Tasks: user.Tasks }); // Update the user document with the updated Tasks array
+            task._id = new mongodb.ObjectId(); // Generate a unique ID for the task
+            if (!query.Tasks) {
+                query.Tasks = [];
+            }
+            // query.Tasks.push(task); // Push the task into the tasks array
+
+            // Update the user document in the database with the updated tasks array
+            await new db().EditByEmail(User.collection, query.email, { task });
 
             return task;
         } catch (error) {
+            console.log(error);
             throw new Error('Failed to create task in createTask');
         }
     }
-
-
 
 
 

@@ -9,7 +9,7 @@ class DB {
     }
 
     //Create
-    async Insert(collection, docs) { 
+    async Insert(collection, docs) {
         try {
             await this.client.connect();
             if (docs.length)
@@ -49,7 +49,7 @@ class DB {
             console.error('Failed to retrieve document:', error);
             throw error;
         }
-        finally{
+        finally {
             await this.client.close();
         }
     }
@@ -89,18 +89,19 @@ class DB {
     async EditByEmail(collection, email, doc) {
         try {
             await this.client.connect();
-            await this.client.db(this.db_name).collection(collection).updateOne(
-                { email: (email) },
-                { $set: { Tasks: { ...doc } } } // using push to add instaed of set to replace.
-            );
 
+            await this.client.db(this.db_name).collection(collection).updateOne(
+                { email: email },
+                { $push: { Tasks: { ...doc } } });
         } catch (error) {
-            return error;
-        }
-        finally {
+            console.error('Failed to update document:', error);
+            throw error;
+        } finally {
             await this.client.close();
         }
     }
+
+
 
     async Reactive(collection, id) {
         try {
