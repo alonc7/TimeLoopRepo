@@ -32,10 +32,8 @@ function HomeScreen() {
     try {
       const userDataString = await AsyncStorage.getItem('userData');
       if (userDataString !== null) {
-        let userData = await JSON.parse(userDataString);
+        const userData = await JSON.parse(userDataString);
         setUserName(userData.name);
-        userData = await JSON.parse(userDataString);
-        setUserEmail(userDataString.email)
       }
     } catch (error) {
         console.log(userDataString.email);

@@ -87,6 +87,7 @@ class DB {
 
         }
     }
+    
     async EditByEmail(collection, email, doc) {
         try {
             await this.client.connect();

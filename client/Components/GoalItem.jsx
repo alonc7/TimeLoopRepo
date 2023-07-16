@@ -12,6 +12,7 @@ function GoalItem(props) {
 
     function toggleCompletion() {
         setCompleted(!completed);
+       
     }
     let backgroundColor;
     switch (props.priority) {

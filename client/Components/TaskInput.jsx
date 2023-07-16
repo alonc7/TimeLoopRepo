@@ -11,8 +11,8 @@ function TaskInput(props) {
   const [enteredTaskText, setEnteredTaskText] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState();
-  const [startDate, setStartDate] = useState(null);
-  const [startTime, setStartTime] = useState(null);
+  const [startDate, setStartDate] = useState('');
+  const [startTime, setStartTime] = useState('');
   const [dueDate, setDueDate] = useState(null);
   const [dueTime, setDueTime] = useState(null);
   const [isStartDateSelected, setIsStartDateSelected] = useState(false);

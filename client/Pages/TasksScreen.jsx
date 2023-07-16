@@ -15,30 +15,29 @@ const TasksScreen = () => {
   const [modalIsVisible, setModalIsVisible] = useState(false); // boolean for visualise of the modal ( is it visual right now?)
   const [isHidden, setIsHidden] = useState(true); // boolean for setting the modal hidden or not. 
   const [taskList, setTaskList] = useState([]); // array of tasks 
-  const [taskCounter, setTaskCounter] = useState(1); // use for id creating. 
   const { userEmail, setUserId } = useContext(MainContext);
 
 
   useEffect(() => {
     // retrieveUserId();
+    const loadTask = async (userEmail) => {
+      try {
+        const response = await fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`);
+        if (response.ok) {
+          const data = await response.json();
+          setTaskList(data)
+
+        }
+        throw new Error('Request failed');
+
+      } catch (error) {
+        // const message = `An error has occured in TaskScreen: ${error.message}`;
+        // console.log(message);
+      }
+    }
     loadTask(userEmail);
   }, [taskList]);
 
-  const loadTask = async (userEmail) => {
-    try {
-      const response = await fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`);
-
-      if (response.ok) {
-        setTaskList(response);
-        console.log('gets here', taskList);
-      }
-      throw new Error('Request failed');
-
-    } catch (error) {
-      const message = `An error has occured: ${error.message}`;
-      console.log('here is the pop', message);
-    }
-  }
 
 
   const retrieveUserId = async () => {
@@ -63,29 +62,43 @@ const TasksScreen = () => {
     setModalIsVisible(!modalIsVisible);
   }
 
-  function addTaskHandler(title, startDate, dueDate, startTime, dueTime, priority) {
-    setTaskList((currentListTasks) => [
-      {
-        text: title,
-        startDate: startDate,
-        dueDate: dueDate,
-        key: uuid.v1(),
-        startTime: startTime,
-        dueTime: dueTime,
-        priority: priority
+  const addTaskHandler = async (title, startDate, dueDate, startTime, dueTime, priority) => {
+    const taskData = {
+      title: title,
+      startDate: startDate,
+      dueDate: dueDate,
+      key: uuid.v1(),
+      startTime: startTime,
+      dueTime: dueTime,
+      priority: priority,
+      userEmail: userEmail
+    };
+    const response = await fetch(`${Server_path}/api/tasks/addTask`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
       },
-      ...currentListTasks
-    ]);
-    console.log(title, startDate, dueDate, startTime, dueTime, priority);
-    // setTaskCounter((currTaskCounter) => currTaskCounter + 1);
-    handleModalIsVisible();
+      body: JSON.stringify(taskData)
+    })
+      .then(response => {
+        if (response.ok) {
+          console.log('Task created successfully');
+        } else {
+          console.log('Failed to create task:', response.status);
+        }
+      })
+      .catch(error => {
+        console.error('Error creating task:', error);
+      });
+
   }
 
-  function deleteAllTasks() {
+  function deleteAllTasks(key) {
     setTaskList([]);
     toggleBtn();
   }
 
+  // const deleteTaskHandler = async()
   function deleteTaskHandler(id) {
     setTaskList((currentListTasks) =>
       currentListTasks.filter((task) => task.key !== id)
@@ -112,7 +125,6 @@ const TasksScreen = () => {
           onClose={handleModalIsVisible}
           toggleBtn={toggleBtn}
           setTasks={setTaskList}
-          key={taskCounter}
         />
         <View style={styles.tasksContainer}>
           <FlatList
@@ -120,7 +132,7 @@ const TasksScreen = () => {
             data={taskList}
             renderItem={({ item }) => (
               <GoalItem
-                text={item.text}
+                text={item.title}
                 startDate={item.startDate}
                 endDate={item.dueDate}
                 id={item.key}
