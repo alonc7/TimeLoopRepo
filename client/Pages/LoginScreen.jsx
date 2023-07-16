@@ -8,6 +8,7 @@ import Checkbox from "expo-checkbox";
 import Button from '../Components/UI/Button';
 import { MainContext } from '../Components/Context/MainContextProvider';
 import { AlertContext } from '../Components/DropDown/AlertContext';
+import { Server_path } from '../utils/api-url';
 
 const Login = ({ navigation }) => {
   const { setAuthenticated } = useContext(MainContext);
@@ -26,7 +27,7 @@ const Login = ({ navigation }) => {
 
   const handleLogin = async (email, password) => {
     try {
-      const response = await fetch('https://timeloopserver.onrender.com/api/users/login', {
+      const response = await fetch(`${Server_path}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

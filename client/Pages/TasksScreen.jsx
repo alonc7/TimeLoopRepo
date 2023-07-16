@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingAction } from "react-native-floating-action";
@@ -9,17 +9,37 @@ import COLORS from '../constants/colors';
 import { MainContext } from '../Components/Context/MainContextProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid';
+import { Server_path } from '../utils/api-url';
+
 const TasksScreen = () => {
   const [modalIsVisible, setModalIsVisible] = useState(false); // boolean for visualise of the modal ( is it visual right now?)
   const [isHidden, setIsHidden] = useState(true); // boolean for setting the modal hidden or not. 
   const [taskList, setTaskList] = useState([]); // array of tasks 
   const [taskCounter, setTaskCounter] = useState(1); // use for id creating. 
-  const { userId, setUserId } = useContext(MainContext);
+  const { userEmail, setUserId } = useContext(MainContext);
 
 
   useEffect(() => {
-    retrieveUserId();
-  }, []);
+    // retrieveUserId();
+    loadTask(userEmail);
+  }, [taskList]);
+
+  const loadTask = async (userEmail) => {
+    try {
+      const response = await fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`);
+
+      if (response.ok) {
+        setTaskList(response);
+        console.log('gets here', taskList);
+      }
+      throw new Error('Request failed');
+
+    } catch (error) {
+      const message = `An error has occured: ${error.message}`;
+      console.log('here is the pop', message);
+    }
+  }
+
 
   const retrieveUserId = async () => {
     try {
@@ -33,23 +53,6 @@ const TasksScreen = () => {
     }
   };
 
-  const displayUserTasks = async (userId) => {
-    try {
-      const response = await fetch(' ${Server_path}/api/${{userId}}.', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.ok) {
-        const tasksData = await response.json();
-        setTaskList(tasksData);
-      }
-    } catch (err) {
-      throw new Error(err);
-    }
-
-  };
 
 
   function toggleBtn() {

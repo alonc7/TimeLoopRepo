@@ -6,8 +6,12 @@ function MainContextProvider({ children }) {
   const [userName, setUserName] = useState('');
   const [userId, setUserId] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
+  
   const MainContextValues = {
+    isLoading,
+    setIsLoading,
     setAuthenticated,
     authenticated,
     setUserName,

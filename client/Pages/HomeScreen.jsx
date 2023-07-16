@@ -15,49 +15,33 @@ function HomeScreen() {
 
     useEffect(() => {
         // removeDataFromAsyncStorage();
-        retriveUserImage();
+        retrieveUserImage ();
         retrieveUserData();
-        loadTask();
     }, []);
-    const loadTask = async () => {
-        try {
-            const response = await fetch('https://timeloopserver.onrender.com/api/tasks/allTasks/${userEmail}');
-            if (response.ok) {
-                throw new Error('Request failed');
-            }
-            const data = await response.json();
-            const taskList = data.tasks;
-            console.log(taskList);
-
-        } catch (error) {
-            const message = `An error has occured: ${error.message}`;
-
-        }
+  const retrieveUserImage  = async () => {
+    try {
+      const imageUri = await AsyncStorage.getItem('userImage');
+      if (imageUri !== null) {
+        setUserImage(imageUri);
+      }
+    } catch (error) {
+      console.log('Error retrieving user image', error);
     }
-    const retriveUserImage = async () => {
-        try {
-            const imageUri = await AsyncStorage.getItem('userImage');
-            if (imageUri !== null) {
-                setUserImage(imageUri);
-            }
-        } catch (error) {
-            console.log('Error retrieving user image', error);
-        }
-    };
-    const retrieveUserData = async () => {
-        try {
-            const userDataString = await AsyncStorage.getItem('userData');
-            if (userDataString !== null) {
-                const userData = JSON.parse(userDataString);
-                setUserName(userData.name);
-                userData = JSON.parse(userDataString);
-                setUserEmail(userDataString.email)
-            }
-        } catch (error) {
-            console.log('Error retrieving user data:', error);
-        }
-    };
-
+  };
+  const retrieveUserData = async () => {
+    try {
+      const userDataString = await AsyncStorage.getItem('userData');
+      if (userDataString !== null) {
+        let userData = await JSON.parse(userDataString);
+        setUserName(userData.name);
+        userData = await JSON.parse(userDataString);
+        setUserEmail(userDataString.email)
+      }
+    } catch (error) {
+        console.log(userDataString.email);
+      console.log('this is also  Error retrieving user data:', error);
+    }
+  };
     const removeDataFromAsyncStorage = async () => {
         try {
             await AsyncStorage.removeItem('userData');

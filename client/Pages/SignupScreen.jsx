@@ -17,6 +17,7 @@ import { ScrollView } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useState } from 'react';
+import { Server_path } from '../utils/api-url';
 
 const SignupSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Email is required'),
@@ -43,7 +44,7 @@ const Signup = ({ navigation }) => {
     // modify security with server name.
     const handleSignUp = async (email, firstName, lastName, password, birthdate) => {
         try {
-            const response = await fetch('https://timeloopserver.onrender.com/api/users/signup', {
+            const response = await fetch(`${Server_path}/api/users/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

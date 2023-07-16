@@ -7,8 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 export default function Main() {
-    const { authenticated, setAuthenticated } = useContext(MainContext);
-    const [isLoading, setIsLoading] = useState(true);
+    const { authenticated, setAuthenticated, userEmail, setUserEmail,setIsLoading,isLoading } = useContext(MainContext);
 
     useEffect(() => {
         const retrieveUserData = async () => {
@@ -18,6 +17,7 @@ export default function Main() {
                     const userData = JSON.parse(userDataString);
                     // Use the retrieved user data to authenticate the user
                     console.log('Main: User data retrieved successfully:');
+                    setUserEmail(userData.email)
                     setAuthenticated(true);
                 } else {
                     // User data does not exist
@@ -31,11 +31,11 @@ export default function Main() {
         };
 
         retrieveUserData();
-    }, [setAuthenticated]);
-
+    }, [setAuthenticated,setUserEmail]);
+    console.log('Main after the useEffect', userEmail);
     const getContent = () => {
         if (isLoading) {
-            return <ActivityIndicator size="large"/>;
+            return <ActivityIndicator size="large" />;
         }
     }
     return (
