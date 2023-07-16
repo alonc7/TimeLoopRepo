@@ -3,15 +3,15 @@ const bcrypt = require('bcrypt');
 
 class User {
     static collection = 'users';
+  
     constructor(email, firstName, lastName, password, birthdate) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
         this.birthdate = birthdate;
-        this.Tasks = []; // Initialize the tasks field as an empty array
+        // Initialize the tasks field as an empty array
     }
-
 
     // GET list of all users.
     static async getAllUsers() {

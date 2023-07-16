@@ -28,7 +28,8 @@ class DB {
     async FindAll(collection, query = {}, project = {}) {
         try {
             await this.client.connect();
-            const cursor = this.client.db(this.db_name).collection(collection).find(query, project);
+            const cursor = this.client.db(this.db_name).collection(collection).find(
+                query, project);
             const result = await cursor.toArray();
             return result;
             // return await this.client.db(this.db_name).collection(collection).find(query, project).toArray();

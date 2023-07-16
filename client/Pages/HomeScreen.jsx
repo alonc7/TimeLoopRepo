@@ -10,15 +10,30 @@ import { MainContext } from '../Components/Context/MainContextProvider';
 
 function HomeScreen() {
     const [userImage, setUserImage] = useState(null);
-    const { userName, setUserName } = useContext(MainContext);
+    const { userName, setUserName, userEmail, setUserEmail } = useContext(MainContext);
 
 
     useEffect(() => {
         // removeDataFromAsyncStorage();
         retriveUserImage();
-        retrieveUserName();
+        retrieveUserData();
+        loadTask();
     }, []);
+    const loadTask = async () => {
+        try {
+            const response = await fetch('https://timeloopserver.onrender.com/api/tasks/allTasks/${userEmail}');
+            if (response.ok) {
+                throw new Error('Request failed');
+            }
+            const data = await response.json();
+            const taskList = data.tasks;
+            console.log(taskList);
 
+        } catch (error) {
+            const message = `An error has occured: ${error.message}`;
+
+        }
+    }
     const retriveUserImage = async () => {
         try {
             const imageUri = await AsyncStorage.getItem('userImage');
@@ -29,18 +44,20 @@ function HomeScreen() {
             console.log('Error retrieving user image', error);
         }
     };
-    const retrieveUserName = async () => {
+    const retrieveUserData = async () => {
         try {
-          const userDataString = await AsyncStorage.getItem('userData');
-          if (userDataString !== null) {
-            const userData = JSON.parse(userDataString);
-            setUserName(userData.name);
-          }
+            const userDataString = await AsyncStorage.getItem('userData');
+            if (userDataString !== null) {
+                const userData = JSON.parse(userDataString);
+                setUserName(userData.name);
+                userData = JSON.parse(userDataString);
+                setUserEmail(userDataString.email)
+            }
         } catch (error) {
-          console.log('Error retrieving user data:', error);
+            console.log('Error retrieving user data:', error);
         }
-      };
-  
+    };
+
     const removeDataFromAsyncStorage = async () => {
         try {
             await AsyncStorage.removeItem('userData');

@@ -17,14 +17,26 @@ class Task {
 
     };
     // GET list of all tasks.
-    static async getAllTasks(userEmail) {
+    static async getTaskList(userId) {
         try {
-            const query = { userEmail }; // Add a query to filter tasks by user ID
-            return await new db().FindAll(Task.collection, query);
+            const user = await User.findUserByEmail(userId);
+            if (!user) {
+                throw new Error('User not found');
+            }
+            let taskList = [];
+            if (user.Tasks && Array.isArray(user.Tasks)) {
+                user.Tasks.forEach(taskObj => {
+                    taskList.push(taskObj.task);
+                });
+            }
+            return taskList; // Wrap taskList in an object for the correct assignment
         } catch (error) {
-            throw new Error('Failed to retrieve tasks');
+            console.error(error);
+            return { taskList: [] }; // Wrap an empty array in an object for consistency
         }
-    };
+    }
+
+
     // insert task into tasks field. 
     static async createTask(user, task) {
         try {
@@ -83,13 +95,13 @@ class Task {
         }
     }
     //Delete task.
-    static async deleteTask(taskId) {
-        try {
-            const query = { _id: mo }
-        } catch (error) {
-            throw new Error('Failed to delete task')
-        }
-    }
+    // static async deleteTask(taskId) {
+    //     try {
+    //         const query = { _id: mo }
+    //     } catch (error) {
+    //         throw new Error('Failed to delete task')
+    //     }
+    // }
     //Sorting and Ordering 
     static async sortTasks(sortCriterion) {
         try {

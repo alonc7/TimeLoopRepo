@@ -3,24 +3,36 @@ const router = express.Router();
 const User = require('../models/userModel');
 const Task = require('../models/taskModel');
 
-// POST create task
 
-// Get all tasks for a user
-router.get('/:userEmail', async (req, res) => {
+router.get('/allTasks/:userEmail', async (req, res) => {
     try {
-        const userEmail = req.params.userEmail;
-        const result = await Task.findUserById(userEmail);
-        console.log(result);
-        if (!result) {
-            return res.status(404).json({ message: 'No Tasks Found' });
-        } else {
-            return res.status(200).send({ tasks: result });
+        const { userEmail } = req.params;
+        const user = await User.findUserByEmail(userEmail);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
         }
-    } catch (err) {
-        console.error(`Error in getting tasks ${err}`);
-        return res.status(500).json({ message: 'Internal Server Error' });
+        const taskList = await Task.getTaskList(userEmail);
+        res.status(200).json(taskList)
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'no Tasks found.' })
     }
 });
+// router.get('/:userEmail', async (req, res) => {
+//     try {
+//         const userEmail = req.params.userEmail;
+//         const result = await Task.findUserById(userEmail);
+//         console.log(result);
+//         if (!result) {
+//             return res.status(404).json({ message: 'No Tasks Found' });
+//         } else {
+//             return res.status(200).send({ tasks: result });
+//         }
+//     } catch (err) {
+//         console.error(`Error in getting tasks ${err}`);
+//         return res.status(500).json({ message: 'Internal Server Error' });
+//     }
+// });
 
 // POST create task
 router.post('/addTask', async (req, res) => {
@@ -29,8 +41,8 @@ router.post('/addTask', async (req, res) => {
         const task = new Task(title, startDate, dueDate, key, startTime, dueTime, priority); //
         const authUser = await User.findUserByEmail(userEmail);
         if (authUser) {
-            const createdTask = await Task.createTask(authUser, task); // Pass the object user and object task.
-            res.status(201).json(createdTask);
+            await Task.createTask(authUser, task);
+            res.status(201).json('Task created successfully');
         }
         else (
             res.status(403).json('You are unauthorized')
@@ -40,28 +52,6 @@ router.post('/addTask', async (req, res) => {
     }
 });
 
-// router.post('/addTask', async (req, res) => {
-//     const { userEmail, title, startDate, dueDate, key, startTime, dueTime, priority } = req.body;
-//     try {
-//         // Retrieve the user document
-//         const user = await User.findUserByEmail(userEmail);
-//         if (!user) {
-//             return res.status(404).json({ error: 'User not found' });
-//         }
-//         // Create a new task
-//         const task = new Task(title, startDate, dueDate, key, startTime, dueTime, priority);
-//         console.log(task);
-
-//         user.tasks.push(task); // Add the task to the tasks array
-
-//         // Save the updated user document
-//         await user.save();
-
-//         res.status(201).json({ message: 'Task created successfully' });
-//     } catch (error) {
-//         res.status(500).json({ error: 'Failed to create task' });
-//     }
-// });
 
 // GET single task by key
 router.get('/getBykey/:key', async (req, res) => {
@@ -95,6 +85,7 @@ router.put('/updateByKey/:key', async (req, res) => {
         res.status(500).json({ error: 'Failed to update task' });
     }
 });
+
 // PUT update task status by taskId
 router.put('/updateStatus/:taskId', async (req, res) => {
     const taskId = req.params.taskId;
@@ -111,8 +102,6 @@ router.put('/updateStatus/:taskId', async (req, res) => {
         res.status(500).json({ error: 'Failed to update task status' });
     }
 });
-
-
 
 // DELETE task by key
 router.delete('/deleteByKey/:key', async (req, res) => {

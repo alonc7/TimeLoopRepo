@@ -5,6 +5,7 @@ function MainContextProvider({ children }) {
   const [authenticated, setAuthenticated] = useState(false)
   const [userName, setUserName] = useState('');
   const [userId, setUserId] = useState('');
+  const [userEmail, setUserEmail] = useState('');
 
   const MainContextValues = {
     setAuthenticated,
@@ -12,7 +13,9 @@ function MainContextProvider({ children }) {
     setUserName,
     userName,
     userId,
-    setUserId
+    setUserId,
+    userEmail,
+    setUserEmail
   }
   return (
     <MainContext.Provider value={MainContextValues}>

@@ -7,8 +7,8 @@ import TaskInput from '../Components/TaskInput';
 import GoalItem from '../Components/GoalItem';
 import COLORS from '../constants/colors';
 import { MainContext } from '../Components/Context/MainContextProvider';
-import { v4 as uuidv4 } from 'uuid';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid';
 const TasksScreen = () => {
   const [modalIsVisible, setModalIsVisible] = useState(false); // boolean for visualise of the modal ( is it visual right now?)
   const [isHidden, setIsHidden] = useState(true); // boolean for setting the modal hidden or not. 
@@ -66,7 +66,7 @@ const TasksScreen = () => {
         text: title,
         startDate: startDate,
         dueDate: dueDate,
-        key: uuidv4(),
+        key: uuid.v1(),
         startTime: startTime,
         dueTime: dueTime,
         priority: priority
