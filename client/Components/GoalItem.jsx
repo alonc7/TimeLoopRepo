@@ -1,120 +1,160 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, Pressable, Button, SafeAreaView } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { StyleSheet, View, Text, Pressable, SafeAreaView, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
+// import AnimatedText from 'react-native-paper/lib/typescript/src/components/Typography/AnimatedText';
+
 function GoalItem(props) {
     const { text, startDate, endDate, startHour, endHour, onDeleteItem, priority } = props;
     const [completed, setCompleted] = useState(false);
 
+    const lineThroughAnim = useRef(new Animated.Value(0)).current;
+    const opacityAnim = useRef(new Animated.Value(1)).current;
+
     function handleDeleteItem() {
-        onDeleteItem(props.id);
+        Animated.timing(opacityAnim, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+        }).start(() => onDeleteItem(props.id));
     }
+
 
     function toggleCompletion() {
         setCompleted(!completed);
-       
+        if (!completed) {
+            Animated.sequence([ //זהו מערך שעל פיו נקבע סדר האנימציות שאבהן אני רוצה שיקרו 
+                Animated.timing(lineThroughAnim, {
+                    toValue: 1,
+                    duration: 300,
+                    useNativeDriver: false,
+                }),
+                Animated.delay(300),
+                Animated.timing(opacityAnim, {
+                    toValue: 0,
+                    duration: 500,
+                    useNativeDriver: true,
+                }),
+            ]).start(); // פקודת הרצה למערך האנימציות
+        } else {
+            Animated.sequence([
+                Animated.timing(opacityAnim, {
+                    toValue: 1,
+                    duration: 500,
+                    useNativeDriver: true,
+                }),
+                Animated.delay(300),
+                Animated.timing(lineThroughAnim, {
+                    toValue: 0,
+                    duration: 300,
+                    useNativeDriver: false,
+                }),
+            ]).start();
+        }
     }
-    let backgroundColor;
+
+    let borderColor;
     switch (props.priority) {
         case 'high':
-            backgroundColor = 'red';
+            borderColor = 'red';
             break;
         case 'medium':
-            backgroundColor = 'orange';
+            borderColor = 'orange';
             break;
         case 'low':
-            backgroundColor = 'grey';
+            borderColor = 'grey';
             break;
         default:
-            backgroundColor = 'transparent'
+            borderColor = 'transparent'
     }
 
     return (
         <SafeAreaView style={styles.container}>
-            <Pressable onPress={toggleCompletion}>
-                <View style={[styles.goalItem, { backgroundColor }]}>
-                    <View style={styles.leftColumn}>
-                        <Ionicons
-                            name={completed ? 'ios-checkmark-circle' : 'ios-checkmark-circle-outline'}
-                            size={24}
-                            color={completed ? '#2ecc71' : '#ffffff'}
-                            onPress={toggleCompletion}
-                        />
-                        <Text style={styles.taskText}>{text}</Text>
-                    </View>
-                    <View style={styles.rightColumn}>
-                        <View style={styles.dateContainer}>
-                            <Text>{startDate}</Text>
-                            <Text>{endDate}</Text>
-                        </View>
-                        <View style={styles.timeContainer}>
-                            <Text>{startHour}</Text>
-                            <Text>{endHour}</Text>
-                        </View>
-                        <View style={styles.timeContainer}>
-                        </View>
-                    </View>
-
-                    <View style={styles.buttonContainer}>
-                        <Pressable onPress={handleDeleteItem}><Text style={styles.x}>✖️</Text></Pressable>
-                    </View>
+          <Pressable onPress={toggleCompletion}>
+            <Animated.View style={[styles.goalItem, { borderColor, elevation: 5, opacity: opacityAnim }]}>
+              <View style={styles.titleContainer}>
+                <Ionicons
+                  name={completed ? 'ios-checkmark-circle' : 'ios-checkmark-circle-outline'}
+                  size={24}
+                  color={completed ? '#2ecc71' : '#ffffff'}
+                  onPress={toggleCompletion}
+                />
+                <Animated.Text
+                  style={[
+                    styles.taskText,
+                    {
+                      textDecorationLine: completed ? 'line-through' : 'none',
+                    },
+                  ]}
+                >
+                  {text}
+                </Animated.Text>
+              </View>
+    
+              <View style={styles.dateTimeContainer}>
+                <View style={styles.dateContainer}>
+                  <Text>{`Start Date: ${startDate}`}</Text>
+                  <Text>{`End Date: ${endDate}`}</Text>
                 </View>
-            </Pressable>
+                <View style={styles.timeContainer}>
+                  <Text>{`Start Hour: ${startHour}`}</Text>
+                  <Text>{`End Hour: ${endHour}`}</Text>
+                </View>
+              </View>
+    
+              <View style={styles.buttonContainer}>
+                <Pressable onPress={handleDeleteItem}>
+                  <Ionicons name='trash' size={30} color={completed ? '#2ecc71' : '#ffffff'} />
+                </Pressable>
+              </View>
+            </Animated.View>
+          </Pressable>
         </SafeAreaView>
-    );
-}
+      );
+    }
+    
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        width: '99.9%'
+        margin: 25
     },
     goalItem: {
-        flex: 1,
-        // flexDirection: 'row',
-        // alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 31,
+        flexDirection: 'column', // Change to column
+        alignItems: 'center', // Align items at the center
+        justifyContent: 'center', // Center the content vertically
+        padding: 16,
+        borderRadius: 10,
+        borderWidth: 4,
+        backgroundColor: COLORS.primary,
         marginVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 30,
     },
-    leftColumn: {
-        flex: 1,
+    titleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    rightColumn: {
-        flex: 1,
-        marginRight: 5,
-    },
-    checkboxIcon: {
-        marginRight: 8,
-        color: COLORS.primary
+    dateTimeContainer: {
+        marginTop: 8,
+        alignItems: 'center', // Align items at the center
     },
     taskText: {
-        flex: 1,
         color: 'white',
-        paddingLeft: 10,
-        marginBottom: 30
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginLeft: 10,
     },
     timeContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        // marginBottom: 8,
+        marginTop: 8,
     },
     dateContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        marginBottom: 8,
     },
     buttonContainer: {
-        width: 30, 
+        width: 50,
         height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    x: {
-        borderWidth: 1,
-        borderStyle: 'dotted',
-    }
 });
 
 export default GoalItem;

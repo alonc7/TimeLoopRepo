@@ -35,6 +35,27 @@ class Task {
             return { taskList: [] }; // Wrap an empty array in an object for consistency
         }
     }
+    static async getPendingTaskList(userEmail) {
+        try {
+
+            const user = await User.findUserByEmail(userEmail);
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            let taskList = [];
+            if (user.Tasks && Array.isArray(user.Tasks)) {
+                taskList = user.Tasks
+                    .filter(taskObj => taskObj.task.status === 'pending')
+                    .map(taskObj => taskObj.task);
+            }
+
+            return { taskList };
+        } catch (error) {
+            console.error(error);
+            return { taskList: [] };
+        }
+    }
 
 
     // insert task into tasks field. 
@@ -58,6 +79,19 @@ class Task {
         }
     }
 
+    static async deleteTask(taskId) {
+        try {
+            const query = { 'Tasks.key': taskId }; // Find the user by the task's key
+            const update = { $pull: { Tasks: { key: taskId } } }; // Remove the task with the matching key from the Tasks array
+
+            await new db().UpdateOne(User.collection, query, update);
+
+            return true;
+        } catch (error) {
+            throw new Error('Failed to delete task');
+        }
+    }
+
 
 
 
@@ -75,17 +109,6 @@ class Task {
             throw new Error('Failed to find task');
         }
     };
-
-    //Update task.
-    static async updateTask(taskId, updatedTask) {
-        try {
-            const query = { _id: mongodb.ObjectId(taskId) };
-            await new db().UpdateOne(Task.collection, query, updatedTask);
-            return true;
-        } catch (error) {
-            throw new Error('Failed to update task');
-        }
-    }
     static async findUserById(userEmail) {
         try {
             const query = { userEmail };
@@ -95,13 +118,13 @@ class Task {
         }
     }
     //Delete task.
-    // static async deleteTask(taskId) {
-    //     try {
-    //         const query = { _id: mo }
-    //     } catch (error) {
-    //         throw new Error('Failed to delete task')
-    //     }
-    // }
+    static async deleteTask(taskId) {
+        try {
+            const query = { _id: taskId }
+        } catch (error) {
+            throw new Error('Failed to delete task')
+        }
+    }
     //Sorting and Ordering 
     static async sortTasks(sortCriterion) {
         try {

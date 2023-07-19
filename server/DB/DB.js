@@ -87,7 +87,22 @@ class DB {
 
         }
     }
-    
+    async DeactiveTask(collection, email) {
+        try {
+            await this.client.connect();
+            return await this.client.db(this.db_name).collection(collection).updateOne(
+                { email: email },
+                { $set: { priority: 'completed' } }
+            );
+        } catch (error) {
+            return error;
+        }
+        finally {
+            await this.client.close();
+
+        }
+    }
+
     async EditByEmail(collection, email, doc) {
         try {
             await this.client.connect();

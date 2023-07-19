@@ -6,8 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
 
 function TaskInput(props) {
- 
-
   const [enteredTaskText, setEnteredTaskText] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState();
@@ -21,8 +19,8 @@ function TaskInput(props) {
   const [isPriorityVisible, setPriorityVisible] = useState(false);
   // const dropDownAlertRef = useContext(AlertContext);
 
- 
-  const goalInputHandler = (enteredText) => {
+
+  const taskInputHandler = (enteredText) => {
     setEnteredTaskText(enteredText);
   };
 
@@ -136,7 +134,7 @@ function TaskInput(props) {
   );
 
   return (
-    <Modal visible={props.visible} animationType="slide" 
+    <Modal visible={props.visible} animationType="slide"
     // onShow={info}
     >
       <View style={styles.inputContainer}>
@@ -146,7 +144,7 @@ function TaskInput(props) {
           placeholderTextColor="#AAAAAA"
           style={styles.textInput}
           placeholder="Your next task!!"
-          onChangeText={goalInputHandler}
+          onChangeText={taskInputHandler}
           value={enteredTaskText}
         />
 

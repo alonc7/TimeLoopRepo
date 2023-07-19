@@ -18,21 +18,24 @@ router.get('/allTasks/:userEmail', async (req, res) => {
         res.status(500).json({ error: 'no Tasks found.' })
     }
 });
-// router.get('/:userEmail', async (req, res) => {
-//     try {
-//         const userEmail = req.params.userEmail;
-//         const result = await Task.findUserById(userEmail);
-//         console.log(result);
-//         if (!result) {
-//             return res.status(404).json({ message: 'No Tasks Found' });
-//         } else {
-//             return res.status(200).send({ tasks: result });
-//         }
-//     } catch (err) {
-//         console.error(`Error in getting tasks ${err}`);
-//         return res.status(500).json({ message: 'Internal Server Error' });
-//     }
-// });
+
+router.get('/getPendingTaskList/:userEmail', async (req, res) => {
+    try {
+        const { userEmail } = req.params;
+        const user = await User.findUserByEmail(userEmail);
+        if(!user){
+            return res.status(404).json({message:"User not found"});
+        }
+        const pendingTaskList = await Task.getPendingTaskList(userEmail)
+        res.json(pendingTaskList);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching the pending task list.' });
+    }
+});
+
+// 
 
 // POST create task
 router.post('/addTask', async (req, res) => {
@@ -54,20 +57,20 @@ router.post('/addTask', async (req, res) => {
 
 
 // GET single task by key
-router.get('/getBykey/:key', async (req, res) => {
-    const taskKey = req.params.key;
+// router.get('/getBykey/:key', async (req, res) => {
+//     const taskKey = req.params.key;
 
-    try {
-        const task = await Task.findTaskByKey(taskKey);
-        if (!task) {
-            res.status(404).json({ error: 'Task not found' });
-        } else {
-            res.json(task);
-        }
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to retrieve task' });
-    }
-});
+//     try {
+//         const task = await Task.findTaskByKey(taskKey);
+//         if (!task) {
+//             res.status(404).json({ error: 'Task not found' });
+//         } else {
+//             res.json(task);
+//         }
+//     } catch (error) {
+//         res.status(500).json({ error: 'Failed to retrieve task' });
+//     }
+// });
 
 // PUT update task by key
 router.put('/updateByKey/:key', async (req, res) => {
@@ -108,12 +111,26 @@ router.delete('/deleteByKey/:key', async (req, res) => {
     const taskKey = req.params.key;
 
     try {
-        const success = await Task.deleteTaskByKey(taskKey);
+        const success = await Task.findTaskByKey(taskKey);
         if (success) {
             res.json({ message: 'Task deleted successfully' });
         } else {
             res.status(404).json({ error: 'Task not found' });
         }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete task' });
+    }
+});
+// DELETE a task by taskKey
+router.delete('/deleteTask/:taskKey', async (req, res) => {
+    const { userEmail, taskKey } = req.body;
+
+    try {
+        await User.updateOne(
+            { email: userEmail },
+            { $pull: { Tasks: { key: taskKey } } }
+        ); // moveto Model some of the logic. like updateone
+        res.status(200).json('Task deleted successfully');
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete task' });
     }
