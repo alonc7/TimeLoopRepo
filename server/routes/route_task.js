@@ -23,10 +23,10 @@ router.get('/getPendingTaskList/:userEmail', async (req, res) => {
     try {
         const { userEmail } = req.params;
         const user = await User.findUserByEmail(userEmail);
-        if(!user){
-            return res.status(404).json({message:"User not found"});
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
-        const pendingTaskList = await Task.getPendingTaskList(userEmail)
+        const pendingTaskList = await Task.getPendingTaskList(userEmail);
         res.json(pendingTaskList);
 
     } catch (error) {
@@ -34,8 +34,23 @@ router.get('/getPendingTaskList/:userEmail', async (req, res) => {
         res.status(500).json({ error: 'An error occurred while fetching the pending task list.' });
     }
 });
+router.get('/getCompletedTaskList/:userEmail', async (req, res) => {
+    try {
+        const { userEmail } = req.params;
+        const user = await User.findUserByEmail(userEmail);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const completedTaskList = await Task.getCompletedTaskList(userEmail)
+        res.json(completedTaskList);
 
-// 
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching the pending task list.' });
+    }
+});
+
+
 
 // POST create task
 router.post('/addTask', async (req, res) => {
@@ -121,18 +136,21 @@ router.delete('/deleteByKey/:key', async (req, res) => {
         res.status(500).json({ error: 'Failed to delete task' });
     }
 });
-// DELETE a task by taskKey
-router.delete('/deleteTask/:taskKey', async (req, res) => {
-    const { userEmail, taskKey } = req.body;
 
+// complete a task by taskKey
+router.put('/completeTask/', async (req, res) => {
     try {
-        await User.updateOne(
-            { email: userEmail },
-            { $pull: { Tasks: { key: taskKey } } }
-        ); // moveto Model some of the logic. like updateone
-        res.status(200).json('Task deleted successfully');
+        const { userEmail, taskKey } = req.body;
+        const user = await User.findUserByEmail(userEmail);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (user) {
+            await Task.completeTask(taskKey, user.email);
+            res.status(201).json('Task completed successfully');
+        }
     } catch (error) {
-        res.status(500).json({ error: 'Failed to delete task' });
+        res.status(500).json({ error: 'Failed to complete task' });
     }
 });
 

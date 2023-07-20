@@ -87,19 +87,17 @@ class DB {
 
         }
     }
-    async DeactiveTask(collection, email) {
+    async CompleteTask(collection, userEmail, taskId) {
         try {
             await this.client.connect();
             return await this.client.db(this.db_name).collection(collection).updateOne(
-                { email: email },
-                { $set: { priority: 'completed' } }
+                { email: userEmail, 'Tasks.key': taskId }, // Match both userEmail and taskId in the query
+                { $set: { 'Tasks.$.task.status': 'completed' } } // Use the provided update to set the status to 'completed'
             );
         } catch (error) {
             return error;
-        }
-        finally {
+        } finally {
             await this.client.close();
-
         }
     }
 

@@ -56,6 +56,27 @@ class Task {
             return { taskList: [] };
         }
     }
+    static async getCompletedTaskList(userEmail) {
+        try {
+
+            const user = await User.findUserByEmail(userEmail);
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            let taskList = [];
+            if (user.Tasks && Array.isArray(user.Tasks)) {
+                taskList = user.Tasks
+                    .filter(taskObj => taskObj.task.status === 'completed')
+                    .map(taskObj => taskObj.task);
+            }
+
+            return { taskList };
+        } catch (error) {
+            console.error(error);
+            return { taskList: [] };
+        }
+    }
 
 
     // insert task into tasks field. 
@@ -68,7 +89,6 @@ class Task {
                 query.Tasks = [];
             }
             // query.Tasks.push(task); // Push the task into the tasks array
-
             // Update the user document in the database with the updated tasks array
             await new db().EditByEmail(User.collection, query.email, { task });
 
@@ -79,22 +99,18 @@ class Task {
         }
     }
 
-    static async deleteTask(taskId) {
+    static async completeTask(userEmail,taskId) {
         try {
-            const query = { 'Tasks.key': taskId }; // Find the user by the task's key
-            const update = { $pull: { Tasks: { key: taskId } } }; // Remove the task with the matching key from the Tasks array
-
-            await new db().UpdateOne(User.collection, query, update);
-
+            const user = await User.findUserByEmail(userEmail);
+            if (!user) {
+                throw new Error('User not found');
+            }
+            await new db().CompleteTask(User.collection, userEmail, taskId);
             return true;
         } catch (error) {
-            throw new Error('Failed to delete task');
+            throw new Error('Failed to complete task');
         }
     }
-
-
-
-
 
     // get task by its key if exists
     static async findTaskByKey(key) {
