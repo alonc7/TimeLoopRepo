@@ -117,7 +117,7 @@ class Task {
             if (!user) {
                 throw new Error('User not found');
             }
-            await new db().CompleteTask(User.collection, user, taskId);
+            await new db().RemoveTask(User.collection, user, taskId);
 
             return true;
         } catch (error) {

@@ -161,8 +161,8 @@ router.put('/removeTask', async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         if (user) {
-            await Task.completeTask(user.email, taskId);
-            res.status(201).json('Task completed successfully');
+            await Task.removeTask(user.email, taskId);
+            res.status(201).json('Task removed successfully');
         }
     } catch (error) {
         res.status(500).json({ error: 'Failed to complete task' });
