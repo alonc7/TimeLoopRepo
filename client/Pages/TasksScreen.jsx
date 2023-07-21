@@ -67,7 +67,6 @@ const TasksScreen = () => {
       title: title,
       startDate: startDate,
       dueDate: dueDate,
-      key: uuid.v1(),
       startTime: startTime,
       dueTime: dueTime,
       priority: priority,
@@ -135,13 +134,14 @@ const TasksScreen = () => {
                 text={item.title}
                 startDate={item.startDate}
                 endDate={item.dueDate}
-                id={item.key}
+                id={item._id}
                 startHour={item?.startTime}
                 endHour={item?.dueTime}
                 onDeleteItem={deleteTaskHandler}
                 priority={item.priority}
               />
             )}
+            // keyExtractor={(item, key) => key.toString()}
             keyExtractor={(item, key) => key.toString()}
             alwaysBounceVertical={false}
           />

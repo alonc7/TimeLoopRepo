@@ -140,13 +140,13 @@ router.delete('/deleteByKey/:key', async (req, res) => {
 // complete a task by taskKey
 router.put('/completeTask/', async (req, res) => {
     try {
-        const { userEmail, taskKey } = req.body;
+        const { userEmail, taskId } = req.body;
         const user = await User.findUserByEmail(userEmail);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
         if (user) {
-            await Task.completeTask(user.email, taskKey);
+            await Task.completeTask(user.email, taskId);
             res.status(201).json('Task completed successfully');
         }
     } catch (error) {

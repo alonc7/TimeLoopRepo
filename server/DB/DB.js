@@ -147,6 +147,29 @@ class DB {
         }
     }
 
+    async CompleteTask(collection, user, taskId) {
+        try {
+
+            let tasks = user.Tasks.map((task) => {
+                if (new ObjectId(taskId).equals(task._id)) {
+                    console.log(task._id);
+                    task.status = 'completed'
+                }
+                return task;
+            })
+
+            await this.client.connect();
+            await this.client.db(this.db_name).collection(collection).updateOne(
+                { email: user.email },
+                { $set: { Tasks: tasks } });
+        } catch (error) {
+            console.error('Failed to update document:', error);
+            throw error;
+        } finally {
+            await this.client.close();
+        }
+    }
+
 
 
     async Reactive(collection, id) {

@@ -80,25 +80,6 @@ class Task {
     }
 
 
-    // insert task into tasks field. 
-    // static async createTask(user, task) {
-    //     try {
-    //         const query = user;
-
-    //         task._id = new mongodb.ObjectId(); // Generate a unique ID for the task
-    //         if (!query.Tasks) {
-    //             query.Tasks = [];
-    //         }
-    //         // query.Tasks.push(task); // Push the task into the tasks array
-    //         // Update the user document in the database with the updated tasks array
-    //         await new db().EditByEmail(User.collection, query.email, { task });
-
-    //         return task;
-    //     } catch (error) {
-    //         console.log(error);
-    //         throw new Error('Failed to create task in createTask');
-    //     }
-    // }
     static async createTask(user, task) {
         try {
             const query = user;
@@ -107,7 +88,6 @@ class Task {
             if (!query.Tasks) {
                 query.Tasks = [];
             }
-            // query.Tasks.push(task); // Push the task into the tasks array
             // Update the user document in the database with the updated tasks array
             await new db().AddTaskToUser(User.collection, query, task);
 
@@ -124,34 +104,7 @@ class Task {
             if (!user) {
                 throw new Error('User not found');
             }
-
-            // Get the list of pending tasks for the user
-            const taskList = await Task.getPendingTaskList(userEmail);
-
-            if (!taskList || taskList.taskList.length === 0) {
-                throw new Error('Task list not found');
-            }
-
-            let taskToComplete;
-            for (const task of taskList.taskList) {
-                if (task.key === taskId) {
-                    taskToComplete = task;
-                    console.log(taskToComplete.status);
-                    taskToComplete.status = 'completed'; // Update the status directly in memory
-                    console.log(taskToComplete.status);
-                    break;
-                }
-            }
-            console.log(taskToComplete.status);
-            if (!taskToComplete) {
-                throw new Error('Task not found');
-            }
-
-            // // Update the task status to 'completed'
-            // taskToComplete.status = 'completed';
-
-            // Save the updated user object to the database
-            await user.save();
+            await new db().CompleteTask(User.collection, user, taskId);
 
             return true;
         } catch (error) {
