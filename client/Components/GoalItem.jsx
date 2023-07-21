@@ -27,16 +27,13 @@ function GoalItem(props) {
   // Function to mark the task as completed using API request
   async function completeTaskWithAPI(taskId) {
     try {
-
-
       const response = await fetch(`${Server_path}/completeTask/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userEmail, taskId),
+        body: JSON.stringify({ userEmail, taskId }),
       });
-
       if (response.ok) {
         console.log('Task completed successfully');
       } else {

@@ -111,6 +111,19 @@ class Task {
             throw new Error('Failed to complete task');
         }
     }
+    static async removeTask(userEmail, taskId) {
+        try {
+            const user = await User.findUserByEmail(userEmail);
+            if (!user) {
+                throw new Error('User not found');
+            }
+            await new db().CompleteTask(User.collection, user, taskId);
+
+            return true;
+        } catch (error) {
+            throw new Error('Failed to complete task');
+        }
+    }
 
 
 
