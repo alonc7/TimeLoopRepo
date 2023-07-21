@@ -22,7 +22,7 @@ const TasksScreen = () => {
     // retrieveUserId();
     const loadTask = async (userEmail) => {
       try {
-        const response = await fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`);
+        const response = await fetch(`${Server_path}/api/tasks/getPendingTaskList/${userEmail}`);
         if (response.ok) {
           const data = await response.json();
           setTaskList(data)

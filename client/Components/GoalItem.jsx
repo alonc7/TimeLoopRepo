@@ -1,12 +1,16 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useContext } from 'react';
 import { StyleSheet, View, Text, Pressable, SafeAreaView, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
+import { MainContext } from '../Components/Context/MainContextProvider';
+import { Server_path } from '../utils/api-url';
+
 // import AnimatedText from 'react-native-paper/lib/typescript/src/components/Typography/AnimatedText';
 
 function GoalItem(props) {
-  const { text, startDate, endDate, startHour, endHour, onDeleteItem, priority } = props;
+  const { text, startDate, endDate, startHour, endHour, onDeleteItem } = props;
   const [completed, setCompleted] = useState(false);
+  const { userEmail } = useContext(MainContext);
 
   const lineThroughAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
@@ -20,23 +24,47 @@ function GoalItem(props) {
     }).start(() => onDeleteItem(props.id));
   }
 
+  // Function to mark the task as completed using API request
+  async function completeTaskWithAPI(taskId) {
+    try {
 
+
+      const response = await fetch(`${Server_path}/completeTask/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userEmail, taskId),
+      });
+
+      if (response.ok) {
+        console.log('Task completed successfully');
+      } else {
+        console.log('Failed to complete task:', response.status);
+      }
+    } catch (error) {
+      console.error('Error completing task:', error);
+    }
+  }
+
+  // Function to handle the completion toggle
   function toggleCompletion() {
     setCompleted(!completed);
     if (!completed) {
-      Animated.sequence([ //זהו מערך שעל פיו נקבע סדר האנימציות שאבהן אני רוצה שיקרו 
+      Animated.sequence([
         Animated.timing(lineThroughAnim, {
           toValue: 1,
           duration: 300,
           useNativeDriver: false,
         }),
-        Animated.delay(300),
         Animated.timing(opacityAnim, {
           toValue: 0,
           duration: 500,
           useNativeDriver: true,
         }),
-      ]).start(); // פקודת הרצה למערך האנימציות
+      ]).start(() => {
+        completeTaskWithAPI(props.id); // Call the API function with the task ID (props.id)
+      });
     } else {
       Animated.sequence([
         Animated.timing(opacityAnim, {
@@ -44,7 +72,6 @@ function GoalItem(props) {
           duration: 500,
           useNativeDriver: true,
         }),
-        Animated.delay(300),
         Animated.timing(lineThroughAnim, {
           toValue: 0,
           duration: 300,
@@ -53,6 +80,9 @@ function GoalItem(props) {
       ]).start();
     }
   }
+
+
+
 
   let borderColor;
   switch (props.priority) {
@@ -105,7 +135,7 @@ function GoalItem(props) {
 
           <View style={styles.buttonContainer}>
             <Pressable onPress={handleDeleteItem}>
-              <Ionicons name='trash' size={30} color={completed ? '#2ecc71' : '#ffffff'} />
+              <Ionicons name='trash' size={30} color='#ffffff' />
             </Pressable>
           </View>
         </Animated.View>
