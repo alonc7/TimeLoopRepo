@@ -90,16 +90,32 @@ class DB {
     async CompleteTask(collection, userEmail, taskId) {
         try {
             await this.client.connect();
-            return await this.client.db(this.db_name).collection(collection).updateOne(
-                { email: userEmail, 'Tasks.key': taskId }, // Match both userEmail and taskId in the query
-                { $set: { 'Tasks.$.task.status': 'completed' } } // Use the provided update to set the status to 'completed'
+            const result = await this.client.db(this.db_name).collection(collection).updateOne(
+                {
+                    email: userEmail,
+                    'Tasks.key': taskId // Match the specific user with the current email and task with the provided taskId in the query
+                },
+                {
+                    $set: { 'Tasks.$[task].status': 'completed' } // Use the provided array filter to set the status to 'completed'
+                },
+                {
+                    arrayFilters: [{ 'task.key': taskId }] // Array filter to match the specific task with the provided taskId
+                }
             );
+
+            // Check if the update was successful and at least one document was modified
+            if (result.modifiedCount > 0) {
+                return true; // Task updated successfully
+            } else {
+                throw new Error('Task not found for the given user.'); // Task with the provided ID not found
+            }
         } catch (error) {
             return error;
         } finally {
             await this.client.close();
         }
     }
+
 
     async EditByEmail(collection, email, doc) {
         try {
@@ -108,6 +124,21 @@ class DB {
             await this.client.db(this.db_name).collection(collection).updateOne(
                 { email: email },
                 { $push: { Tasks: { ...doc } } });
+        } catch (error) {
+            console.error('Failed to update document:', error);
+            throw error;
+        } finally {
+            await this.client.close();
+        }
+    }
+
+    async AddTaskToUser(collection, user, task) {
+        try {
+            user.Tasks.push(task);
+            await this.client.connect();
+            await this.client.db(this.db_name).collection(collection).updateOne(
+                { email: user.email },
+                { $set: { Tasks: user.Tasks } });
         } catch (error) {
             console.error('Failed to update document:', error);
             throw error;

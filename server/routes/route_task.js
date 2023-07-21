@@ -146,7 +146,7 @@ router.put('/completeTask/', async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         if (user) {
-            await Task.completeTask(taskKey, user.email);
+            await Task.completeTask(user.email, taskKey);
             res.status(201).json('Task completed successfully');
         }
     } catch (error) {

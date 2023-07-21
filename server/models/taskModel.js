@@ -23,16 +23,16 @@ class Task {
             if (!user) {
                 throw new Error('User not found');
             }
-            let taskList = [];
-            if (user.Tasks && Array.isArray(user.Tasks)) {
-                user.Tasks.forEach(taskObj => {
-                    taskList.push(taskObj.task);
-                });
-            }
-            return taskList; // Wrap taskList in an object for the correct assignment
+            // let taskList = [];
+            // if (user.Tasks && Array.isArray(user.Tasks)) {
+            //     user.Tasks.forEach(taskObj => {
+            //         taskList.push(taskObj.task);
+            //     });
+            // }
+            return user.Tasks || []; // Wrap taskList in an object for the correct assignment
         } catch (error) {
             console.error(error);
-            return { taskList: [] }; // Wrap an empty array in an object for consistency
+            return []; // Wrap an empty array in an object for consistency
         }
     }
     static async getPendingTaskList(userEmail) {
@@ -43,17 +43,18 @@ class Task {
                 throw new Error('User not found');
             }
 
-            let taskList = [];
-            if (user.Tasks && Array.isArray(user.Tasks)) {
-                taskList = user.Tasks
-                    .filter(taskObj => taskObj.task.status === 'pending')
-                    .map(taskObj => taskObj.task);
-            }
+            let taskList = user.Tasks.filter((task) => task.status === 'pending');
+            // if (user.Tasks && Array.isArray(user.Tasks)) {
+            //     taskList = user.Tasks
+            //         .filter(taskObj => taskObj.task.status === 'pending')
+            //         .map(taskObj => taskObj.task);
+            // }
 
-            return { taskList };
+
+            return taskList;
         } catch (error) {
             console.error(error);
-            return { taskList: [] };
+            return [];
         }
     }
     static async getCompletedTaskList(userEmail) {
@@ -64,22 +65,40 @@ class Task {
                 throw new Error('User not found');
             }
 
-            let taskList = [];
-            if (user.Tasks && Array.isArray(user.Tasks)) {
-                taskList = user.Tasks
-                    .filter(taskObj => taskObj.task.status === 'completed')
-                    .map(taskObj => taskObj.task);
-            }
+            let taskList = user.Tasks.filter((task) => task.status === 'completed');
+            // if (user.Tasks && Array.isArray(user.Tasks)) {
+            //     taskList = user.Tasks
+            //         .filter(taskObj => taskObj.task.status === 'completed')
+            //         .map(taskObj => taskObj.task);
+            // }
 
-            return { taskList };
+            return taskList;
         } catch (error) {
             console.error(error);
-            return { taskList: [] };
+            return [];
         }
     }
 
 
     // insert task into tasks field. 
+    // static async createTask(user, task) {
+    //     try {
+    //         const query = user;
+
+    //         task._id = new mongodb.ObjectId(); // Generate a unique ID for the task
+    //         if (!query.Tasks) {
+    //             query.Tasks = [];
+    //         }
+    //         // query.Tasks.push(task); // Push the task into the tasks array
+    //         // Update the user document in the database with the updated tasks array
+    //         await new db().EditByEmail(User.collection, query.email, { task });
+
+    //         return task;
+    //     } catch (error) {
+    //         console.log(error);
+    //         throw new Error('Failed to create task in createTask');
+    //     }
+    // }
     static async createTask(user, task) {
         try {
             const query = user;
@@ -90,7 +109,7 @@ class Task {
             }
             // query.Tasks.push(task); // Push the task into the tasks array
             // Update the user document in the database with the updated tasks array
-            await new db().EditByEmail(User.collection, query.email, { task });
+            await new db().AddTaskToUser(User.collection, query, task);
 
             return task;
         } catch (error) {
@@ -99,18 +118,51 @@ class Task {
         }
     }
 
-    static async completeTask(userEmail,taskId) {
+    static async completeTask(userEmail, taskId) {
         try {
             const user = await User.findUserByEmail(userEmail);
             if (!user) {
                 throw new Error('User not found');
             }
-            await new db().CompleteTask(User.collection, userEmail, taskId);
+
+            // Get the list of pending tasks for the user
+            const taskList = await Task.getPendingTaskList(userEmail);
+
+            if (!taskList || taskList.taskList.length === 0) {
+                throw new Error('Task list not found');
+            }
+
+            let taskToComplete;
+            for (const task of taskList.taskList) {
+                if (task.key === taskId) {
+                    taskToComplete = task;
+                    console.log(taskToComplete.status);
+                    taskToComplete.status = 'completed'; // Update the status directly in memory
+                    console.log(taskToComplete.status);
+                    break;
+                }
+            }
+            console.log(taskToComplete.status);
+            if (!taskToComplete) {
+                throw new Error('Task not found');
+            }
+
+            // // Update the task status to 'completed'
+            // taskToComplete.status = 'completed';
+
+            // Save the updated user object to the database
+            await user.save();
+
             return true;
         } catch (error) {
             throw new Error('Failed to complete task');
         }
     }
+
+
+
+
+
 
     // get task by its key if exists
     static async findTaskByKey(key) {
