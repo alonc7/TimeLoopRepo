@@ -7,7 +7,12 @@ function MainContextProvider({ children }) {
   const [userId, setUserId] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [taskList, setTaskList] = useState([]); // array of tasks 
 
+  //HomeScreen method
+  const capitalizeFirstLetter = (str) => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
   
   const MainContextValues = {
     isLoading,
@@ -19,7 +24,8 @@ function MainContextProvider({ children }) {
     userId,
     setUserId,
     userEmail,
-    setUserEmail
+    setUserEmail,
+    capitalizeFirstLetter
   }
   return (
     <MainContext.Provider value={MainContextValues}>

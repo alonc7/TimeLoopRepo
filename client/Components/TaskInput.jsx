@@ -17,8 +17,12 @@ function TaskInput(props) {
   const [isCalendarVisible, setCalendarVisible] = useState(false);
   const [selectedPriority, setSelectedPriority] = useState('low');
   const [isPriorityVisible, setPriorityVisible] = useState(false);
+  const [isInfoVisible, setInfoVisible] = useState(false); // New state for the info message
   // const dropDownAlertRef = useContext(AlertContext);
 
+  const handleToggleInfo = () => {
+    setInfoVisible(!isInfoVisible);
+  };
 
   const taskInputHandler = (enteredText) => {
     setEnteredTaskText(enteredText);
@@ -134,11 +138,10 @@ function TaskInput(props) {
   );
 
   return (
-    <Modal visible={props.visible} animationType="slide"
-    // onShow={info}
-    >
+    <Modal visible={props.visible} animationType="slide">
       <View style={styles.inputContainer}>
         <Image source={require('../assets/images/task.png')} style={styles.image} />
+
         <TextInput
           autoFocus={true}
           placeholderTextColor="#AAAAAA"
@@ -147,7 +150,22 @@ function TaskInput(props) {
           onChangeText={taskInputHandler}
           value={enteredTaskText}
         />
-
+        <TouchableOpacity onPress={handleToggleInfo} style={styles.infoIconContainer}>
+          <Ionicons
+            name="information-circle-outline"
+            size={30}
+            color='#331993'
+          />
+        </TouchableOpacity>
+        {isInfoVisible && (
+          <View style={styles.infoMessageBubble}>
+            <Text style={styles.infoText}>
+              {isStartDateSelected
+                ? 'Set due date and time for the task.'
+                : '* Start by set your task title.\n* Use the icons bellow the text input box to set priority for a task using the right Icon, and set the time and date usign the left icon'}
+            </Text>
+          </View>
+        )}
         <View style={styles.iconContainer}>
           <Ionicons
             name="calendar"
@@ -303,5 +321,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     marginBottom: 10,
+  },
+  infoIconContainer: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    zIndex: 1,
+    color: '#331993',
+    size: 34
+  },
+  infoMessageBubble: {
+    position: 'absolute',
+    top: 28,
+    left: 36,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    borderTopLeftRadius: 0,
+    padding: 12,
+    elevation: 5, // Adds a bit of elevation for a raised effect
+    marginBottom: 20,
+    maxWidth: '90%', // Adjust the width as needed
+    opacity: 0.7, // You can adjust the opacity here (1 for fully visible, 0 for fully transparent)
+  },
+  infoText: {
+    fontSize: 14,
+    width:'100%',
+    color: '#331993',
   },
 });

@@ -8,7 +8,6 @@ import GoalItem from '../Components/GoalItem';
 import COLORS from '../constants/colors';
 import { MainContext } from '../Components/Context/MainContextProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import uuid from 'react-native-uuid';
 import { Server_path } from '../utils/api-url';
 
 const TasksScreen = () => {
@@ -24,8 +23,9 @@ const TasksScreen = () => {
       try {
         const response = await fetch(`${Server_path}/api/tasks/getPendingTaskList/${userEmail}`);
         if (response.ok) {
-          const data = await response.json();
-          setTaskList(data)
+          const data = await response.json(); //data returned from fetch result
+          const sortedTasks = sortTasksByPriority(data); // sorting the data according to priority
+          setTaskList(sortedTasks); // setting the taskList as sorted data. 
 
         }
         throw new Error('Request failed');
@@ -38,20 +38,14 @@ const TasksScreen = () => {
     loadTask(userEmail);
   }, [taskList]);
 
+  function sortTasksByPriority(tasks) {
+    return tasks.sort(comparePriority);
+  }
+  function comparePriority(a, b) {
+    const priorityOrder = { high: 1, medium: 2, low: 3 };  // Define priority order using an object
+    return priorityOrder[a.priority] - priorityOrder[b.priority];  // Compare the priority values of tasks 'a' and 'b'
 
-
-  const retrieveUserId = async () => {
-    try {
-      const userDataString = await AsyncStorage.getItem('userData');
-      if (userDataString !== null) {
-        const userData = JSON.parse(userDataString);
-        setUserId(userData.id);
-      }
-    } catch (error) {
-      console.log('Error retrieving user data:', error);
-    }
-  };
-
+  }
 
 
   function toggleBtn() {
@@ -92,17 +86,35 @@ const TasksScreen = () => {
 
   }
 
-  function deleteAllTasks(key) {
-    setTaskList([]);
-    toggleBtn();
+  // function deleteAllTasks(key) {
+  //   setTaskList([]);
+  //   toggleBtn();
+  // }
+  function deleteTaskHandler(id) {
+    // Perform the API fetch request to remove the task from the server
+    fetch(`${Server_path}/api/tasks/removeTask`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userEmail, taskId: id }), // 'id' is the task ID passed from GoalItem
+    })
+      .then(response => {
+        if (response.ok) {
+          console.log('Task removed successfully');
+          // Now update the taskList state to remove the task from the view
+          setTaskList((currentListTasks) =>
+            currentListTasks.filter((task) => task._id !== id)
+          );
+        } else {
+          console.log('Failed to remove task:', response.status);
+        }
+      })
+      .catch(error => {
+        console.error('Error removing task:', error);
+      });
   }
 
-  // const deleteTaskHandler = async()
-  function deleteTaskHandler(id) {
-    setTaskList((currentListTasks) =>
-      currentListTasks.filter((task) => task.key !== id)
-    );
-  }
 
   const actions = [
     {
@@ -141,16 +153,16 @@ const TasksScreen = () => {
                 priority={item.priority}
               />
             )}
-            // keyExtractor={(item, key) => key.toString()}
-            keyExtractor={(item, key) => key.toString()}
+            keyExtractor={(item) => item._id} // Use the _id property as the key for each task item
             alwaysBounceVertical={false}
           />
-          <Pressable
+
+          {/* <Pressable
             style={[styles.buttonText, isHidden && styles.btnHide]}
             onPress={deleteAllTasks}
           >
             <Text style={styles.buttonText}>Delete All Tasks</Text>
-          </Pressable>
+          </Pressable> */}
           <FloatingAction
             color='#222222'
             position={'left'}

@@ -21,13 +21,34 @@ function GoalItem(props) {
       toValue: 0,
       duration: 500,
       useNativeDriver: true,
-    }).start(() => onDeleteItem(props.id));
+    }).start(() => deleteTaskWithAPI(props.id));
+  }
+
+  // Function to mark the task as removed using API request
+  async function deleteTaskWithAPI(taskId) {
+    try {
+      const response = await fetch(`${Server_path}/api/tasks/removeTask`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userEmail, taskId }),
+      });
+      if (response.ok) {
+        console.log('Task removed successfully');
+      } else {
+        console.log('Failed to remove task:', response.status);
+      }
+    } catch (error) {
+      console.error('Error removing task:', error);
+    }
   }
 
   // Function to mark the task as completed using API request
+
   async function completeTaskWithAPI(taskId) {
     try {
-      const response = await fetch(`${Server_path}/completeTask/`, {
+      const response = await fetch(`${Server_path}/api/tasks/completeTask`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -37,6 +58,7 @@ function GoalItem(props) {
       if (response.ok) {
         console.log('Task completed successfully');
       } else {
+        console.log(response);
         console.log('Failed to complete task:', response.status);
       }
     } catch (error) {
@@ -98,45 +120,45 @@ function GoalItem(props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Pressable onPress={toggleCompletion}>
-        <Animated.View style={[styles.goalItem, { borderColor, elevation: 5, opacity: opacityAnim }]}>
-          <View style={styles.titleContainer}>
+      <Animated.View style={[styles.goalItem, { borderColor, elevation: 5, opacity: opacityAnim }]}>
+        <View style={styles.titleContainer}>
+          <Pressable>
             <Ionicons
               name={completed ? 'ios-checkmark-circle' : 'ios-checkmark-circle-outline'}
               size={24}
               color={completed ? '#2ecc71' : '#ffffff'}
               onPress={toggleCompletion}
             />
-            <Animated.Text
-              style={[
-                styles.taskText,
-                {
-                  textDecorationLine: completed ? 'line-through' : 'none',
-                },
-              ]}
-            >
-              {text}
-            </Animated.Text>
-          </View>
+          </Pressable>
+          <Animated.Text
+            style={[
+              styles.taskText,
+              {
+                textDecorationLine: completed ? 'line-through' : 'none',
+              },
+            ]}
+          >
+            {text}
+          </Animated.Text>
+        </View>
 
-          <View style={styles.dateTimeContainer}>
-            <View style={styles.dateContainer}>
-              <Text>{`Start Date: ${startDate}`}</Text>
-              <Text>{`End Date: ${endDate}`}</Text>
-            </View>
-            <View style={styles.timeContainer}>
-              <Text>{`Start Hour: ${startHour}`}</Text>
-              <Text>{`End Hour: ${endHour}`}</Text>
-            </View>
+        <View style={styles.dateTimeContainer}>
+          <View style={styles.dateContainer}>
+            <Text>{`Start Date: ${startDate}`}</Text>
+            <Text>{`End Date: ${endDate}`}</Text>
           </View>
+          <View style={styles.timeContainer}>
+            <Text>{`Start Hour: ${startHour}`}</Text>
+            <Text>{`End Hour: ${endHour}`}</Text>
+          </View>
+        </View>
 
-          <View style={styles.buttonContainer}>
-            <Pressable onPress={handleDeleteItem}>
-              <Ionicons name='trash' size={30} color='#ffffff' />
-            </Pressable>
-          </View>
-        </Animated.View>
-      </Pressable>
+        <View style={styles.buttonContainer}>
+          <Pressable onPress={handleDeleteItem}>
+            <Ionicons name='trash' size={30} color='#ffffff' />
+          </Pressable>
+        </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }

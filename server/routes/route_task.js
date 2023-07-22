@@ -153,6 +153,7 @@ router.put('/completeTask', async (req, res) => {
         res.status(500).json({ error: 'Failed to complete task' });
     }
 });
+
 router.put('/removeTask', async (req, res) => {
     try {
         const { userEmail, taskId } = req.body;

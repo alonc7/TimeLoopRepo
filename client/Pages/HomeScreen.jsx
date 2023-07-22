@@ -10,36 +10,36 @@ import { MainContext } from '../Components/Context/MainContextProvider';
 
 function HomeScreen() {
     const [userImage, setUserImage] = useState(null);
-    const { userName, setUserName, userEmail, setUserEmail } = useContext(MainContext);
+    const { userName, setUserName, userEmail, setUserEmail, capitalizeFirstLetter } = useContext(MainContext);
 
 
     useEffect(() => {
         // removeDataFromAsyncStorage();
-        retrieveUserImage ();
+        retrieveUserImage();
         retrieveUserData();
     }, []);
-  const retrieveUserImage  = async () => {
-    try {
-      const imageUri = await AsyncStorage.getItem('userImage');
-      if (imageUri !== null) {
-        setUserImage(imageUri);
-      }
-    } catch (error) {
-      console.log('Error retrieving user image', error);
-    }
-  };
-  const retrieveUserData = async () => {
-    try {
-      const userDataString = await AsyncStorage.getItem('userData');
-      if (userDataString !== null) {
-        const userData = await JSON.parse(userDataString);
-        setUserName(userData.name);
-      }
-    } catch (error) {
-        console.log(userDataString.email);
-      console.log('this is also  Error retrieving user data:', error);
-    }
-  };
+    const retrieveUserImage = async () => {
+        try {
+            const imageUri = await AsyncStorage.getItem('userImage');
+            if (imageUri !== null) {
+                setUserImage(imageUri);
+            }
+        } catch (error) {
+            console.log('Error retrieving user image', error);
+        }
+    };
+    const retrieveUserData = async () => {
+        try {
+            const userDataString = await AsyncStorage.getItem('userData');
+            if (userDataString !== null) {
+                const userData = await JSON.parse(userDataString);
+                setUserName(userData.name);
+            }
+        } catch (error) {
+            console.log(userDataString.email);
+            console.log('this is also  Error retrieving user data:', error);
+        }
+    };
     const removeDataFromAsyncStorage = async () => {
         try {
             await AsyncStorage.removeItem('userData');
@@ -136,7 +136,7 @@ function HomeScreen() {
                             <Ionicons name="person-circle-outline" size={80} />
                         )}
                     </TouchableOpacity>
-                    <Text style={styles.welcomeText}>Welcome {userName}!</Text>
+                    <Text style={styles.welcomeText}>Welcome {capitalizeFirstLetter(userName)}!</Text>
                 </View>
                 <Grid style={styles.gridContainer}>
                     <Col>
@@ -197,6 +197,7 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         width: '90%',
         height: '95%',
+
     },
     box: {
         justifyContent: 'center',
@@ -226,6 +227,10 @@ const styles = StyleSheet.create({
     welcomeText: {
         marginLeft: 10,
         fontSize: 18,
+        elevation: 15,
+        borderRadius: 22,
+        backgroundColor: COLORS.secondary,
+        padding: 15
     },
 });
 

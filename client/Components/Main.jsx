@@ -16,7 +16,6 @@ export default function Main() {
                 if (userDataString !== null) {
                     const userData = JSON.parse(userDataString);
                     // Use the retrieved user data to authenticate the user
-                    console.log('Main: User data retrieved successfully:');
                     setUserEmail(userData.email)
                     setAuthenticated(true);
                 } else {
@@ -32,7 +31,6 @@ export default function Main() {
 
         retrieveUserData();
     }, [setAuthenticated,setUserEmail]);
-    console.log('Main after the useEffect', userEmail);
     const getContent = () => {
         if (isLoading) {
             return <ActivityIndicator size="large" />;
