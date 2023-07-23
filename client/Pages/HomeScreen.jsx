@@ -139,7 +139,7 @@ function HomeScreen() {
                     </View>
                     <Grid style={styles.gridContainer}>
                         <Col>
-                            <TouchableOpacity onPress={handleDropdownMenuPress}>
+                            <TouchableOpacity >
                                 <View style={styles.boxTimeRemain}>
                                     <Text>Total Time of Remaining Tasks</Text>
                                     <Text style={styles.boxText}>5 hours</Text>
@@ -147,25 +147,25 @@ function HomeScreen() {
                             </TouchableOpacity>
                         </Col>
                         <Col>
-                            <TouchableOpacity onPress={handleDropdownMenuPress}>
+                            <TouchableOpacity >
                                 <View style={[styles.box, { backgroundColor: '#7B1FA2' }]}>
                                     <Text>Tasks Completed</Text>
                                     <Text style={styles.boxText}>10</Text>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={handleDropdownMenuPress}>
+                            <TouchableOpacity >
                                 <View style={[styles.box, { backgroundColor: '#4CAF50' }]}>
                                     <Text>Tasks Remaining</Text>
                                     <Text style={styles.boxText}>5</Text>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={handleDropdownMenuPress}>
+                            <TouchableOpacity >
                                 <View style={[styles.box, { backgroundColor: '#FFEB3B' }]}>
                                     <Text>Tasks Completed On Time</Text>
                                     <Text style={styles.boxText}>7</Text>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity onPress={handleDropdownMenuPress}>
+                            <TouchableOpacity >
                                 <View style={[styles.box, { backgroundColor: '#FF9800' }]}>
                                     <Text>Tasks Completed After Due</Text>
                                     <Text style={styles.boxText}>3</Text>
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
         padding: 20,
         marginLeft: 10,
         width: '90%',
-        height: '95%',
+        height:511,
 
     },
     box: {

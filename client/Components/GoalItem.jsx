@@ -16,7 +16,6 @@ function GoalItem(props) {
   const opacityAnim = useRef(new Animated.Value(1)).current;
 
   function handleDeleteItem() {
-    console.log(props.id);
     Animated.timing(opacityAnim, {
       toValue: 0,
       duration: 500,
