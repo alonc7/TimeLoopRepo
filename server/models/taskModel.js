@@ -9,19 +9,20 @@ class Task {
         this.title = title;
         this.startDate = startDate;
         this.dueDate = dueDate;
+        // this.IsOnDate=true; // task that is still not after due of due Date
+        // this.IsOnTime=true; // task that is still not after due of dueTime .
         this.key = key;
         this.startTime = startTime;
         this.dueTime = dueTime;
         this.priority = priority;
         this.status = 'pending'; // Add the status field with the default value 'pending'
-
     };
     // GET list of all tasks.
     static async getTaskList(userId) {
         try {
             const user = await User.findUserByEmail(userId);
             if (!user) {
-                throw new Error('User not found');
+              throw new Error('User not found');
             }
             // let taskList = [];
             // if (user.Tasks && Array.isArray(user.Tasks)) {
@@ -44,12 +45,6 @@ class Task {
             }
 
             let taskList = user.Tasks.filter((task) => task.status === 'pending');
-            // if (user.Tasks && Array.isArray(user.Tasks)) {
-            //     taskList = user.Tasks
-            //         .filter(taskObj => taskObj.task.status === 'pending')
-            //         .map(taskObj => taskObj.task);
-            // }
-
 
             return taskList;
         } catch (error) {
@@ -66,11 +61,7 @@ class Task {
             }
 
             let taskList = user.Tasks.filter((task) => task.status === 'completed');
-            // if (user.Tasks && Array.isArray(user.Tasks)) {
-            //     taskList = user.Tasks
-            //         .filter(taskObj => taskObj.task.status === 'completed')
-            //         .map(taskObj => taskObj.task);
-            // }
+      
 
             return taskList;
         } catch (error) {
@@ -111,6 +102,7 @@ class Task {
             throw new Error('Failed to complete task');
         }
     }
+
     static async removeTask(userEmail, taskId) {
         try {
             const user = await User.findUserByEmail(userEmail);
@@ -160,14 +152,14 @@ class Task {
         }
     }
     //Sorting and Ordering 
-    static async sortTasks(sortCriterion) {
-        try {
-            const sortQuery = {}; // Define the sorting query based on the criterion
-            return await new db().FindAll(Task.collection, {}, sortQuery);
-        } catch (error) {
-            throw new Error('Failed to sort tasks');
-        }
-    }
+    // static async sortTasks(sortCriterion) {
+    //     try {
+    //         const sortQuery = {}; // Define the sorting query based on the criterion
+    //         return await new db().FindAll(Task.collection, {}, sortQuery);
+    //     } catch (error) {
+    //         throw new Error('Failed to sort tasks');
+    //     }
+    // }
     // Update task status
     static async updateTaskStatus(taskId, currentDate) {
         try {

@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 export default function Main() {
-    const { authenticated, setAuthenticated, userEmail, setUserEmail,setIsLoading,isLoading } = useContext(MainContext);
+    const { authenticated, setAuthenticated, userEmail, setUserEmail } = useContext(MainContext);
 
     useEffect(() => {
         const retrieveUserData = async () => {
@@ -26,21 +26,15 @@ export default function Main() {
             } catch (error) {
                 console.log('Error retrieving user data:', error);
             }
-            setIsLoading(false);
         };
 
         retrieveUserData();
-    }, [setAuthenticated,setUserEmail]);
+    }, [setAuthenticated, setUserEmail]);
     const getContent = () => {
-        if (isLoading) {
-            return <ActivityIndicator size="large" />;
-        }
+       
     }
     return (
         <NavigationContainer>
-            <View styles={styles.container}>
-                {getContent()}
-            </View>
             {authenticated ? <Registered /> : <NotRegistered />}
         </NavigationContainer>
     )

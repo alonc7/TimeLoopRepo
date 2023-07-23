@@ -1,5 +1,4 @@
-import React from 'react';
-
+import React ,{ useState } from 'react';
 import {
     View,
     Text,
@@ -16,7 +15,6 @@ import COLORS from '../constants/colors';
 import { ScrollView } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { useState } from 'react';
 import { Server_path } from '../utils/api-url';
 
 const SignupSchema = Yup.object().shape({

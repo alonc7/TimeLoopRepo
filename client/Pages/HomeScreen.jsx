@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Alert, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Grid, Col } from 'react-native-easy-grid';
 import * as ImagePicker from 'expo-image-picker';
 import COLORS from '../constants/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MainContext } from '../Components/Context/MainContextProvider';
+import Charts from '../Components/Charts';
 
 
 function HomeScreen() {
     const [userImage, setUserImage] = useState(null);
-    const { userName, setUserName, userEmail, setUserEmail, capitalizeFirstLetter } = useContext(MainContext);
+    const { userName, setUserName, userEmail, setUserEmail, capitalizeFirstLetter, handleImageSelection } = useContext(MainContext);
 
 
     useEffect(() => {
@@ -40,141 +41,143 @@ function HomeScreen() {
             console.log('this is also  Error retrieving user data:', error);
         }
     };
-    const removeDataFromAsyncStorage = async () => {
-        try {
-            await AsyncStorage.removeItem('userData');
-            console.log('User data removed successfully.');
-        } catch (error) {
-            console.log('Error removing user data:', error);
-        }
-    };
-    const saveUserImage = async () => {
-        try {
-            if (userImage) {
-                await AsyncStorage.setItem('userImage', userImage);
-                console.log('user image saved successfully');
-            } else
-                await AsyncStorage.removeItem('userImage');
-        } catch (error) {
-            console.log('Error saving user image', error);
-        }
-    }
-    const openImagePicker = async () => {
-        try {
-            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    // const removeDataFromAsyncStorage = async () => {
+    //     try {
+    //         await AsyncStorage.removeItem('userData');
+    //         console.log('User data removed successfully.');
+    //     } catch (error) {
+    //         console.log('Error removing user data:', error);
+    //     }
+    // };
+    // const saveUserImage = async () => {
+    //     try {
+    //         if (userImage) {
+    //             await AsyncStorage.setItem('userImage', userImage);
+    //             console.log('user image saved successfully');
+    //         } else
+    //             await AsyncStorage.removeItem('userImage');
+    //     } catch (error) {
+    //         console.log('Error saving user image', error);
+    //     }
+    // }
+    // const openImagePicker = async () => {
+    //     try {
+    //         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-            if (!permissionResult.granted) {
-                Alert.alert('Permission Denied', 'Please grant camera roll permissions to select an image.');
-                return;
-            }
+    //         if (!permissionResult.granted) {
+    //             Alert.alert('Permission Denied', 'Please grant camera roll permissions to select an image.');
+    //             return;
+    //         }
 
-            const pickerResult = await ImagePicker.launchImageLibraryAsync();
+    //         const pickerResult = await ImagePicker.launchImageLibraryAsync();
 
-            if (!pickerResult.canceled) {
-                setUserImage(pickerResult.assets[0].uri);
-                saveUserImage(pickerResult.assets[0].uri);
-            }
-        } catch (error) {
-            console.log('Error picking an image:', error);
-        }
-    };
+    //         if (!pickerResult.canceled) {
+    //             setUserImage(pickerResult.assets[0].uri);
+    //             saveUserImage(pickerResult.assets[0].uri);
+    //         }
+    //     } catch (error) {
+    //         console.log('Error picking an image:', error);
+    //     }
+    // };
 
-    const openCamera = async () => {
-        try {
-            const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    // const openCamera = async () => {
+    //     try {
+    //         const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
-            if (!permissionResult.granted) {
-                Alert.alert('Permission Denied', 'Please grant camera permissions to take a photo.');
-                return;
-            }
+    //         if (!permissionResult.granted) {
+    //             Alert.alert('Permission Denied', 'Please grant camera permissions to take a photo.');
+    //             return;
+    //         }
 
-            const cameraResult = await ImagePicker.launchCameraAsync();
+    //         const cameraResult = await ImagePicker.launchCameraAsync();
 
-            if (!cameraResult.canceled) {
-                setUserImage(cameraResult.assets[0].uri);
-                saveUserImage(cameraResult.assets[0].uri);
-                console.log('gets to saveUserImage');
-            }
-        } catch (error) {
-            console.log('Error taking a photo:', error);
-        }
-    };
+    //         if (!cameraResult.canceled) {
+    //             setUserImage(cameraResult.assets[0].uri);
+    //             saveUserImage(cameraResult.assets[0].uri);
+    //             console.log('gets to saveUserImage');
+    //         }
+    //     } catch (error) {
+    //         console.log('Error taking a photo:', error);
+    //     }
+    // };
 
-    const handleImageSelection = () => {
-        Alert.alert(
-            'Choose Image Source',
-            'Select the source for the user image',
-            [
-                {
-                    text: 'Cancel',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Gallery',
-                    onPress: openImagePicker,
-                },
-                {
-                    text: 'Camera',
-                    onPress: openCamera,
-                },
+    // const handleImageSelection = () => {
+    //     Alert.alert(
+    //         'Choose Image Source',
+    //         'Select the source for the user image',
+    //         [
+    //             {
+    //                 text: 'Cancel',
+    //                 style: 'cancel',
+    //             },
+    //             {
+    //                 text: 'Gallery',
+    //                 onPress: openImagePicker,
+    //             },
+    //             {
+    //                 text: 'Camera',
+    //                 onPress: openCamera,
+    //             },
 
-            ],
-        );
-    };
-    const handleDropdownMenuPress = () => {
-        // Implement your logic to show the dropdown menu for the specific column
-        // You can use state variables or functions to control the visibility of the dropdown menu
-    };
+    //         ],
+    //     );
+    // };
+ 
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={handleImageSelection}>
-                        {userImage ? (
-                            <Image source={{ uri: userImage }} style={styles.userImage} />
-                        ) : (
-                            <Ionicons name="person-circle-outline" size={80} />
-                        )}
-                    </TouchableOpacity>
-                    <Text style={styles.welcomeText}>Welcome {capitalizeFirstLetter(userName)}!</Text>
+            <ScrollView>
+                <View style={styles.container}>
+                    <View style={styles.header}>
+                        <TouchableOpacity onPress={handleImageSelection}>
+                            {userImage ? (
+                                <Image source={{ uri: userImage }} style={styles.userImage} />
+                            ) : (
+                                <Ionicons name="person-circle-outline" size={80} />
+                            )}
+                        </TouchableOpacity>
+                        <Text style={styles.welcomeText}>Welcome {capitalizeFirstLetter(userName)}!</Text>
+                    </View>
+                    <Grid style={styles.gridContainer}>
+                        <Col>
+                            <TouchableOpacity onPress={handleDropdownMenuPress}>
+                                <View style={styles.boxTimeRemain}>
+                                    <Text>Total Time of Remaining Tasks</Text>
+                                    <Text style={styles.boxText}>5 hours</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </Col>
+                        <Col>
+                            <TouchableOpacity onPress={handleDropdownMenuPress}>
+                                <View style={[styles.box, { backgroundColor: '#7B1FA2' }]}>
+                                    <Text>Tasks Completed</Text>
+                                    <Text style={styles.boxText}>10</Text>
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={handleDropdownMenuPress}>
+                                <View style={[styles.box, { backgroundColor: '#4CAF50' }]}>
+                                    <Text>Tasks Remaining</Text>
+                                    <Text style={styles.boxText}>5</Text>
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={handleDropdownMenuPress}>
+                                <View style={[styles.box, { backgroundColor: '#FFEB3B' }]}>
+                                    <Text>Tasks Completed On Time</Text>
+                                    <Text style={styles.boxText}>7</Text>
+                                </View>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={handleDropdownMenuPress}>
+                                <View style={[styles.box, { backgroundColor: '#FF9800' }]}>
+                                    <Text>Tasks Completed After Due</Text>
+                                    <Text style={styles.boxText}>3</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </Col>
+                    </Grid>
                 </View>
-                <Grid style={styles.gridContainer}>
-                    <Col>
-                        <TouchableOpacity onPress={handleDropdownMenuPress}>
-                            <View style={styles.boxTimeRemain}>
-                                <Text>Total Time of Remaining Tasks</Text>
-                                <Text style={styles.boxText}>5 hours</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </Col>
-                    <Col>
-                        <TouchableOpacity onPress={handleDropdownMenuPress}>
-                            <View style={[styles.box, { backgroundColor: '#7B1FA2' }]}>
-                                <Text>Tasks Completed</Text>
-                                <Text style={styles.boxText}>10</Text>
-                            </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={handleDropdownMenuPress}>
-                            <View style={[styles.box, { backgroundColor: '#4CAF50' }]}>
-                                <Text>Tasks Remaining</Text>
-                                <Text style={styles.boxText}>5</Text>
-                            </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={handleDropdownMenuPress}>
-                            <View style={[styles.box, { backgroundColor: '#FFEB3B' }]}>
-                                <Text>Tasks Completed On Time</Text>
-                                <Text style={styles.boxText}>7</Text>
-                            </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={handleDropdownMenuPress}>
-                            <View style={[styles.box, { backgroundColor: '#FF9800' }]}>
-                                <Text>Tasks Completed After Due</Text>
-                                <Text style={styles.boxText}>3</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </Col>
-                </Grid>
-            </View>
+                <View>
+                    <Charts />
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
