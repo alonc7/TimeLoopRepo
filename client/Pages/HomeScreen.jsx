@@ -150,13 +150,13 @@ function HomeScreen() {
                             <TouchableOpacity >
                                 <View style={[styles.box, { backgroundColor: '#7B1FA2' }]}>
                                     <Text>Tasks Completed</Text>
-                                    <Text style={styles.boxText}>10</Text>
+                                    <Text style={styles.boxText}>4</Text>
                                 </View>
                             </TouchableOpacity>
                             <TouchableOpacity >
                                 <View style={[styles.box, { backgroundColor: '#4CAF50' }]}>
                                     <Text>Tasks Remaining</Text>
-                                    <Text style={styles.boxText}>5</Text>
+                                    <Text style={styles.boxText}>3</Text>
                                 </View>
                             </TouchableOpacity>
                             <TouchableOpacity >

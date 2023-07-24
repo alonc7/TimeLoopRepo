@@ -85,6 +85,8 @@ const Charts = () => {
             <View style={styles.taskContainer}>
                 <View style={[styles.dot, { backgroundColor: '#38761d' }]} />
                 <Text style={styles.taskText}>Total Tasks: {taskMetrics.totalTasks}</Text>
+                <View style={[styles.dot, { backgroundColor: '#7B1FA2' }]} />
+                <Text style={styles.taskText}>Completed Tasks: {taskMetrics.completedTasks}</Text>
             </View>
 
             {/* Completed Tasks */}
