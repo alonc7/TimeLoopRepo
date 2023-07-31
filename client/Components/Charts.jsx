@@ -6,8 +6,7 @@ import { MainContext } from '../Components/Context/MainContextProvider';
 import { Server_path } from '../utils/api-url';
 
 const Charts = () => {
-    const [tasks, setTasks] = useState([]);
-    const { userEmail } = useContext(MainContext);
+    const { userEmail,tasks, setTotalTaskList } = useContext(MainContext);
 
     useEffect(() => {
         const loadTask = async (userEmail) => {
@@ -15,7 +14,7 @@ const Charts = () => {
                 const response = await fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`);
                 if (response.ok) {
                     const data = await response.json(); //data returned from fetch result
-                    setTasks(data);
+                    setTotalTaskList(data);
                 } else {
                     throw new Error('Request failed');
                 }

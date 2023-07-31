@@ -7,18 +7,66 @@ import COLORS from '../constants/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MainContext } from '../Components/Context/MainContextProvider';
 import Charts from '../Components/Charts';
+import { Server_path } from '../utils/api-url'
 
 
 function HomeScreen() {
     const [userImage, setUserImage] = useState(null);
-    const { userName, setUserName, userEmail, setUserEmail, capitalizeFirstLetter, handleImageSelection } = useContext(MainContext);
-
-
+    const { userName, setUserName, userEmail, setUserEmail, capitalizeFirstLetter } = useContext(MainContext);
+    const [totalTaskList, setTotalTaskList] = useState([]);
+    const [pendingTaskList, setPendingTaskList] = useState([]);
+    const [completedTaskList, setCompletedTaskList] = useState([]);
+    let i = 1;
     useEffect(() => {
-        // removeDataFromAsyncStorage();
+        loadCompletedTask(userEmail);
+        loadPendingTask(userEmail);
         retrieveUserImage();
         retrieveUserData();
     }, []);
+    // const loadTotalTask = async (userEmail) => {
+    //     try {
+    //         const response = await fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`);
+    //         if (response.ok) {
+    //             const data = await response.json();
+    //             setTotalTaskList(data);
+    //             console.log(i++);
+    //         } else {
+    //             throw new Error('Request failed');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error loading tasks:', error);
+    //     }
+    // };
+    const loadPendingTask = async (userEmail) => {
+        try {
+            const response = await fetch(`${Server_path}/api/tasks/getPendingTaskList/${userEmail}`);
+            if (response.ok) {
+                const data = await response.json();
+                setPendingTaskList(data);
+                console.log(i++);
+            } else {
+                throw new Error('Request failed');
+            }
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+        }
+    };
+
+    const loadCompletedTask = async (userEmail) => {
+        try {
+            const response = await fetch(`${Server_path}/api/tasks/getCompletedTaskList/${userEmail}`);
+            if (response.ok) {
+                const data = await response.json();
+                setCompletedTaskList(data);
+                console.log(i++);
+            } else {
+                throw new Error('Request failed');
+            }
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+        }
+    }
+
     const retrieveUserImage = async () => {
         try {
             const imageUri = await AsyncStorage.getItem('userImage');
@@ -41,88 +89,80 @@ function HomeScreen() {
             console.log('this is also  Error retrieving user data:', error);
         }
     };
-    // const removeDataFromAsyncStorage = async () => {
-    //     try {
-    //         await AsyncStorage.removeItem('userData');
-    //         console.log('User data removed successfully.');
-    //     } catch (error) {
-    //         console.log('Error removing user data:', error);
-    //     }
-    // };
-    // const saveUserImage = async () => {
-    //     try {
-    //         if (userImage) {
-    //             await AsyncStorage.setItem('userImage', userImage);
-    //             console.log('user image saved successfully');
-    //         } else
-    //             await AsyncStorage.removeItem('userImage');
-    //     } catch (error) {
-    //         console.log('Error saving user image', error);
-    //     }
-    // }
-    // const openImagePicker = async () => {
-    //     try {
-    //         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const saveUserImage = async () => {
+        try {
+            if (userImage) {
+                await AsyncStorage.setItem('userImage', userImage);
+                console.log('user image saved successfully');
+            } else
+                await AsyncStorage.removeItem('userImage');
+        } catch (error) {
+            console.log('Error saving user image', error);
+        }
+    }
+    const openImagePicker = async () => {
+        try {
+            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    //         if (!permissionResult.granted) {
-    //             Alert.alert('Permission Denied', 'Please grant camera roll permissions to select an image.');
-    //             return;
-    //         }
+            if (!permissionResult.granted) {
+                Alert.alert('Permission Denied', 'Please grant camera roll permissions to select an image.');
+                return;
+            }
 
-    //         const pickerResult = await ImagePicker.launchImageLibraryAsync();
+            const pickerResult = await ImagePicker.launchImageLibraryAsync();
 
-    //         if (!pickerResult.canceled) {
-    //             setUserImage(pickerResult.assets[0].uri);
-    //             saveUserImage(pickerResult.assets[0].uri);
-    //         }
-    //     } catch (error) {
-    //         console.log('Error picking an image:', error);
-    //     }
-    // };
+            if (!pickerResult.canceled) {
+                setUserImage(pickerResult.assets[0].uri);
+                saveUserImage(pickerResult.assets[0].uri);
+            }
+        } catch (error) {
+            console.log('Error picking an image:', error);
+        }
+    };
 
-    // const openCamera = async () => {
-    //     try {
-    //         const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    const openCamera = async () => {
+        try {
+            const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
-    //         if (!permissionResult.granted) {
-    //             Alert.alert('Permission Denied', 'Please grant camera permissions to take a photo.');
-    //             return;
-    //         }
+            if (!permissionResult.granted) {
+                Alert.alert('Permission Denied', 'Please grant camera permissions to take a photo.');
+                return;
+            }
 
-    //         const cameraResult = await ImagePicker.launchCameraAsync();
+            const cameraResult = await ImagePicker.launchCameraAsync();
 
-    //         if (!cameraResult.canceled) {
-    //             setUserImage(cameraResult.assets[0].uri);
-    //             saveUserImage(cameraResult.assets[0].uri);
-    //             console.log('gets to saveUserImage');
-    //         }
-    //     } catch (error) {
-    //         console.log('Error taking a photo:', error);
-    //     }
-    // };
+            if (!cameraResult.canceled) {
+                setUserImage(cameraResult.assets[0].uri);
+                saveUserImage(cameraResult.assets[0].uri);
+                console.log('gets to saveUserImage');
+            }
+        } catch (error) {
+            console.log('Error taking a photo:', error);
+        }
+    };
 
-    // const handleImageSelection = () => {
-    //     Alert.alert(
-    //         'Choose Image Source',
-    //         'Select the source for the user image',
-    //         [
-    //             {
-    //                 text: 'Cancel',
-    //                 style: 'cancel',
-    //             },
-    //             {
-    //                 text: 'Gallery',
-    //                 onPress: openImagePicker,
-    //             },
-    //             {
-    //                 text: 'Camera',
-    //                 onPress: openCamera,
-    //             },
+    const handleImageSelection = () => {
+        Alert.alert(
+            'Choose Image Source',
+            'Select the source for the user image',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Gallery',
+                    onPress: openImagePicker,
+                },
+                {
+                    text: 'Camera',
+                    onPress: openCamera,
+                },
 
-    //         ],
-    //     );
-    // };
- 
+            ],
+        );
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
@@ -150,13 +190,13 @@ function HomeScreen() {
                             <TouchableOpacity >
                                 <View style={[styles.box, { backgroundColor: '#7B1FA2' }]}>
                                     <Text>Tasks Completed</Text>
-                                    <Text style={styles.boxText}>4</Text>
+                                    <Text style={styles.boxText}>{completedTaskList.length}</Text>
                                 </View>
                             </TouchableOpacity>
                             <TouchableOpacity >
                                 <View style={[styles.box, { backgroundColor: '#4CAF50' }]}>
                                     <Text>Tasks Remaining</Text>
-                                    <Text style={styles.boxText}>3</Text>
+                                    <Text style={styles.boxText}>{pendingTaskList.length}</Text>
                                 </View>
                             </TouchableOpacity>
                             <TouchableOpacity >
@@ -174,9 +214,9 @@ function HomeScreen() {
                         </Col>
                     </Grid>
                 </View>
-                <View>
+                {/* <View>
                     <Charts />
-                </View>
+                </View> */}
             </ScrollView>
         </SafeAreaView>
     );
@@ -199,7 +239,7 @@ const styles = StyleSheet.create({
         padding: 20,
         marginLeft: 10,
         width: '90%',
-        height:511,
+        height: 511,
 
     },
     box: {

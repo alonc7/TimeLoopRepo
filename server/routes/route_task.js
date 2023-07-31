@@ -52,23 +52,6 @@ router.get('/getCompletedTaskList/:userEmail', async (req, res) => {
 
 
 
-// POST create task
-router.post('/addTask', async (req, res) => {
-    const { userEmail, title, startDate, dueDate, key, startTime, dueTime, priority } = req.body;
-    try {
-        const task = new Task(title, startDate, dueDate, key, startTime, dueTime, priority); //
-        const authUser = await User.findUserByEmail(userEmail);
-        if (authUser) {
-            await Task.createTask(authUser, task);
-            res.status(201).json('Task created successfully');
-        }
-        else (
-            res.status(403).json('You are unauthorized')
-        )
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to create task in addTask' });
-    }
-});
 
 
 // GET single task by key
@@ -167,6 +150,23 @@ router.put('/removeTask', async (req, res) => {
         }
     } catch (error) {
         res.status(500).json({ error: 'Failed to complete task' });
+    }
+});
+// POST create task
+router.post('/addTask', async (req, res) => {
+    const { userEmail, title, startDate, dueDate, key, startTime, dueTime, priority } = req.body;
+    try {
+        const task = new Task(title, startDate, dueDate, key, startTime, dueTime, priority); //
+        const authUser = await User.findUserByEmail(userEmail);
+        if (authUser) {
+            await Task.createTask(authUser, task);
+            res.status(201).json('Task created successfully');
+        }
+        else (
+            res.status(403).json('You are unauthorized')
+        )
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create task in addTask' });
     }
 });
 

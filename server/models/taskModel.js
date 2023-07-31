@@ -22,7 +22,7 @@ class Task {
         try {
             const user = await User.findUserByEmail(userId);
             if (!user) {
-              throw new Error('User not found');
+                throw new Error('User not found');
             }
             // let taskList = [];
             // if (user.Tasks && Array.isArray(user.Tasks)) {
@@ -61,7 +61,7 @@ class Task {
             }
 
             let taskList = user.Tasks.filter((task) => task.status === 'completed');
-      
+
 
             return taskList;
         } catch (error) {
