@@ -5,10 +5,11 @@ import NotRegistered from "./AuthComp/NotRegistered";
 import { MainContext } from './Context/MainContextProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { Server_path } from '../utils/api-url';
 
 export default function Main() {
     const { authenticated, setAuthenticated, userEmail, setUserEmail } = useContext(MainContext);
-
+    const [content, setContent] = useState(false);
     useEffect(() => {
         const retrieveUserData = async () => {
             try {
@@ -27,11 +28,49 @@ export default function Main() {
                 console.log('Error retrieving user data:', error);
             }
         };
-
+        loadCompletedTask(userEmail);
+        loadPendingTask(userEmail);
         retrieveUserData();
+        setContent(true);
     }, [setAuthenticated, setUserEmail]);
+    const loadPendingTask = async (userEmail) => {
+        try {
+            console.log(userEmail, Server_path);
+            const response = await fetch(`${Server_path}/api/tasks/getPendingTaskList/${userEmail}`);
+            if (response.ok) {
+                const data = await response.json();
+                setPendingTaskList(data);
+            } else {
+                throw new Error('Request failed');
+            }
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+        }
+    };
+
+    const loadCompletedTask = async (userEmail) => {
+        try {
+            console.log(userEmail, Server_path);
+            const response = await fetch(`${Server_path}/api/tasks/getCompletedTaskList/${userEmail}`);
+            if (response.ok) {
+                const data = await response.json();
+                setCompletedTaskList(data);
+            } else {
+                throw new Error('Request failed');
+            }
+        } catch (error) {
+            console.error('Error loading tasks:', error);
+        }
+    }
+
     const getContent = () => {
-       
+        if (!content) {
+            return (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                </View>
+            )
+        }
     }
     return (
         <NavigationContainer>

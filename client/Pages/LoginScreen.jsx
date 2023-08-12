@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import React, { useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -43,7 +43,13 @@ const Login = ({ navigation }) => {
         storeUserData(userData);
         setAuthenticated(true);
       } else {
-        const data = await response.json();
+        // Handle non-OK responses
+        const errorData = await response.json();
+        if (errorData && errorData.message) {
+          window.alert('Error: ' + errorData.message);
+        } else {
+          window.alert('An error occurred while logging in.');
+        }
       }
     } catch (error) {
 

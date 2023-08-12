@@ -7,19 +7,18 @@ import COLORS from '../constants/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MainContext } from '../Components/Context/MainContextProvider';
 import Charts from '../Components/Charts';
-import { Server_path } from '../utils/api-url'
-
+// import { Server_path } from '../utils/api-url';
 
 function HomeScreen() {
-    const [userImage, setUserImage] = useState(null);
     const { userName, setUserName, userEmail, setUserEmail, capitalizeFirstLetter } = useContext(MainContext);
+    const [userImage, setUserImage] = useState(null);
     const [totalTaskList, setTotalTaskList] = useState([]);
     const [pendingTaskList, setPendingTaskList] = useState([]);
     const [completedTaskList, setCompletedTaskList] = useState([]);
-    let i = 1;
+
     useEffect(() => {
-        loadCompletedTask(userEmail);
-        loadPendingTask(userEmail);
+        // loadCompletedTask(userEmail);
+        // loadPendingTask(userEmail);
         retrieveUserImage();
         retrieveUserData();
     }, []);
@@ -37,35 +36,33 @@ function HomeScreen() {
     //         console.error('Error loading tasks:', error);
     //     }
     // };
-    const loadPendingTask = async (userEmail) => {
-        try {
-            const response = await fetch(`${Server_path}/api/tasks/getPendingTaskList/${userEmail}`);
-            if (response.ok) {
-                const data = await response.json();
-                setPendingTaskList(data);
-                console.log(i++);
-            } else {
-                throw new Error('Request failed');
-            }
-        } catch (error) {
-            console.error('Error loading tasks:', error);
-        }
-    };
+    // const loadPendingTask = async (userEmail) => {
+    //     try {
+    //         const response = await fetch(`${Server_path}/api/tasks/getPendingTaskList/${userEmail}`);
+    //         if (response.ok) {
+    //             const data = await response.json();
+    //             setPendingTaskList(data);
+    //         } else {
+    //             throw new Error('Request failed');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error loading tasks:', error);
+    //     }
+    // };
 
-    const loadCompletedTask = async (userEmail) => {
-        try {
-            const response = await fetch(`${Server_path}/api/tasks/getCompletedTaskList/${userEmail}`);
-            if (response.ok) {
-                const data = await response.json();
-                setCompletedTaskList(data);
-                console.log(i++);
-            } else {
-                throw new Error('Request failed');
-            }
-        } catch (error) {
-            console.error('Error loading tasks:', error);
-        }
-    }
+    // const loadCompletedTask = async (userEmail) => {
+    //     try {
+    //         const response = await fetch(`${Server_path}/api/tasks/getCompletedTaskList/${userEmail}`);
+    //         if (response.ok) {
+    //             const data = await response.json();
+    //             setCompletedTaskList(data);
+    //         } else {
+    //             throw new Error('Request failed');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error loading tasks:', error);
+    //     }
+    // }
 
     const retrieveUserImage = async () => {
         try {
