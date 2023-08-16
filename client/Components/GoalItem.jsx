@@ -1,16 +1,17 @@
 import React, { useRef, useState, useContext } from 'react';
-import { StyleSheet, View, Text, Pressable, SafeAreaView, Animated } from 'react-native';
+import { StyleSheet, View, Text, Pressable, SafeAreaView, Animated, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
 import { MainContext } from '../Components/Context/MainContextProvider';
 import { Server_path } from '../utils/api-url';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // import AnimatedText from 'react-native-paper/lib/typescript/src/components/Typography/AnimatedText';
 
 function GoalItem(props) {
-  const { text, startDate, endDate, startHour, endHour, onDeleteItem } = props;
+  const { text, description, startDate, endDate, startHour, endHour } = props;
   const [completed, setCompleted] = useState(false);
-  const { userEmail } = useContext(MainContext);
+  const { userEmail, setPendingTaskList } = useContext(MainContext);
 
   const lineThroughAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
@@ -26,6 +27,7 @@ function GoalItem(props) {
   // Function to mark the task as removed using API request
   async function deleteTaskWithAPI(taskId) {
     try {
+      console.log('got to delettaskwithapi in goalitem');
       const response = await fetch(`${Server_path}/api/tasks/removeTask`, {
         method: 'PUT',
         headers: {
@@ -34,7 +36,10 @@ function GoalItem(props) {
         body: JSON.stringify({ userEmail, taskId }),
       });
       if (response.ok) {
-        console.log('Task removed successfully');
+        setPendingTaskList((currentListTasks) =>
+          currentListTasks.filter((task) => task._id !== taskId)
+        );
+        Alert.alert('Task removed successfully');
       } else {
         console.log('Failed to remove task:', response.status);
       }
@@ -55,10 +60,12 @@ function GoalItem(props) {
         body: JSON.stringify({ userEmail, taskId }),
       });
       if (response.ok) {
-        console.log('Task completed successfully');
+        setPendingTaskList((currentListTasks) =>
+          currentListTasks.filter((task) => task._id !== taskId)
+        );
+        Alert.alert('Task completed successfully');
       } else {
-        console.log(response);
-        console.log('Failed to complete task:', response.status);
+        Alert.alert('Failed to complete task:', response.status);
       }
     } catch (error) {
       console.error('Error completing task:', error);
@@ -105,7 +112,8 @@ function GoalItem(props) {
   let borderColor;
   switch (props.priority) {
     case 'high':
-      borderColor = 'red';
+      borderColor = '#e100ff';
+      // borderColor = COLORS.red;
       break;
     case 'medium':
       borderColor = 'orange';
@@ -118,47 +126,54 @@ function GoalItem(props) {
   }
 
   return (
+
     <SafeAreaView style={styles.container}>
-      <Animated.View style={[styles.goalItem, { borderColor, elevation: 5, opacity: opacityAnim }]}>
-        <View style={styles.titleContainer}>
-          <Pressable>
-            <Ionicons
-              name={completed ? 'ios-checkmark-circle' : 'ios-checkmark-circle-outline'}
-              size={24}
-              color={completed ? '#2ecc71' : '#ffffff'}
-              onPress={toggleCompletion}
-            />
-          </Pressable>
-          <Animated.Text
-            style={[
-              styles.taskText,
-              {
-                textDecorationLine: completed ? 'line-through' : 'none',
-              },
-            ]}
-          >
-            {text}
-          </Animated.Text>
-        </View>
+      <Animated.View style={[styles.goalItem, { borderColor, elevation: 0, opacity: opacityAnim }]}>
+        <LinearGradient style={styles.LinerGradientContainer}
+          colors={[COLORS.secondary, COLORS.primary]}
+        >
 
-        <View style={styles.dateTimeContainer}>
-          <View style={styles.dateContainer}>
-            <Text>{`Start Date: ${startDate}`}</Text>
-            <Text>{`End Date: ${endDate}`}</Text>
-          </View>
-          <View style={styles.timeContainer}>
-            <Text>{`Start Hour: ${startHour}`}</Text>
-            <Text>{`End Hour: ${endHour}`}</Text>
-          </View>
-        </View>
+          <View style={styles.titleContainer}>
 
-        <View style={styles.buttonContainer}>
-          <Pressable onPress={handleDeleteItem}>
-            <Ionicons name='trash' size={30} color='#ffffff' />
-          </Pressable>
-        </View>
+            <Animated.Text
+              style={[
+                styles.taskText,
+                {
+                  textDecorationLine: completed ? 'line-through' : 'none',
+                },
+              ]}
+            >
+              {text}
+            </Animated.Text>
+          </View>
+          <View style={styles.dateTimeContainer}>
+            <View>
+              <Text>{description}</Text>
+            </View>
+            <View style={styles.dateContainer}>
+              <Text style={styles.TextStyle}>{startDate ? `Start Date: ${startDate}` : ''}</Text>
+              <Text style={styles.TextStyle}>{endDate ? `End Date: ${endDate}` : ''}</Text>
+            </View>
+            <View style={styles.timeContainer}>
+              <Text style={styles.TextStyle}>{startHour ? `Start Hour: ${startHour}` : ''}</Text>
+              <Text style={styles.TextStyle}>{endHour ? `End Hour: ${endHour}` : ''}</Text>
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <Pressable style={styles.button} onPress={handleDeleteItem}>
+              <Ionicons name='trash' size={30} color={COLORS.white} />
+            </Pressable>
+            <Pressable style={styles.button} onPress={toggleCompletion}>
+              <Ionicons name={completed ? 'ios-checkmark-circle' : 'ios-checkmark-circle-outline'} size={24} color={COLORS.red} />
+            </Pressable>
+            <Pressable style={styles.button}>
+              <Ionicons name='md-create' size={24} color={COLORS.white} />
+            </Pressable>
+          </View>
+        </LinearGradient>
       </Animated.View>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 }
 
@@ -166,20 +181,26 @@ function GoalItem(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 25
+    padding: 32
+
+  },
+  LinerGradientContainer: {
+    justifyContent: 'space-around',
+    padding: 16,
+    flex: 1
+
   },
   goalItem: {
-    flexDirection: 'column', // Change to column
-    alignItems: 'center', // Align items at the center
+    marginTop: 25,
+    overflow: 'hidden',
     justifyContent: 'center', // Center the content vertically
-    padding: 16,
     borderRadius: 10,
-    borderWidth: 4,
-    backgroundColor: COLORS.primary,
-    marginVertical: 8,
+    borderWidth: 1.4,
+    alignSelf: 'center',
+    width: 300,
+    height: 350,
   },
   titleContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
   },
   dateTimeContainer: {
@@ -187,10 +208,17 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Align items at the center
   },
   taskText: {
-    color: 'white',
+    color: COLORS.white,
+    // color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
     marginLeft: 10,
+
+  },
+  TextStyle: {
+    fontSize: 18,
+    letterSpacing: 1,
+    fontWeight: 'bold'
   },
   timeContainer: {
     marginTop: 8,
@@ -203,7 +231,36 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 8
+
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between', // Distribute items evenly along the row
+    alignItems: 'center',
+    marginTop: 10,
+  },
+
+  button: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary,
+    borderRadius: 20,
+  },
+
+  iconContainer: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+    backgroundColor: COLORS.primary, // Change this to match your background color
+    borderRadius: 12,
+
   },
 });
+
 
 export default GoalItem;

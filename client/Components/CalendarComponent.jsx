@@ -1,12 +1,14 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import COLORS from '../constants/colors';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const CalendarComponent = ({ tasks, onDayPress, selectedDate }) => {
   // Thank god for Helper function to convert date format from F***ing "YYYY/MM/DD" to WHAT-F***ing-difference-"YYYY-MM-DD"
   const convertDateFormat = (dateString) => {
     const [year, month, day] = dateString.split('/');
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // padStart = method in JS strings. helps with placing 0 in single digit field.
+    return `${year}-${month?.padStart(2, '0')}-${day?.padStart(2, '0')}`; // padStart = method in JS strings. helps with placing 0 in single digit field.
   };
 
   const markDates = () => {
@@ -45,7 +47,7 @@ const CalendarComponent = ({ tasks, onDayPress, selectedDate }) => {
       case 'medium':
         return 'orange';
       case 'high':
-        return 'red';
+        return COLORS.red;
       default:
         return 'blue';
     }
@@ -63,9 +65,24 @@ const CalendarComponent = ({ tasks, onDayPress, selectedDate }) => {
         markedDates={markDates()}
         // Handler for day press
         onDayPress={onDayPress}
+        style={styles.CalendarContainer}
       />
     </View>
   );
 };
 
 export default CalendarComponent;
+
+const styles = StyleSheet.create({
+
+  CalendarContainer: {
+    marginTop: 25,
+    padding: 15,
+    marginBottom: 15,
+    borderRadius: 5,
+    elevation: 15,
+    borderRadius: 10,
+    borderColor: "lightblue",
+    borderWidth: 3,
+  }
+})

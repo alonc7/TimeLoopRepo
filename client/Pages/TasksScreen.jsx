@@ -1,52 +1,20 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet, FlatList, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FloatingAction } from "react-native-floating-action";
 import { AntDesign } from '@expo/vector-icons';
-import TaskInput from '../Components/TaskInput';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import TaskInput from '../Components/Modals/TaskInput';
 import GoalItem from '../Components/GoalItem';
 import COLORS from '../constants/colors';
 import { MainContext } from '../Components/Context/MainContextProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Server_path } from '../utils/api-url';
-
+import FloatingActionBtn from '../Components/Modals/FloatingActionBtn'
 const TasksScreen = () => {
   const [modalIsVisible, setModalIsVisible] = useState(false); // boolean for visualise of the modal ( is it visual right now?)
   const [isHidden, setIsHidden] = useState(true); // boolean for setting the modal hidden or not. 
-  const [taskList, setTaskList] = useState([]); // array of tasks 
-  const { userEmail, setUserId } = useContext(MainContext);
-
-
-  useEffect(() => {
-    // retrieveUserId();
-    const loadTask = async (userEmail) => {
-      try {
-        const response = await fetch(`${Server_path}/api/tasks/getPendingTaskList/${userEmail}`);
-        if (response.ok) {
-          const data = await response.json(); //data returned from fetch result
-          const sortedTasks = sortTasksByPriority(data); // sorting the data according to priority
-          setTaskList(sortedTasks); // setting the taskList as sorted data. 
-
-        }
-        throw new Error('Request failed');
-
-      } catch (error) {
-        // const message = `An error has occured in TaskScreen: ${error.message}`;
-        // console.log(message);
-      }
-    }
-    loadTask(userEmail);
-  }, [taskList]);
-
-  function sortTasksByPriority(tasks) {
-    return tasks.sort(comparePriority);
-  }
-  function comparePriority(a, b) {
-    const priorityOrder = { high: 1, medium: 2, low: 3 };  // Define priority order using an object
-    return priorityOrder[a.priority] - priorityOrder[b.priority];  // Compare the priority values of tasks 'a' and 'b'
-
-  }
-
+  const { userEmail, setUserId, pendingTaskList, setPendingTaskList } = useContext(MainContext);
 
   function toggleBtn() {
     setIsHidden(!isHidden);
@@ -56,10 +24,13 @@ const TasksScreen = () => {
     setModalIsVisible(!modalIsVisible);
   }
 
-  const addTaskHandler = async (title, startDate, dueDate, startTime, dueTime, priority) => {
+  const addTaskHandler = async (title, description, startDate, dueDate, startTime, dueTime, priority) => {
+    console.log(title, description);
     const taskData = {
       title: title,
+      description: description,
       startDate: startDate,
+      description: description,
       dueDate: dueDate,
       startTime: startTime,
       dueTime: dueTime,
@@ -75,9 +46,10 @@ const TasksScreen = () => {
     })
       .then(response => {
         if (response.ok) {
-          console.log('Task created successfully');
+          setPendingTaskList([...pendingTaskList, taskData])
+          Alert.alert('Task added successfully')
         } else {
-          console.log('Failed to create task:', response.status);
+          Alert.alert('Failed to create task:', response.status)
         }
       })
       .catch(error => {
@@ -86,11 +58,8 @@ const TasksScreen = () => {
 
   }
 
-  // function deleteAllTasks(key) {
-  //   setTaskList([]);
-  //   toggleBtn();
-  // }
   function deleteTaskHandler(id) {
+    console.log('got to deleteTaskhandler on taskscreen');
     // Perform the API fetch request to remove the task from the server
     fetch(`${Server_path}/api/tasks/removeTask`, {
       method: 'PUT',
@@ -101,11 +70,11 @@ const TasksScreen = () => {
     })
       .then(response => {
         if (response.ok) {
-          console.log('Task removed successfully');
           // Now update the taskList state to remove the task from the view
-          setTaskList((currentListTasks) =>
+          setPendingTaskList((currentListTasks) =>
             currentListTasks.filter((task) => task._id !== id)
           );
+          Alert.alert('Task removed successfully');
         } else {
           console.log('Failed to remove task:', response.status);
         }
@@ -116,64 +85,64 @@ const TasksScreen = () => {
   }
 
 
-  const actions = [
+  const taskActions = [
     {
-      text: 'Add Task',
-      icon: <AntDesign name="plus" size={20} color="white" />,
+      text: 'Scheduled Task',
+      icon: <AntDesign name="pluscircleo" size={20} color="white" />,
       name: 'add_task',
-      position: 2,
+      position: 1,
     },
   ];
+
+
   return (
     <LinearGradient
       style={styles.container}
       colors={[COLORS.secondary, COLORS.primary]}
     >
       <View style={styles.container}>
-        <TaskInput
-          visible={modalIsVisible}
-          onAddTask={addTaskHandler}
-          onClose={handleModalIsVisible}
-          toggleBtn={toggleBtn}
-          setTasks={setTaskList}
-        />
-        <View style={styles.tasksContainer}>
+        {modalIsVisible && (
+          <View>
+            <TaskInput
+              visible={modalIsVisible}
+              onAddTask={addTaskHandler}
+              onClose={handleModalIsVisible}
+              toggleBtn={toggleBtn}
+              setTasks={setPendingTaskList}
+            />
+          </View>)}
+        <View>
           <FlatList
             contentContainerStyle={{ justifyContent: 'center' }}
-            data={taskList}
+            data={pendingTaskList}
             renderItem={({ item }) => (
               <GoalItem
                 text={item.title}
-                startDate={item.startDate}
-                endDate={item.dueDate}
+                description={item?.description}
+                startDate={item?.startDate}
+                endDate={item?.dueDate}
                 id={item._id}
                 startHour={item?.startTime}
                 endHour={item?.dueTime}
                 onDeleteItem={deleteTaskHandler}
-                priority={item.priority}
+                priority={item?.priority}
               />
             )}
-            keyExtractor={(item) => item._id} // Use the _id property as the key for each task item
+            keyExtractor={(item, index) => item._id || index.toString()} // Use _id if available, fallback to index
             alwaysBounceVertical={false}
           />
 
-          {/* <Pressable
-            style={[styles.buttonText, isHidden && styles.btnHide]}
-            onPress={deleteAllTasks}
-          >
-            <Text style={styles.buttonText}>Delete All Tasks</Text>
-          </Pressable> */}
+
           <FloatingAction
-            color='#222222'
+            color={COLORS.secondary}
             position={'left'}
             buttonSize={30}
             overrideWithAction={true}
             showBackground={false}
-            actions={actions}
+            actions={taskActions}
             onPressItem={handleModalIsVisible}
-
-
           />
+          <FloatingActionBtn />
         </View>
       </View>
     </LinearGradient>
@@ -188,20 +157,20 @@ const styles = StyleSheet.create({
 
 
   tasksContainer: {
-    flex: 5
+    flex: 1
   },
-  buttonText: {
-    flexDirection: 'row',
-    color: '#B2A4FF',
-    fontSize: 18,
-    textDecorationLine: 'underline',
-    fontWeight: 'bold',
-    marginBottom: 40,
-    justifyContent: 'center',
-  },
-  btnHide: {
-    display: 'none'
-  }
+  // buttonText: {
+  //   flexDirection: 'row',
+  //   color: '#B2A4FF',
+  //   fontSize: 18,
+  //   textDecorationLine: 'underline',
+  //   fontWeight: 'bold',
+  //   marginBottom: 40,
+  //   justifyContent: 'center',
+  // },
+  // btnHide: {
+  //   display: 'none'
+  // }
 });
 
 export default TasksScreen;

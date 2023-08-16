@@ -1,64 +1,84 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import CalendarComponent from '../Components/CalendarComponent';
 import { MainContext } from '../Components/Context/MainContextProvider';
-import { Server_path } from '../utils/api-url'
+import { Server_path } from '../utils/api-url';
+import COLORS from '../constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 
 const ScheduleScreen = () => {
-  const [tasks, setTasks] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [tasksForSelectedDate, setTasksForSelectedDate] = useState([]);
-  const { userEmail } = useContext(MainContext);
+  const [expandedItemId, setExpandedItemId] = useState(null); // Track expanded item
+  const { pendingTaskList } = useContext(MainContext);
 
-  useEffect(() => {
-    loadAllTasks(userEmail);
-  }, [userEmail]);
-
-  const loadAllTasks = async (userEmail) => {
-    try {
-      const response = await fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`);
-      if (response.ok) {
-        const data = await response.json();
-        setTasks(data);
-
-      } else {
-        throw new Error('Request failed');
-      }
-    } catch (error) {
-      console.error('Error loading tasks:', error);
-    }
-  };
-
-  const handleAddTask = (task) => {
-    setTasks((prevState) => [...prevState, task]);
-  };
-
+  // Handler for when a day is pressed on the calendar
   const handleDayPress = (date) => {
-    // Convert the selected date to the desired format "2023/07/01"
     const formattedDate = date.dateString.split('-').join('/');
     setSelectedDate(formattedDate);
+    setExpandedItemId(null); // Reset expanded item when selecting a new date
   };
 
-  const filteredTasks = tasks.filter((task) => task.startDate === selectedDate);
+  // Filter tasks based on the selected date
+  const filteredTasks = pendingTaskList.filter((task) => task?.startDate === selectedDate);
 
   return (
     <View style={styles.container}>
-      <CalendarComponent tasks={tasks} onDayPress={handleDayPress} selectedDate={selectedDate} />
+      {/* Calendar */}
+      <CalendarComponent tasks={pendingTaskList} onDayPress={handleDayPress} selectedDate={selectedDate} />
 
       {selectedDate ? (
-        <View style={{ flex: 1 }}>
+        // Display tasks for the selected date
+        <View style={styles.tasksContainer}>
           <FlatList
             data={filteredTasks}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => (
-              <View style={styles.taskContainer}>
-                <Text style={styles.taskText}>{item.title}</Text>
-                {item.startTime && <Text style={styles.dateText}>Start Time: {item.startTime}</Text>}
-                {item.dueTime && <Text style={styles.dateText}>Due Time: {item.dueTime}</Text>}
-                <Text style={styles.priorityText}>Priority: {item.priority}</Text>
-              </View>
+              <TouchableOpacity
+                style={[
+                  styles.taskContainer,
+                  {
+                    borderColor:
+                      item.priority === 'high'
+                        ? COLORS.red
+                        : item.priority === 'medium'
+                        ? 'orange'
+                        : COLORS.grey,
+                  },
+                ]}
+                onPress={() => setExpandedItemId(expandedItemId === item._id ? null : item._id)}
+              >
+                <View style={styles.taskHeader}>
+                  <Text style={styles.taskText}>{item.title}</Text>
+                  <TouchableOpacity onPress={() => setExpandedItemId(item._id)}>
+                    <Ionicons name="add-circle-outline" size={24} color={COLORS.primary} />
+                  </TouchableOpacity>
+                </View>
+                {expandedItemId === item._id && (
+                  // Show detailed information for an expanded task
+                  <View>
+                    {item.startTime && <Text style={styles.dateText}>Start Time: {item.startTime}</Text>}
+                    {item.dueTime && <Text style={styles.dateText}>Due Time: {item.dueTime}</Text>}
+                    <Text
+                      style={[
+                        styles.priorityText,
+                        {
+                          color:
+                            item.priority === 'high'
+                              ? COLORS.red
+                              : item.priority === 'medium'
+                              ? 'orange'
+                              : COLORS.grey,
+                        },
+                      ]}
+                    >
+                      Priority: {item.priority}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
             )}
             ListEmptyComponent={
+              // Display message when no tasks are scheduled for the selected date
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>No tasks scheduled for {selectedDate}.</Text>
               </View>
@@ -66,6 +86,7 @@ const ScheduleScreen = () => {
           />
         </View>
       ) : (
+        // Display default message when no date is selected
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Select a date to view tasks.</Text>
         </View>
@@ -78,6 +99,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: COLORS.secondary,
+  },
+  tasksContainer: {
+    flex: 1,
   },
   emptyContainer: {
     flex: 1,
@@ -87,29 +112,33 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'gray',
+    color: COLORS.grey,
   },
   taskContainer: {
     borderWidth: 1,
-    // borderBottomColor: 'white',
-    borderBottomWidth: 2,
-    borderColor: 'gray',
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
+    backgroundColor: COLORS.white,
+  },
+  taskHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   taskText: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 4,
+    color: COLORS.black,
   },
   dateText: {
     fontSize: 14,
-    color: 'gray',
+    color: COLORS.grey,
   },
   priorityText: {
     fontSize: 14,
-    color: 'blue',
+    color: COLORS.primary,
   },
 });
 

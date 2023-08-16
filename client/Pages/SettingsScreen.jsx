@@ -54,10 +54,10 @@ const SettingsScreen = ({ navigation }) => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={removeDataFromAsyncStorage}>
+      {/* <TouchableOpacity style={styles.logoutButton} onPress={removeDataFromAsyncStorage}>
         <Ionicons name="log-out-outline" size={24} color="#1976D2" />
         <Text style={styles.logoutButtonText}>Logout</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };

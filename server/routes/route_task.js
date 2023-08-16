@@ -52,25 +52,6 @@ router.get('/getCompletedTaskList/:userEmail', async (req, res) => {
 
 
 
-
-
-// GET single task by key
-// router.get('/getBykey/:key', async (req, res) => {
-//     const taskKey = req.params.key;
-
-//     try {
-//         const task = await Task.findTaskByKey(taskKey);
-//         if (!task) {
-//             res.status(404).json({ error: 'Task not found' });
-//         } else {
-//             res.json(task);
-//         }
-//     } catch (error) {
-//         res.status(500).json({ error: 'Failed to retrieve task' });
-//     }
-// });
-
-// PUT update task by key
 router.put('/updateByKey/:key', async (req, res) => {
     const taskKey = req.params.key;
     const updatedTask = req.body;
@@ -154,9 +135,9 @@ router.put('/removeTask', async (req, res) => {
 });
 // POST create task
 router.post('/addTask', async (req, res) => {
-    const { userEmail, title, startDate, dueDate, key, startTime, dueTime, priority } = req.body;
+    const { userEmail, title, description, startDate, dueDate, key, startTime, dueTime, priority } = req.body;
     try {
-        const task = new Task(title, startDate, dueDate, key, startTime, dueTime, priority); //
+        const task = new Task(title, description, startDate, dueDate, key, startTime, dueTime, priority); //
         const authUser = await User.findUserByEmail(userEmail);
         if (authUser) {
             await Task.createTask(authUser, task);

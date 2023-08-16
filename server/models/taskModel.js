@@ -5,13 +5,13 @@ const User = require('./userModel');
 class Task {
     static collection = 'Tasks';
 
-    constructor(title, startDate, dueDate, key, startTime, dueTime, priority) {
+    constructor(title, description, startDate, dueDate, startTime, dueTime, priority) {
         this.title = title;
+        this.description = description;
         this.startDate = startDate;
         this.dueDate = dueDate;
         // this.IsOnDate=true; // task that is still not after due of due Date
         // this.IsOnTime=true; // task that is still not after due of dueTime .
-        this.key = key;
         this.startTime = startTime;
         this.dueTime = dueTime;
         this.priority = priority;

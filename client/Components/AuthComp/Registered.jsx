@@ -6,16 +6,17 @@ import SettingsScreen from "../../Pages/SettingsScreen";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import COLORS from '../../constants/colors';
+import { ImageBackgroundComponent } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 export default function Registered() {
-
     function TabNavigator() {
         return (
             <Tab.Navigator
-                initialRouteName='Home'
+                initialRouteName="Home"
                 screenOptions={({ route }) => ({
                     tabBarIcon: ({ focused, color, size }) => {
                         let iconName;
@@ -30,33 +31,28 @@ export default function Registered() {
                         }
                         return <Ionicons name={iconName} size={size} color={color} />;
                     }, headerShown: false,
-                    "tabBarActiveTintColor": "blue",
-                    "tabBarInactiveBackgroundColor": 'white',
-                    "tabBarLabelStyle": {
-                        "fontSize": 12
+                    tabBarStyle: {
+                        display: 'flex',
                     },
-                    "tabBarStyle": [
-                        {
-                            "display": "flex"
-                        },
-                        null
-                    ]
+                    tabBarLabelStyle: {
+                        fontSize: 12,
+                        color: '#212529',
+                    },
+                    tabBarActiveTintColor: COLORS.secondary,
+                    tabBarInactiveBackgroundColor: COLORS.white,
+                    tabBarActiveBackgroundColor: COLORS.primary,
                 })}
             >
-                <Tab.Screen name='Home' component={HomeScreen} />
-                <Tab.Screen name='Tasks' component={TasksScreen} />
-                <Tab.Screen name='Schedule' component={ScheduleScreen} />
-                <Tab.Screen name='Settings' component={SettingsScreen} />
+                <Tab.Screen name="Home" component={HomeScreen} />
+                <Tab.Screen name="Tasks" component={TasksScreen} />
+                <Tab.Screen name="Schedule" component={ScheduleScreen} />
+                <Tab.Screen name="Settings" component={SettingsScreen} />
             </Tab.Navigator>
-        )
+        );
     }
     return (
-        <Stack.Navigator
-            initialRouteName='Tabs'
-            screenOptions={{ headerShown: false }}>
-            <Stack.Screen name='Tabs' component={TabNavigator} />
-
+        <Stack.Navigator initialRouteName="Tabs" screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Tabs" component={TabNavigator} />
         </Stack.Navigator>
-    )
-
+    );
 }
