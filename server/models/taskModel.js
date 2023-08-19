@@ -190,14 +190,10 @@ class Task {
 
     static async updateTask(user, updatedTask) {
         try {
-            console.log(user, updatedTask)
             const taskIndex = user.Tasks.findIndex(task => task._id.toString() === updatedTask._id);
-            console.log(taskIndex)
-
             if (taskIndex === -1) {
                 return null;
             }
-
             user.Tasks[taskIndex] = updatedTask;
             await new db().UpdateUserTasks(User.collection, user.email, user.Tasks);
             return user;
