@@ -58,7 +58,7 @@ const CalendarComponent = ({ tasks, onDayPress, selectedDate }) => {
       <Calendar
         // Minimum and maximum date that can be selected
         minDate={'2023-01-01'}
-        maxDate={'2023-12-31'}
+        maxDate={'2030-12-31'}
         // Date marking style [simple/period/multi-dot/custom]. Default = 'simple'
         markingType={'multi-dot'}
         // Date marking style

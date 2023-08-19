@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { StyleSheet, View, Text, TextInput, Modal, Image, TouchableOpacity, Alert, KeyboardAvoidingView, Pressable, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Modal, TouchableOpacity, Keyboard, KeyboardAvoidingView, Pressable, ScrollView, Vibration } from 'react-native';
 import { Button } from 'react-native-paper';
 import DatePicker from 'react-native-modern-datepicker';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,7 @@ function TaskInput(props) {
   const [enteredTaskText, setEnteredTaskText] = useState('');
   const [enteredDescription, setEnteredDescription] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState();
+  const [selectedTime, setSelectedTime] = useState(null);
   const [startDate, setStartDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [dueDate, setDueDate] = useState(null);
@@ -19,6 +19,9 @@ function TaskInput(props) {
   const [isCalendarVisible, setCalendarVisible] = useState(false);
   const [selectedPriority, setSelectedPriority] = useState('low');
   const [isPriorityVisible, setPriorityVisible] = useState(false);
+  const [isStartTimeSelected, setIsStartTimeSelected] = useState(false)
+  const [isDueTimeSelected, setDueTimeSelected] = useState(false)
+
   // const [isInfoVisible, setInfoVisible] = useState(true); // New state for the info message
 
   const taskInputHandler = (enteredText) => {
@@ -30,33 +33,49 @@ function TaskInput(props) {
   const descriptionInputHandler = (text) => {
     setEnteredDescription(text);
   };
+
+
   const addTaskHandler = () => {
-    if (!enteredTaskText || !selectedDate) {
+    if (!enteredTaskText || !selectedDate || !selectedTime) {
       return;
     }
-
     if (!isStartDateSelected) {
       setStartDate(selectedDate);
       setStartTime(selectedTime);
       setisStartDateSelected(true);
+      setIsStartTimeSelected(true);
     } else {
-      console.log('gets here ');
+      console.log("gets here");
       setDueDate(selectedDate);
       setDueTime(selectedTime);
-      props.onAddTask(enteredTaskText, enteredDescription, startDate, selectedDate, startTime, selectedTime, selectedPriority);
+      setDueTimeSelected(true);
+      setDueTimeSelected(true)
+
+      props.onAddTask(
+        enteredTaskText,
+        enteredDescription,
+        startDate,
+        selectedDate,
+        startTime,
+        selectedTime,
+        selectedPriority
+      );
+
       setEnteredTaskText('');
-      setEnteredDescription('')
+      setEnteredDescription('');
       setSelectedDate(null);
       setisStartDateSelected(false);
+      setIsStartTimeSelected(false);
+      setDueTimeSelected(false);
 
       props.toggleBtn();
     }
   };
+
   const addQuickTaskHandler = () => {
     if (!enteredTaskText) {
       return;
     }
-    console.log("addQuickTaskHandler", enteredDescription);
     props.onAddTask(enteredTaskText, enteredDescription, startDate, selectedDate, startTime, selectedTime, selectedPriority);
 
     setEnteredTaskText('');
@@ -68,6 +87,7 @@ function TaskInput(props) {
     setDueDate(null);
     setDueTime(null);
     setisStartDateSelected(false);
+    setIsStartTimeSelected(false);
     setSelectedPriority('low');
     setPriorityVisible(false);
     setCalendarVisible(false);
@@ -77,11 +97,14 @@ function TaskInput(props) {
   };
 
   const handleDateChange = (date) => {
+    console.log(selectedDate);
     setSelectedDate(date);
   };
 
   const handleTimeChange = (time) => {
     setSelectedTime(time.toString());
+    console.log(selectedTime);
+
   };
 
   const handleClose = () => {
@@ -93,12 +116,14 @@ function TaskInput(props) {
       setPriorityVisible(!isPriorityVisible);
     }
     setCalendarVisible(!isCalendarVisible);
+    Keyboard.dismiss()
   };
   const handleTogglePriority = () => {
     if (isCalendarVisible) {
       setCalendarVisible(!isCalendarVisible);
     }
     setPriorityVisible(!isPriorityVisible);
+    Keyboard.dismiss()
   };
 
   const handlePrioritySelection = (priority) => {
@@ -164,121 +189,135 @@ function TaskInput(props) {
   );
 
   return (
+
     <Modal visible={props.visible} animationType="slide" transparent={true}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }} // Ensure the view takes up the full screen
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Adjust behavior based on platform
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // Adjust offset as needed
+        >
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }} // Ensure the view takes up the full screen
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} // Adjust behavior based on platform
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // Adjust offset as needed
-      >
-
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            {/* Close Button */}
-
-            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-              <Ionicons name="close" size={19} color={COLORS.black} />
-            </TouchableOpacity>
-
-            <TextInput
-              placeholderTextColor={COLORS.grey}
-              style={styles.textInput}
-              placeholder="Insert task's title"
-              onChangeText={taskInputHandler}
-              value={enteredTaskText}
-            />
-
-            {/* Description Input */}
-            <TextInput
-              placeholderTextColor={COLORS.grey}
-              style={styles.textInput}
-              placeholder="Insert task's description"
-              onChangeText={descriptionInputHandler}
-              value={enteredDescription}
-              maxLength={400} // Limit to 200 characters
-            />
-
-            {/* Char Count */}
-            <Text style={styles.charCount}>
-              {enteredDescription.length}/400 characters
-            </Text>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              {/* Close Button */}
 
 
-
-            <View style={styles.iconContainer}>
-              <TouchableOpacity style={styles.iconButton} onPress={handleToggleCalendar}>
-                <Ionicons name="calendar" size={40} style={[{ color: COLORS.primary, }]} />
-                <View style={styles.iconLabelContainer}>
-                  <Text style={styles.iconLabel}>Date&Time</Text>
-                </View>
+              <TouchableOpacity onPress={() => {
+                Vibration.vibrate(1)
+                handleClose()
+              }
+              } style={styles.closeButton}>
+                <Ionicons name="close" size={19} color={COLORS.black} />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.iconButton} onPress={handleTogglePriority}>
-                <Ionicons name="md-options" size={40} color={COLORS.primary} />
-                <Text style={styles.iconLabel}>Priority</Text>
-                <View style={styles.iconLabelContainer}>
 
-                </View>
-              </TouchableOpacity>
-            </View>
+              <TextInput
+                placeholderTextColor={COLORS.grey}
+                style={styles.textInput}
+                placeholder="Insert task's title"
+                onChangeText={taskInputHandler}
+                value={enteredTaskText}
+              />
 
-            <View style={styles.centeredButtonContainer}>
-              {isTitle && (
-                <Pressable onPress={addQuickTaskHandler} style={styles.iconButton}>
-                  <Ionicons name='paper-plane' size={40} color={COLORS.primary} />
+              {/* Description Input */}
+              <TextInput
+                placeholderTextColor={COLORS.grey}
+                style={styles.textInput}
+                placeholder="Insert task's description"
+                onChangeText={descriptionInputHandler}
+                value={enteredDescription}
+                maxLength={400}
+              />
+
+
+              {/* Char Count */}
+              <Text style={styles.charCount}>
+                {enteredDescription.length}/400 characters
+              </Text>
+
+
+
+              <View style={styles.iconContainer}>
+                <TouchableOpacity style={styles.iconButton} onPress={handleToggleCalendar}>
+                  <Ionicons name="calendar" size={40} style={[{ color: COLORS.primary, }]} />
                   <View style={styles.iconLabelContainer}>
-                    <Text style={styles.iconLabel}>Quick Task</Text>
+                    <Text style={styles.iconLabel}>Open Calendar</Text>
                   </View>
-                </Pressable>
-              )}
-              {!isTitle && (
-                <View style={styles.emptyTaskMessage}>
-                  <Text style={styles.emptyTaskText}>
-                    Add title and description for quick task,{'\n'} Priority and date are optional.
-                  </Text>
-                </View>
-              )}
-            </View>
-            <View style={styles.centeredButtonContainer}>
-              {isStartDateSelected && (
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton} onPress={handleTogglePriority}>
+                  <Ionicons name="md-options" size={40} color={COLORS.primary} />
+                  <Text style={styles.iconLabel}>Open Priority</Text>
+                  <View style={styles.iconLabelContainer}>
+
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.centeredButtonContainer}>
+                {isTitle && (
+                  <Pressable onPress={addQuickTaskHandler} style={styles.iconButton}>
+                    <Ionicons name='paper-plane' size={40} color={COLORS.primary} />
+                    <View style={styles.iconLabelContainer}>
+                      <Text style={styles.iconLabel}>Set Quick Task</Text>
+                    </View>
+                  </Pressable>
+                )}
+                {!isTitle && (
+                  <View style={styles.emptyTaskMessage}>
+                    <Text style={styles.emptyTaskText}>
+                      Add title and description for quick task,{'\n'} Priority and date are optional.
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <View style={styles.centeredButtonContainer}>
+                {isStartDateSelected && (
+                  <Button
+                    style={{ color: 'red' }}
+                    mode="elevated"
+                    onPress={() => {
+                      setisStartDateSelected(false)
+                      setIsStartTimeSelected(false)
+                    }
+                    }
+                  >
+                    Clear
+                  </Button>
+                )}
                 <Button
-                  style={{ color: 'red' }}
+                  style={styles.button}
                   mode="elevated"
-                  onPress={() => setisStartDateSelected(false)}
+                  onPress={addTaskHandler}
+                  disabled={!enteredTaskText || !selectedTime || !selectedDate}
                 >
-                  Clear
+                  {isStartDateSelected && !isStartTimeSelected ? 'Set Due Date' : 'Set Start Date'}
                 </Button>
-              )}
-              <Button
-                style={styles.button}
-                mode="elevated"
-                onPress={addTaskHandler}
-                disabled={!enteredTaskText || !selectedDate}
-              >
-                {isStartDateSelected ? 'Set Due Date' : 'Set Start Date'}
-              </Button>
-              {/* <Button style={styles.button} mode="outlined" onPress={handleClose}>
+                {/* <Button style={styles.button} mode="outlined" onPress={handleClose}>
               Close
             </Button> */}
+              </View>
+
+              {isCalendarVisible && (
+                <DatePicker
+                  style={styles.datePicker}
+                  mode="datepicker"
+                  onDateChange={handleDateChange}
+                  onTimeChange={handleTimeChange}
+                  placeholder={!isStartDateSelected && !isStartTimeSelected ? 'Set Start Date' : 'Set Due Date'}
+                  display="spinner"
+                  date={selectedDate}
+                  minDate={new Date()}
+                  options={Keyboard}
+                />
+              )}
+              {isPriorityVisible && priorityOptions}
             </View>
-
-            {isCalendarVisible && (
-              <DatePicker
-                style={styles.datePicker}
-                mode="datepicker"
-                onDateChange={handleDateChange}
-                onTimeChange={handleTimeChange}
-                placeholder={!isStartDateSelected ? 'Set Start Date' : 'Set Due Date'}
-                display="spinner"
-                date={selectedDate}
-                minDate={new Date()}
-              />
-            )}
-            {isPriorityVisible && priorityOptions}
           </View>
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
 
+      </ScrollView>
     </Modal >
+
   );
 }
 // completed pending 
@@ -329,20 +368,20 @@ const styles = StyleSheet.create({
     marginRight: 12,
     fontSize: 9
   },
-  // datePicker: {
-  //   marginTop: 8,
-  //   borderWidth: 1.5,
-  //   borderColor: COLORS.primary,
-  //   borderRadius: 10,
-  //   height: '50%',
-  //   marginVertical: 4,
-  // },
+
   datePicker: {
     marginTop: 8,
     borderWidth: 1.5,
     borderColor: COLORS.primary,
     borderRadius: 10,
-    height: "30%" // Adjust this value as needed
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 8,
+    backgroundColor: COLORS.lightGray, // You can adjust the background color
+    borderRadius: 8,
   },
   iconButton: {
     borderWidth: .3,
@@ -449,3 +488,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+
+

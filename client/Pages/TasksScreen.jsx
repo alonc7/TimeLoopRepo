@@ -25,7 +25,6 @@ const TasksScreen = () => {
   }
 
   const addTaskHandler = async (title, description, startDate, dueDate, startTime, dueTime, priority) => {
-    console.log(title, description);
     const taskData = {
       title: title,
       description: description,
@@ -59,7 +58,6 @@ const TasksScreen = () => {
   }
 
   function deleteTaskHandler(id) {
-    console.log('got to deleteTaskhandler on taskscreen');
     // Perform the API fetch request to remove the task from the server
     fetch(`${Server_path}/api/tasks/removeTask`, {
       method: 'PUT',

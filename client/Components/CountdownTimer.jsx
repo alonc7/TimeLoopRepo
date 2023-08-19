@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import React, { useEffect, useState } from 'react';
 
 export default function CountdownTimer({ remainingTime }) {
@@ -17,14 +17,13 @@ export default function CountdownTimer({ remainingTime }) {
                             ...prevTime,
                             seconds: prevTime.seconds + 59,
                             minutes: prevTime.minutes - 1
-
                         }
                     }
                     if (prevTime.minutes <= 0) {
                         return {
                             ...prevTime,
                             minutes: prevTime.minutes + 59,
-                            hours: prevTime.hours > 0 && prevTime.hours - 1
+                            hours: prevTime.hours > 0 ? prevTime.hours - 1 : 0
                         }
                     }
                     if (prevTime.hours < 1) {
@@ -55,6 +54,14 @@ export default function CountdownTimer({ remainingTime }) {
     const seconds = Math.floor(time.seconds);
 
     return (
-        <Text style={{ fontSize: 16, fontWeight: "bold" }}>{`${days}:${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}</Text>
+        // <Text style={styles.timeText}>{`${days}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}</Text>
+        <Text style={styles.timeText}>{`${days}:${(hours).toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}</Text>
     );
 }
+const styles = StyleSheet.create({
+    timeText: {
+        fontSize: 16,
+        fontWeight: "bold",
+        padding: 14
+    }
+})

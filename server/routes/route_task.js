@@ -52,21 +52,27 @@ router.get('/getCompletedTaskList/:userEmail', async (req, res) => {
 
 
 
-router.put('/updateByKey/:key', async (req, res) => {
-    const taskKey = req.params.key;
-    const updatedTask = req.body;
-
+// PUT edit task
+router.put('/editTask', async (req, res) => {
     try {
-        const success = await Task.updateTaskByKey(taskKey, updatedTask);
-        if (success) {
-            res.json({ message: 'Task updated successfully' });
+        const { userEmail, updatedTask } = req.body;
+        const user = await User.findUserByEmail(userEmail);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const updatedUser = await Task.updateTask(user, updatedTask);
+
+        if (updatedUser) {
+            res.status(200).json({ message: 'Task updated successfully' });
         } else {
-            res.status(404).json({ error: 'Task not found' });
+            res.status(500).json({ error: 'Failed to update task' });
         }
     } catch (error) {
         res.status(500).json({ error: 'Failed to update task' });
     }
 });
+
 
 // PUT update task status by taskId
 router.put('/updateStatus/:taskId', async (req, res) => {

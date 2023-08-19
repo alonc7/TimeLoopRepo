@@ -44,7 +44,6 @@ const Login = ({ navigation }) => {
         setAuthenticated(true);
         navigation.navigate('Main')
       } else {
-        const data = await response.json();
         // Handle non-OK responses
         const errorData = await response.json();
         if (errorData && errorData.message) {

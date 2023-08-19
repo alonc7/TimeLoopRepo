@@ -181,11 +181,44 @@ class Task {
             }
 
             const update = { $set: { status: status } };
-            await new db().UpdateOne(Task.collection, query, update);
+            await new db().UpdateById(Task.collection, query, update);
             return true;
         } catch (error) {
             throw new Error('Failed to update task status');
         }
+    };
+
+    static async updateTask(user, updatedTask) {
+        try {
+            console.log(user, updatedTask)
+            const taskIndex = user.Tasks.findIndex(task => task._id.toString() === updatedTask._id);
+            console.log(taskIndex)
+
+            if (taskIndex === -1) {
+                return null;
+            }
+
+            user.Tasks[taskIndex] = updatedTask;
+            await new db().UpdateUserTasks(User.collection, user.email, user.Tasks);
+            return user;
+        } catch (error) {
+            console.error('Failed to update task:', error);
+            throw error;
+        }
     }
+
+    static async updateTaskByKey(taskKey, updatedTask) {
+        try {
+            const query = { _id: new mongodb.ObjectId(taskKey) };
+            const update = { $set: updatedTask };
+            await new db().UpdateById(Task.collection, query, update);
+
+            return true; // Successfully updated
+        } catch (error) {
+            console.error(error);
+            return false; // Failed to update
+        }
+    }
+
 }
 module.exports = Task;

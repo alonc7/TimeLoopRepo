@@ -58,6 +58,7 @@ class DB {
     //Update
     async UpdateById(collection, id, doc) {
         try {
+            console.log("collection", collection, id, 'doc', doc);
             await this.client.connect();
             return await this.client.db(this.db_name).collection(collection).updateOne(
                 { _id: new ObjectId(id) },
@@ -179,7 +180,21 @@ class DB {
             await this.client.close();
         }
     }
+    async UpdateUserTasks(collection, userEmail, updatedTasks) {
+        try {
+            await this.client.connect();
 
+            await this.client.db(this.db_name).collection(collection).updateOne(
+                { email: userEmail },
+                { $set: { Tasks: updatedTasks } }
+            );
+        } catch (error) {
+            console.error('Failed to update user tasks:', error);
+            throw error;
+        } finally {
+            await this.client.close();
+        }
+    }
 }
 
 module.exports = DB;

@@ -27,7 +27,6 @@ function GoalItem(props) {
   // Function to mark the task as removed using API request
   async function deleteTaskWithAPI(taskId) {
     try {
-      console.log('got to delettaskwithapi in goalitem');
       const response = await fetch(`${Server_path}/api/tasks/removeTask`, {
         method: 'PUT',
         headers: {

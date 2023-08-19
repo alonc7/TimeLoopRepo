@@ -1,23 +1,61 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Pressable } from 'react-native';
-import { Modal, Portal } from 'react-native-paper';
+import React, { useContext, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Pressable, Vibration } from 'react-native'; // Import necessary components
+import { Modal, } from 'react-native';
 import COLORS from '../../constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import { MainContext } from '../Context/MainContextProvider';
+import EditTaskModal from './EditTaskModal'; // Import the EditTaskModal component
+
+import axios from 'axios';
+import { Server_path } from '../../utils/api-url';
+
 
 function TaskListModal({ isVisible, taskList, onClose, isPendingTasks }) {
-    const { deleteTask, completeTask } = useContext(MainContext);
+    const { deleteTask, completeTask, userEmail } = useContext(MainContext);
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false); // State to manage the visibility of EditTaskModal
+    const [selectedTask, setSelectedTask] = useState(null); // State to hold the selected task for editing
+    const [expandedItemId, setExpandedItemId] = useState(null); // Track expanded item
 
-    const handleEdit = (taskId) => {
-        // Implement edit functionality here
-        console.log('Editing task with ID:', taskId);
+
+    const handleEditTask = async (userEmail, updatedTask) => {
+        try {
+            console.log(userEmail, updatedTask);
+            const response = await axios.put(`${Server_path}/api/tasks/editTask`, {
+                userEmail,
+                updatedTask
+            });
+
+            if (response.status === 200) {
+                alert('Task updated successfully');
+            } else {
+                alert('Something went wrong with task updating');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Something went wrong with task updating');
+        }
     };
 
+
+    const handleOnCancel = () => {
+        setIsEditModalVisible(false)
+        setSelectedTask('')
+    };
+
+    const handleEdit = (taskId) => {
+        const taskToEdit = taskList.find((task) => task._id === taskId);
+        setSelectedTask(taskToEdit); // Set the selected task for editing
+        setIsEditModalVisible(true); // Show the EditTaskModal
+    };
     return (
-        <Portal>
-            <Modal visible={isVisible} onDismiss={onClose} contentContainerStyle={styles.modalBackground}>
+        <Modal visible={isVisible} animationType="slide" onDismiss={onClose} transparent={true} onRequestClose={onClose}>
+            <View style={styles.modalBackground}>
                 <View style={styles.modalContent}>
-                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                    <TouchableOpacity onPress={() => {
+                        onClose()
+                        Vibration.vibrate(5); // Trigger a short vibration
+                    }} style={styles.closeButton}>
+
                         <Ionicons name="close-circle" size={24} color={COLORS.textLight} />
                     </TouchableOpacity>
                     <Text style={styles.header}>
@@ -26,49 +64,89 @@ function TaskListModal({ isVisible, taskList, onClose, isPendingTasks }) {
                     <FlatList
                         data={taskList}
                         renderItem={({ item }) => (
-                            <View style={styles.taskItem}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.taskItem,
+                                    {
+                                        borderColor:
+                                            item.priority === 'high'
+                                                ? COLORS.red
+                                                : item.priority === 'medium'
+                                                    ? 'orange'
+                                                    : 'grey',
+                                    },
+                                ]}
+                                onPress={() => setExpandedItemId(expandedItemId === item._id ? null : item._id)}
+                            >
                                 <View style={styles.taskDetails}>
-                                    <Text style={styles.taskTitle}>{item.title}</Text>
-                                    <Text style={styles.dateText}>{`Start Date: ${item.startDate}`}</Text>
-                                    <Text style={styles.dateText}>{`End Date: ${item.endDate}`}</Text>
+                                    <Text style={styles.taskTitle}>{item.title}
+                                        <Ionicons name="add-circle-outline" size={14} color={COLORS.primary} />
+
+                                    </Text>
+                                    {expandedItemId === item._id && (
+                                        <View>
+                                            {item.startDate && <Text style={styles.dateText}>{`Start Date: ${item.startDate}`}</Text>}
+                                            {item.endDate && <Text style={styles.dateText}>{`End Date: ${item.endDate}`}</Text>}
+                                            {item.description && <Text style={styles.description}>{item.description}</Text>}
+                                            {item.startTime && <Text style={styles.dateText}>Start Time: {item.startTime}</Text>}
+                                            {item.dueTime && <Text style={styles.dateText}>Due Time: {item.dueTime}</Text>}
+                                        </View>
+                                    )}
                                 </View>
                                 <View style={styles.taskFooter}>
-                                    <Pressable onPress={() => completeTask(item._id)} style={styles.iconContainer}>
+                                    <Pressable onPress={() => {
+                                        Vibration.vibrate(5)
+                                        completeTask(item._id)
+                                    }} style={styles.iconContainer}>
                                         <Ionicons name={item.completed ? 'ios-checkmark-circle' : 'ios-checkmark-circle-outline'} size={24} color={item.completed ? COLORS.textSuccess : COLORS.textDark} />
                                     </Pressable>
-                                    <Pressable onPress={() => deleteTask(item._id)} style={styles.iconContainer}>
+                                    <Pressable onPress={() => {
+                                        Vibration.vibrate(5)
+                                        deleteTask(item._id)
+                                    }} style={styles.iconContainer}>
                                         <Ionicons name="trash" size={24} color={COLORS.textDark} />
                                     </Pressable>
                                     <Pressable onPress={() => handleEdit(item._id)} style={styles.iconContainer}>
                                         <Ionicons name="md-create" size={24} color={COLORS.textDark} />
                                     </Pressable>
                                 </View>
-                            </View>
+                            </TouchableOpacity>
                         )}
                         keyExtractor={(item) => item._id}
                         alwaysBounceVertical={false}
                     />
                 </View>
-            </Modal>
-        </Portal>
+                {selectedTask && (
+                    <EditTaskModal
+                        visible={isEditModalVisible}
+                        task={selectedTask}
+                        onSave={(editedTask) => {
+                            handleEditTask(userEmail, editedTask);                            // Implement the onSave logic here
+                            setIsEditModalVisible(false); // Hide the EditTaskModal
+                        }}
+                        onCancel={() => handleOnCancel()} // Hide the EditTaskModal
+                    />
+                )}
+            </View>
+        </Modal>
     );
 }
-export default TaskListModal;
 
 const styles = StyleSheet.create({
     modalBackground: {
-        backgroundColor: COLORS.white,
-        borderRadius: 22,
-        maxHeight: '70%', // Adjust the value here to control the modal's height
-        elevation: 10,
-        alignSelf: 'center', // Center the modal vertically,
-        overflow: 'hidden'
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     modalContent: {
-        padding: 30, // Adjust padding to provide more space around content
-        borderWidth: 1,
-        maxWidth: '100%',
-    }, closeButton: {
+        backgroundColor: COLORS.white,
+        borderRadius: 12,
+        padding: 20,
+        width: '80%',
+        maxHeight: '80%',
+    },
+    closeButton: {
         alignSelf: 'flex-end',
         marginBottom: 10,
     },
@@ -85,31 +163,41 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     taskTitle: {
-        fontSize: 16,
+        fontSize: 17,
         fontWeight: 'bold',
         color: COLORS.black,
-        alignSelf: 'center'
-
+        alignSelf: 'center',
+        marginBottom: 6,
+    },
+    description: {
+        fontSize: 14,
+        color: COLORS.grey,
     },
     dateText: {
         fontSize: 14,
-        color: COLORS.white,
-
+        color: COLORS.black,
     },
     header: {
         fontSize: 24,
         fontWeight: 'bold',
         textDecorationLine: 'underline',
         color: COLORS.black,
+        alignSelf: 'center',
+        justifyContent: 'center',
+        marginBottom: 15,
     },
     taskFooter: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         marginTop: 10,
+        borderTopColor: COLORS.secondary,
+        borderWidth: .9,
 
     },
     iconContainer: {
         alignItems: 'center',
-
+        borderWidth: .2,
     },
 });
+
+export default TaskListModal;
