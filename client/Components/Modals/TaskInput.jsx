@@ -39,13 +39,13 @@ function TaskInput(props) {
     if (!enteredTaskText || !selectedDate || !selectedTime) {
       return;
     }
+
     if (!isStartDateSelected) {
       setStartDate(selectedDate);
       setStartTime(selectedTime);
       setisStartDateSelected(true);
       setIsStartTimeSelected(true);
     } else {
-      console.log("gets here");
       setDueDate(selectedDate);
       setDueTime(selectedTime);
       setDueTimeSelected(true);
@@ -76,7 +76,16 @@ function TaskInput(props) {
     if (!enteredTaskText) {
       return;
     }
-    props.onAddTask(enteredTaskText, enteredDescription, startDate, selectedDate, startTime, selectedTime, selectedPriority);
+
+    console.log(enteredTaskText, enteredDescription, startDate, selectedDate, startTime, selectedTime, selectedPriority);
+    props.onAddTask(
+      enteredTaskText,
+      enteredDescription,
+      startDate,
+      selectedDate,
+      startTime,
+      selectedTime,
+      selectedPriority);
 
     setEnteredTaskText('');
     setEnteredDescription('');
@@ -97,13 +106,11 @@ function TaskInput(props) {
   };
 
   const handleDateChange = (date) => {
-    console.log(selectedDate);
     setSelectedDate(date);
   };
 
   const handleTimeChange = (time) => {
     setSelectedTime(time.toString());
-    console.log(selectedTime);
 
   };
 
@@ -217,6 +224,7 @@ function TaskInput(props) {
                 placeholder="Insert task's title"
                 onChangeText={taskInputHandler}
                 value={enteredTaskText}
+                maxLength={21}
               />
 
               {/* Description Input */}
@@ -290,7 +298,7 @@ function TaskInput(props) {
                   onPress={addTaskHandler}
                   disabled={!enteredTaskText || !selectedTime || !selectedDate}
                 >
-                  {isStartDateSelected && !isStartTimeSelected ? 'Set Due Date' : 'Set Start Date'}
+                  {isStartDateSelected || isStartTimeSelected ? 'Set Due Date' : 'Set Start Date'}
                 </Button>
                 {/* <Button style={styles.button} mode="outlined" onPress={handleClose}>
               Close
@@ -303,10 +311,8 @@ function TaskInput(props) {
                   mode="datepicker"
                   onDateChange={handleDateChange}
                   onTimeChange={handleTimeChange}
-                  placeholder={!isStartDateSelected && !isStartTimeSelected ? 'Set Start Date' : 'Set Due Date'}
-                  display="spinner"
                   date={selectedDate}
-                  minDate={new Date()}
+                  minimumDateDate={new Date()}
                   options={Keyboard}
                 />
               )}

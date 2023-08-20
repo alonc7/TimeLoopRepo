@@ -1,5 +1,6 @@
 import React, { createContext, useState } from 'react'
 import { Server_path } from '../../utils/api-url';
+import axios from 'axios';
 
 export const MainContext = createContext()
 
@@ -13,6 +14,8 @@ function MainContextProvider({ children }) {
   const [pendingTaskList, setPendingTaskList] = useState([]);
   const [completedTaskList, setCompletedTaskList] = useState([]);
   const [userImage, setUserImage] = useState(null);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false); // State to manage the visibility of EditTaskModal
+  const [selectedTask, setSelectedTask] = useState(null); // State to hold the selected task for editing
 
   //HomeScreen method
   const capitalizeFirstLetter = (str) => {
@@ -58,11 +61,9 @@ function MainContextProvider({ children }) {
       });
       if (response.ok) {
         // setPendingTaskList(pendingTaskList.filter((item) => item._id !== taskId))
-        console.log('Task removed successfully', taskId);
-        console.table()
-
+        alert('Task removed successfully', taskId);
       } else {
-        console.log('Failed to remove task:', response.status);
+        alert('Failed to remove task:', response.status);
       }
     } catch (error) {
       console.error('Error removing task:', error);
@@ -80,16 +81,65 @@ function MainContextProvider({ children }) {
         body: JSON.stringify({ userEmail, taskId }),
       });
       if (response.ok) {
-        console.log('Task completed successfully');
+        console.log('Before filter:', pendingTaskList);
+        const completedTask = pendingTaskList.find((task) => task._id === taskId);
+        const updatedTaskList = pendingTaskList.filter((task) => task._id !== taskId);
+        console.log('After filter:', updatedTaskList);
+        setCompletedTaskList([...completedTaskList, completedTask])
+        setPendingTaskList(updatedTaskList);
+        // Alert.alert('Task completed successfully');
       } else {
-        console.log(response);
-        console.log('Failed to complete task:', response.status);
+        Alert.alert('Failed to complete task:', response.status);
       }
     } catch (error) {
       console.error('Error completing task:', error);
     }
   };
+  // async function completeTask(taskId) {
+  //   try {
+  //     const response = await fetch(`${Server_path}/api/tasks/completeTask`, {
+  //       method: 'PUT',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ userEmail, taskId }),
+  //     });
+  //     if (response.ok) {
+  //       alert('Task completed successfully');
+  //     } else {
+  //       alert('Failed to complete task:', response.status);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error completing task:', error);
+  //   }
+  // };
 
+  const handleOnCancel = () => {
+    setSelectedTask('')
+    setIsEditModalVisible(false)
+  };
+  const handleEdit = (taskId) => {
+    const taskToEdit = pendingTaskList.find((task) => task._id === taskId);
+    setSelectedTask(taskToEdit); // Set the selected task for editing
+    setIsEditModalVisible(true); // Show the EditTaskModal
+  };
+  const handleEditTask = async (userEmail, updatedTask) => {
+    try {
+      const response = await axios.put(`${Server_path}/api/tasks/editTask`, {
+        userEmail,
+        updatedTask
+      });
+      if (response.status === 200) {
+        setIsEditModalVisible(false); // Hide the EditTaskModal
+        alert('Task updated successfully');
+      } else {
+        alert('Something went wrong with task updating');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Something went wrong with task updating');
+    }
+  };
 
   const MainContextValues = {
     isLoading,
@@ -112,7 +162,12 @@ function MainContextProvider({ children }) {
     userImage,
     setUserImage,
     deleteTask,
-    completeTask
+    completeTask,
+    handleOnCancel,
+    handleEdit,
+    selectedTask,
+    handleEditTask,
+    isEditModalVisible
   }
   return (
     <MainContext.Provider value={MainContextValues}>

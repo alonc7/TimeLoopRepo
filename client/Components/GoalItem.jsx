@@ -5,13 +5,14 @@ import COLORS from '../constants/colors';
 import { MainContext } from '../Components/Context/MainContextProvider';
 import { Server_path } from '../utils/api-url';
 import { LinearGradient } from 'expo-linear-gradient';
+import EditTaskModal from './Modals/EditTaskModal';
 
 // import AnimatedText from 'react-native-paper/lib/typescript/src/components/Typography/AnimatedText';
 
 function GoalItem(props) {
-  const { text, description, startDate, endDate, startHour, endHour } = props;
+  const { task_id, text, description, startDate, endDate, startHour, endHour } = props;
   const [completed, setCompleted] = useState(false);
-  const { userEmail, setPendingTaskList } = useContext(MainContext);
+  const { userEmail, setPendingTaskList, completeTask, deleteTask, handleOnCancel, handleEdit, selectedTask, handleEditTask, isEditModalVisible } = useContext(MainContext);
 
   const lineThroughAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
@@ -21,55 +22,55 @@ function GoalItem(props) {
       toValue: 0,
       duration: 500,
       useNativeDriver: true,
-    }).start(() => deleteTaskWithAPI(props.id));
-  }
+    }).start(() => deleteTask(props.id));
+  };
 
   // Function to mark the task as removed using API request
-  async function deleteTaskWithAPI(taskId) {
-    try {
-      const response = await fetch(`${Server_path}/api/tasks/removeTask`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userEmail, taskId }),
-      });
-      if (response.ok) {
-        setPendingTaskList((currentListTasks) =>
-          currentListTasks.filter((task) => task._id !== taskId)
-        );
-        Alert.alert('Task removed successfully');
-      } else {
-        console.log('Failed to remove task:', response.status);
-      }
-    } catch (error) {
-      console.error('Error removing task:', error);
-    }
-  }
+  // async function deleteTask(taskId) {
+  //   try {
+  //     const response = await fetch(`${Server_path}/api/tasks/removeTask`, {
+  //       method: 'PUT',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ userEmail, taskId }),
+  //     });
+  //     if (response.ok) {
+  //       setPendingTaskList((currentListTasks) =>
+  //         currentListTasks.filter((task) => task._id !== taskId)
+  //       );
+  //       Alert.alert('Task removed successfully');
+  //     } else {
+  //       console.log('Failed to remove task:', response.status);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error removing task:', error);
+  //   }
+  // };
 
   // Function to mark the task as completed using API request
 
-  async function completeTaskWithAPI(taskId) {
-    try {
-      const response = await fetch(`${Server_path}/api/tasks/completeTask`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userEmail, taskId }),
-      });
-      if (response.ok) {
-        setPendingTaskList((currentListTasks) =>
-          currentListTasks.filter((task) => task._id !== taskId)
-        );
-        Alert.alert('Task completed successfully');
-      } else {
-        Alert.alert('Failed to complete task:', response.status);
-      }
-    } catch (error) {
-      console.error('Error completing task:', error);
-    }
-  }
+  // async function completeTask(taskId) {
+  //   try {
+  //     const response = await fetch(`${Server_path}/api/tasks/completeTask`, {
+  //       method: 'PUT',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ userEmail, taskId }),
+  //     });
+  //     if (response.ok) {
+  //       console.log('Before filter:', pendingTaskList);
+  //       const updatedTaskList = pendingTaskList.filter((task) => task._id !== taskId);
+  //       console.log('After filter:', updatedTaskList); setPendingTaskList(updatedTaskList);
+  //       // Alert.alert('Task completed successfully');
+  //     } else {
+  //       Alert.alert('Failed to complete task:', response.status);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error completing task:', error);
+  //   }
+  // };
 
   // Function to handle the completion toggle
   function toggleCompletion() {
@@ -87,7 +88,7 @@ function GoalItem(props) {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        completeTaskWithAPI(props.id); // Call the API function with the task ID (props.id)
+        completeTask(props.task_id); // Call the API function with the task ID (props.id)
       });
     } else {
       Animated.sequence([
@@ -103,7 +104,7 @@ function GoalItem(props) {
         }),
       ]).start();
     }
-  }
+  };
 
 
 
@@ -121,44 +122,33 @@ function GoalItem(props) {
       borderColor = 'grey';
       break;
     default:
-      borderColor = 'transparent'
+      borderColor = COLORS.grey
   }
 
   return (
-
     <SafeAreaView style={styles.container}>
       <Animated.View style={[styles.goalItem, { borderColor, elevation: 0, opacity: opacityAnim }]}>
-        <LinearGradient style={styles.LinerGradientContainer}
-          colors={[COLORS.secondary, COLORS.primary]}
-        >
-
-          <View style={styles.titleContainer}>
-
-            <Animated.Text
-              style={[
-                styles.taskText,
-                {
-                  textDecorationLine: completed ? 'line-through' : 'none',
-                },
-              ]}
-            >
+        <LinearGradient style={styles.LinerGradientContainer} colors={[COLORS.secondary, COLORS.primary]}>
+          <View style={styles.header}>
+            <Animated.Text style={[styles.taskText, { textDecorationLine: completed ? 'line-through' : 'none' }]}>
               {text}
             </Animated.Text>
           </View>
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.descriptionText}>{description}</Text>
+          </View>
           <View style={styles.dateTimeContainer}>
-            <View>
-              <Text>{description}</Text>
+            <View style={styles.dateTimeTextContainer}>
+              <Ionicons name="md-calendar" size={18} color={COLORS.white} />
+              <Text style={styles.dateTimeText}>{startDate ? startDate : 'No Start Date'}</Text>
+              <Text style={styles.dateTimeText}>{endDate ? endDate : 'No End Date'}</Text>
             </View>
-            <View style={styles.dateContainer}>
-              <Text style={styles.TextStyle}>{startDate ? `Start Date: ${startDate}` : ''}</Text>
-              <Text style={styles.TextStyle}>{endDate ? `End Date: ${endDate}` : ''}</Text>
-            </View>
-            <View style={styles.timeContainer}>
-              <Text style={styles.TextStyle}>{startHour ? `Start Hour: ${startHour}` : ''}</Text>
-              <Text style={styles.TextStyle}>{endHour ? `End Hour: ${endHour}` : ''}</Text>
+            <View style={styles.dateTimeTextContainer}>
+              <Ionicons name="md-time" size={18} color={COLORS.white} />
+              <Text style={styles.dateTimeText}>{startHour ? startHour : 'No Start Time'}</Text>
+              <Text style={styles.dateTimeText}>{endHour ? endHour : 'No End Time'}</Text>
             </View>
           </View>
-
           <View style={styles.footer}>
             <Pressable style={styles.button} onPress={handleDeleteItem}>
               <Ionicons name='trash' size={30} color={COLORS.white} />
@@ -166,9 +156,22 @@ function GoalItem(props) {
             <Pressable style={styles.button} onPress={toggleCompletion}>
               <Ionicons name={completed ? 'ios-checkmark-circle' : 'ios-checkmark-circle-outline'} size={24} color={COLORS.red} />
             </Pressable>
-            <Pressable style={styles.button}>
-              <Ionicons name='md-create' size={24} color={COLORS.white} />
+            <Pressable style={styles.button} onPress={() => handleEdit(task_id)} >
+              <Ionicons name="md-create" size={30} color={COLORS.white} />
+
             </Pressable>
+            {selectedTask && (
+              <EditTaskModal
+                visible={isEditModalVisible}
+                task={selectedTask}
+                onSave={(editedTask) => {
+                  handleEditTask(userEmail, editedTask);                            // Implement the onSave logic here
+
+                }}
+                onCancel={() => handleOnCancel()} // Hide the EditTaskModal
+              />
+            )}
+
           </View>
         </LinearGradient>
       </Animated.View>
@@ -183,6 +186,7 @@ const styles = StyleSheet.create({
     padding: 32
 
   },
+
   LinerGradientContainer: {
     justifyContent: 'space-around',
     padding: 16,
@@ -247,6 +251,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.primary,
     borderRadius: 20,
+    color: 'white'
   },
 
   iconContainer: {
@@ -257,7 +262,47 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     backgroundColor: COLORS.primary, // Change this to match your background color
     borderRadius: 12,
-
+  },
+  LinerGradientContainer: {
+    justifyContent: 'space-around',
+    padding: 16,
+    flex: 1,
+  },
+  goalItem: {
+    marginTop: 25,
+    overflow: 'hidden',
+    borderRadius: 20,
+    borderWidth: 1.4,
+    alignSelf: 'center',
+    width: 320,
+    height: 380,
+  },
+  header: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  descriptionContainer: {
+    paddingHorizontal: 20,
+  },
+  descriptionText: {
+    color: COLORS.white,
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  dateTimeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  dateTimeTextContainer: {
+    alignItems: 'center',
+  },
+  dateTimeText: {
+    color: COLORS.white,
+    fontSize: 12,
+    marginTop: 4,
   },
 });
 

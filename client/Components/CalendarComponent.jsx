@@ -49,7 +49,7 @@ const CalendarComponent = ({ tasks, onDayPress, selectedDate }) => {
       case 'high':
         return COLORS.red;
       default:
-        return 'blue';
+        return 'grey';
     }
   };
 

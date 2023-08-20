@@ -36,6 +36,7 @@ const TasksScreen = () => {
       priority: priority,
       userEmail: userEmail
     };
+    console.log("TaskScreen +>",taskData);
     const response = await fetch(`${Server_path}/api/tasks/addTask`, {
       method: 'POST',
       headers: {
@@ -119,11 +120,15 @@ const TasksScreen = () => {
                 description={item?.description}
                 startDate={item?.startDate}
                 endDate={item?.dueDate}
-                id={item._id}
+                task_id={item._id}
                 startHour={item?.startTime}
                 endHour={item?.dueTime}
-                onDeleteItem={deleteTaskHandler}
                 priority={item?.priority}
+                onDeleteItem={deleteTaskHandler}
+                onSave={(editedTask) => {
+                  handleEditTask(userEmail, editedTask);                            // Implement the onSave logic here
+                  // setIsEditModalVisible(false); // Hide the EditTaskModal
+                }}
               />
             )}
             keyExtractor={(item, index) => item._id || index.toString()} // Use _id if available, fallback to index

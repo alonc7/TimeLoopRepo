@@ -39,9 +39,8 @@ function CountdownModal({ isVisible, onClose }) {
     const formatTime = (milliseconds) => {
         const seconds = Math.floor(Math.round((milliseconds / 1000)) % 60);
         const minutes = Math.floor(Math.round((milliseconds / 1000 / 60)) % 60);
-        const days = Math.floor(milliseconds / (1000 * 60 * 60 * 24))
+        const days = Math.floor(milliseconds / (3600000 * 24))
         const hours = Math.floor(Math.round(milliseconds / 3600000) % 24);
-        console.log(milliseconds, days, hours, minutes, seconds);
 
         return { days, hours, minutes, seconds };
     };
@@ -54,7 +53,7 @@ function CountdownModal({ isVisible, onClose }) {
         <Modal visible={isVisible} animationType="slide" transparent={true}>
             <View style={styles.modalBackground}>
                 <View style={styles.modalContent}>
-                    {/*flat list for pending tasks*/}
+                    <Text style={styles.taskTimerTitle}>Task's Timer</Text>
                     <FlatList
                         data={tasksToRender}
                         renderItem={({ item }) => {
@@ -62,7 +61,6 @@ function CountdownModal({ isVisible, onClose }) {
                                 <View style={styles.taskItem}>
                                     <Text style={styles.taskTitle}>{item.title}</Text>
                                     <CountdownTimer remainingTime={{ ...remainingTimes[item._id] }} />
-                                    {/* /*if task time is due then show nothing */}
                                 </View>
                             );
                         }}
@@ -73,7 +71,7 @@ function CountdownModal({ isVisible, onClose }) {
                     <FlatList
                         data={expiredTasks}
                         renderItem={({ item }) => {
-                            return (
+                            return (item.dueDate && (
                                 <View style={styles.taskItem}>
                                     <Text style={styles.taskTitle}>{item.title}</Text>
                                     {remainingTimes[item._id] ? (
@@ -82,7 +80,7 @@ function CountdownModal({ isVisible, onClose }) {
                                         <Text>Task has expired</Text>
                                     )}
                                 </View>
-                            );
+                            ));
                         }}
                         keyExtractor={(item) => item._id}
                     />
@@ -117,22 +115,28 @@ const styles = StyleSheet.create({
     },
     closeButtonText: {
         color: COLORS.primary,
-        fontSize: 16,
+        fontSize: 14,
     },
     taskItem: {
-        flexDirection: 'row', // Display title and countdown timer in the same row
         alignItems: 'center',
         justifyContent: 'space-between',
         marginBottom: 15,
     },
+    taskTimerTitle: {
+        color: COLORS.red,
+        textDecorationLine: 'underline',
+        marginBottom: 10
+    },
+
     taskTitle: {
-        fontSize: 18,
+        fontSize: 14,
         fontWeight: 'bold',
+        padding: 7,
     },
     separator: {
         height: 1,
         width: '70%',
-        backgroundColor: COLORS.primary, // Adjust color as needed
+        backgroundColor: COLORS.primary,
         margin: 5,
     },
 

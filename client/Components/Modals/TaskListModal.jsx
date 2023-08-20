@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Pressable, Vibration } from 'react-native'; // Import necessary components
 import { Modal, } from 'react-native';
 import COLORS from '../../constants/colors';
@@ -8,55 +8,55 @@ import EditTaskModal from './EditTaskModal'; // Import the EditTaskModal compone
 
 import axios from 'axios';
 import { Server_path } from '../../utils/api-url';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 
 function TaskListModal({ isVisible, taskList, onClose, isPendingTasks }) {
-    const { deleteTask, completeTask, userEmail } = useContext(MainContext);
-    const [isEditModalVisible, setIsEditModalVisible] = useState(false); // State to manage the visibility of EditTaskModal
-    const [selectedTask, setSelectedTask] = useState(null); // State to hold the selected task for editing
+    const { deleteTask, completeTask, userEmail, handleOnCancel, handleEdit, selectedTask, handleEditTask, isEditModalVisible } = useContext(MainContext);
     const [expandedItemId, setExpandedItemId] = useState(null); // Track expanded item
+    // const [isEditModalVisible, setIsEditModalVisible] = useState(false); // State to manage the visibility of EditTaskModal
+    // const [selectedTask, setSelectedTask] = useState(null); // State to hold the selected task for editing
 
 
-    const handleEditTask = async (userEmail, updatedTask) => {
-        try {
-            console.log(userEmail, updatedTask);
-            const response = await axios.put(`${Server_path}/api/tasks/editTask`, {
-                userEmail,
-                updatedTask
-            });
+    // const handleEditTask = async (userEmail, updatedTask) => {
+    //     try {
+    //         const response = await axios.put(`${Server_path}/api/tasks/editTask`, {
+    //             userEmail,
+    //             updatedTask
+    //         });
 
-            if (response.status === 200) {
-                alert('Task updated successfully');
-            } else {
-                alert('Something went wrong with task updating');
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Something went wrong with task updating');
-        }
-    };
+    //         if (response.status === 200) {
+    //             alert('Task updated successfully');
+    //         } else {
+    //             alert('Something went wrong with task updating');
+    //         }
+    //     } catch (error) {
+    //         console.error(error);
+    //         alert('Something went wrong with task updating');
+    //     }
+    // };
 
 
-    const handleOnCancel = () => {
-        setIsEditModalVisible(false)
-        setSelectedTask('')
-    };
+    // const handleOnCancel = () => {
+    //     setIsEditModalVisible(false)
+    //     setSelectedTask('')
+    // };
 
-    const handleEdit = (taskId) => {
-        const taskToEdit = taskList.find((task) => task._id === taskId);
-        setSelectedTask(taskToEdit); // Set the selected task for editing
-        setIsEditModalVisible(true); // Show the EditTaskModal
-    };
+    // const handleEdit = (taskId) => {
+    //     const taskToEdit = taskList.find((task) => task._id === taskId);
+    //     setSelectedTask(taskToEdit); // Set the selected task for editing
+    //     setIsEditModalVisible(true); // Show the EditTaskModal
+    // };
     return (
         <Modal visible={isVisible} animationType="slide" onDismiss={onClose} transparent={true} onRequestClose={onClose}>
             <View style={styles.modalBackground}>
                 <View style={styles.modalContent}>
                     <TouchableOpacity onPress={() => {
                         onClose()
-                        Vibration.vibrate(5); // Trigger a short vibration
+                        Vibration.vibrate(25); // Trigger a short vibration
                     }} style={styles.closeButton}>
 
-                        <Ionicons name="close-circle" size={24} color={COLORS.textLight} />
+                        <Ionicons name="close-circle" size={24} color={COLORS.secondary} />
                     </TouchableOpacity>
                     <Text style={styles.header}>
                         {isPendingTasks ? '  Pending Tasks  ' : 'Completed Tasks'}
@@ -79,9 +79,8 @@ function TaskListModal({ isVisible, taskList, onClose, isPendingTasks }) {
                                 onPress={() => setExpandedItemId(expandedItemId === item._id ? null : item._id)}
                             >
                                 <View style={styles.taskDetails}>
+                                    <Ionicons name="add-circle-outline" style={styles.addIcon} />
                                     <Text style={styles.taskTitle}>{item.title}
-                                        <Ionicons name="add-circle-outline" size={14} color={COLORS.primary} />
-
                                     </Text>
                                     {expandedItemId === item._id && (
                                         <View>
@@ -98,16 +97,17 @@ function TaskListModal({ isVisible, taskList, onClose, isPendingTasks }) {
                                         Vibration.vibrate(5)
                                         completeTask(item._id)
                                     }} style={styles.iconContainer}>
-                                        <Ionicons name={item.completed ? 'ios-checkmark-circle' : 'ios-checkmark-circle-outline'} size={24} color={item.completed ? COLORS.textSuccess : COLORS.textDark} />
+                                        <Ionicons name={item.completed ? 'ios-checkmark-circle' : 'ios-checkmark-circle-outline'} size={24} color={item.completed ? 'green' : COLORS.secondary} />
                                     </Pressable>
                                     <Pressable onPress={() => {
                                         Vibration.vibrate(5)
                                         deleteTask(item._id)
                                     }} style={styles.iconContainer}>
-                                        <Ionicons name="trash" size={24} color={COLORS.textDark} />
+                                        <Ionicons name="trash" size={24} color={COLORS.secondary} />
                                     </Pressable>
                                     <Pressable onPress={() => handleEdit(item._id)} style={styles.iconContainer}>
-                                        <Ionicons name="md-create" size={24} color={COLORS.textDark} />
+                                        <Ionicons name="md-create" size={24} color={COLORS.secondary} />
+
                                     </Pressable>
                                 </View>
                             </TouchableOpacity>
@@ -122,7 +122,6 @@ function TaskListModal({ isVisible, taskList, onClose, isPendingTasks }) {
                         task={selectedTask}
                         onSave={(editedTask) => {
                             handleEditTask(userEmail, editedTask);                            // Implement the onSave logic here
-                            setIsEditModalVisible(false); // Hide the EditTaskModal
                         }}
                         onCancel={() => handleOnCancel()} // Hide the EditTaskModal
                     />
@@ -138,6 +137,10 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    addIcon: {
+        fontSize: 20,
+        color: COLORS.primary
     },
     modalContent: {
         backgroundColor: COLORS.white,

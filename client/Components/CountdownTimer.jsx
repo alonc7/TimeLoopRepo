@@ -62,6 +62,6 @@ const styles = StyleSheet.create({
     timeText: {
         fontSize: 16,
         fontWeight: "bold",
-        padding: 14
+        padding: 7
     }
 })

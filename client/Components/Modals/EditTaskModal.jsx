@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import DatePicker from 'react-native-modern-datepicker';
 import COLORS from '../../constants/colors';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 function EditTaskModal(props) {
     const { task } = props;
@@ -11,8 +12,18 @@ function EditTaskModal(props) {
     const [editedDueDate, setEditedDueDate] = useState(task?.dueDate);
     const [editedStartTime, setEditedStartTime] = useState(task?.startTime);
     const [editedDueTime, setEditedDueTime] = useState(task?.dueTime);
+    const [selectedPriority, setSelectedPriority] = useState(task?.priority); // State for selected priority
+    const [isDropDownOpen, setIsDropDownOpen] = useState(false); // State for selected priority
+
+    const priorityOptions = [
+        { label: 'High', value: 'high' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'Low', value: 'low' },
+    ];
+
 
     const handleSave = () => {
+
         const datePatern = /^\d{4}\/\d{2}\/\d{2}$/;
         if (!datePatern.test(editedStartDate) || !datePatern.test(editedDueDate)) {
             alert('Invalid dates inserted. [YYYY/MM/DD]');
@@ -33,6 +44,7 @@ function EditTaskModal(props) {
             dueTime: editedDueTime,
             startDate: editedStartDate,
             dueDate: editedDueDate,
+            priority: selectedPriority,
         };
         props.onSave(editedTask);
     };
@@ -64,6 +76,7 @@ function EditTaskModal(props) {
                 break;
         }
     };
+
     return (
         <Modal visible={props.visible} animationType="slide" transparent={true}>
             <View style={styles.modalContainer}>
@@ -104,6 +117,22 @@ function EditTaskModal(props) {
                         value={editedDueTime}
                         placeholder="Due Time: _:_"
                     />
+
+
+                    <DropDownPicker
+                        open={isDropDownOpen}
+                        value={selectedPriority}
+                        items={priorityOptions}
+                        setOpen={setIsDropDownOpen}
+                        setValue={setSelectedPriority}
+                        placeholder="Set Priority"
+                        containerStyle={styles.dropdownContainer}
+                        style={styles.dropdown}
+                        dropDownStyle={styles.dropdownMenu}
+                    />
+
+
+
                     <Button title="Save" onPress={handleSave} />
                     <Button title="Cancel" onPress={props.onCancel} />
                 </View>
@@ -132,7 +161,24 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 8,
     },
-    // Add more styles as needed
+    dropdownContainer: {
+        height: 50,
+        marginVertical: 8,
+    },
+    dropdown: {
+        borderWidth: 1,
+        borderColor: COLORS.primary,
+        borderRadius: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+    },
+    dropdownItem: {
+        justifyContent: 'flex-start',
+    },
+    dropdownMenu: {
+        marginTop: 8,
+        borderRadius: 8,
+    },
 });
 
 export default EditTaskModal;
