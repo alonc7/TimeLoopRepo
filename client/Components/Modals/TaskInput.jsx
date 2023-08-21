@@ -300,9 +300,9 @@ function TaskInput(props) {
                 >
                   {isStartDateSelected || isStartTimeSelected ? 'Set Due Date' : 'Set Start Date'}
                 </Button>
-                {/* <Button style={styles.button} mode="outlined" onPress={handleClose}>
-              Close
-            </Button> */}
+                <Button style={styles.button} mode="contained-tonal" onPress={handleClose}>
+                  Close
+                </Button>
               </View>
 
               {isCalendarVisible && (

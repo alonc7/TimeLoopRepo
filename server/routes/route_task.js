@@ -34,6 +34,23 @@ router.get('/getPendingTaskList/:userEmail', async (req, res) => {
         res.status(500).json({ error: 'An error occurred while fetching the pending task list.' });
     }
 });
+router.get('/getRemovedTaskList/:userEmail', async (req, res) => {
+    try {
+        console.log('removed+>', userEmail);
+        const { userEmail } = req.params;
+        const user = await User.findUserByEmail(userEmail);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const pendingTaskList = await Task.getPendingTaskList(userEmail);
+        res.json(pendingTaskList);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching the pending task list.' });
+    }
+});
+
 router.get('/getCompletedTaskList/:userEmail', async (req, res) => {
     try {
         const { userEmail } = req.params;
@@ -124,21 +141,37 @@ router.put('/completeTask', async (req, res) => {
     }
 });
 
-router.put('/removeTask', async (req, res) => {
+router.put('/delete', async (req, res) => {
     try {
-        const { userEmail, taskId } = req.body;
+        const { userEmail, deletedTasks } = req.body;
         const user = await User.findUserByEmail(userEmail);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
         if (user) {
-            await Task.removeTask(user.email, taskId);
+            await Task.removeTask(user, deletedTasks);
             res.status(201).json('Task removed successfully');
         }
     } catch (error) {
-        res.status(500).json({ error: 'Failed to complete task' });
+        //res.status(500).json({ error: 'Failed to complete task' });
+        res.status(500).json({ error });
     }
 });
+// router.put('/removeTask', async (req, res) => {
+//     try {
+//         const { userEmail, taskId } = req.body;
+//         const user = await User.findUserByEmail(userEmail);
+//         if (!user) {
+//             return res.status(404).json({ message: 'User not found' });
+//         }
+//         if (user) {
+//             await Task.removeTask(user.email, taskId);
+//             res.status(201).json('Task removed successfully');
+//         }
+//     } catch (error) {
+//         res.status(500).json({ error: 'Failed to complete task' });
+//     }
+// });
 // POST create task
 router.post('/addTask', async (req, res) => {
     const { userEmail, title, description, startDate, dueDate, startTime, dueTime, priority } = req.body;

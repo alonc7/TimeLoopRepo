@@ -1,5 +1,5 @@
 const db = require('../DB/DB');
-const mongodb = require('mongodb');
+const { ObjectId } = require('mongodb');
 const User = require('./userModel');
 
 class Task {
@@ -51,7 +51,23 @@ class Task {
             console.error(error);
             return [];
         }
-    }
+    };
+    static async getRemovedTaskList(userEmail) {
+        try {
+
+            const user = await User.findUserByEmail(userEmail);
+            if (!user) {
+                throw new Error('User not found');
+            }
+
+            let taskList = user.Tasks.filter((task) => task.status === 'removed');
+
+            return taskList;
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
+    };
     static async getCompletedTaskList(userEmail) {
         try {
 
@@ -75,7 +91,7 @@ class Task {
         try {
             const query = user;
 
-            task._id = new mongodb.ObjectId(); // Generate a unique ID for the task
+            task._id = new ObjectId(); // Generate a unique ID for the task
             if (!query.Tasks) {
                 query.Tasks = [];
             }
@@ -103,19 +119,39 @@ class Task {
         }
     }
 
-    static async removeTask(userEmail, taskId) {
+    static async removeTask(user, deletedTasks) {
         try {
-            const user = await User.findUserByEmail(userEmail);
-            if (!user) {
-                throw new Error('User not found');
+
+            let tasks = [...user.Tasks];
+            for (let i = 0; i < tasks.length; i++) {
+                let task = tasks[i];
+                for (let j = 0; j < deletedTasks.length; j++) {
+                    let id = deletedTasks[j];
+                    if (new ObjectId(id).equals(task._id))
+                        task.status = 'removed';
+                }
             }
-            await new db().RemoveTask(User.collection, user, taskId);
+
+            await new db().RemoveTask(User.collection, user, tasks);
 
             return true;
         } catch (error) {
             throw new Error('Failed to complete task');
         }
     }
+    // static async removeTask(userEmail, taskId) {
+    //     try {
+    //         const user = await User.findUserByEmail(userEmail);
+    //         if (!user) {
+    //             throw new Error('User not found');
+    //         }
+    //         await new db().RemoveTask(User.collection, user, taskId);
+
+    //         return true;
+    //     } catch (error) {
+    //         throw new Error('Failed to complete task');
+    //     }
+    // }
 
 
 

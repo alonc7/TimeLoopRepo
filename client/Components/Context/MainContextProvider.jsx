@@ -16,6 +16,12 @@ function MainContextProvider({ children }) {
   const [userImage, setUserImage] = useState(null);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false); // State to manage the visibility of EditTaskModal
   const [selectedTask, setSelectedTask] = useState(null); // State to hold the selected task for editing
+  const [removedTasksList, setRemovedTasksList] = useState([]);
+  const [deletedTasks, setDeletedTasks] = useState([]);
+
+  //Const 
+  const MAX_FOR_DELETE = 2;
+
 
   //HomeScreen method
   const capitalizeFirstLetter = (str) => {
@@ -33,6 +39,40 @@ function MainContextProvider({ children }) {
       console.log('Error saving user image', error);
     }
   };
+  const getCurrentWeekTasks = () => {
+    // Get today's date
+    const today = new Date();
+
+    // Calculate the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    const dayOfWeek = today.getDay();
+    console.log(dayOfWeek);
+    // Calculate the start and end dates of the current week
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - dayOfWeek); // Set to the beginning of the week (Sunday)
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(today);
+    endDate.setDate(today.getDate() + (6 - dayOfWeek)); // Set to the end of the week (Saturday)
+    endDate.setHours(23, 59, 59, 999);
+
+    // Iterate through tasks and check if the start date is within the current week
+    const tasksForThisWeek = pendingTaskList.filter(task => {
+      const taskStartDate = new Date(task.startDate);
+      return taskStartDate >= startDate && taskStartDate <= endDate;
+    });
+
+    if (tasksForThisWeek > 0) {
+      return tasksForThisWeek;
+    }
+    else {
+      return []
+    }
+  }
+  const getTodayTasks = () => {
+    const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+    return tasksOfToday = pendingTaskList.filter(task => task.startDate === today);
+
+  }
 
   //fetch async all tasks from mongo db 
   const loadAllTasks = async (userEmail) => {
@@ -52,25 +92,58 @@ function MainContextProvider({ children }) {
 
   async function deleteTask(taskId) {
     try {
-      const response = await fetch(`${Server_path}/api/tasks/removeTask`, {
+      // const response = await fetch(`${Server_path}/api/tasks/removeTask`, {
+      //   method: 'PUT',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ userEmail, taskId }),
+      // });
+      // if (response.ok) {
+      //   const removedTask = pendingTaskList.find((task) => task._id === taskId);
+      //   const updatedTaskList = pendingTaskList.filter((task) => task._id !== taskId);
+
+      //   setPendingTaskList(updatedTaskList);
+      //   setRemovedTasksList(removedTask);
+      //   alert('Task removed successfully', taskId);
+      // } else {
+      //   alert('Failed to remove task:', response.status);
+      // }
+
+      let tasksToDelete = [...deletedTasks, taskId];
+      if (tasksToDelete.length < MAX_FOR_DELETE) {
+        //update ui
+        setDeletedTasks(tasksToDelete);
+        setPendingTaskList((prev) => prev.filter((task) => task._id !== taskId));
+        alert('Task removed successfully', taskId);
+        return;
+      }
+
+
+      //fetch after the bucket is full
+      const response = await fetch(`${Server_path}/api/tasks/delete`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ userEmail, taskId }),
+        body: JSON.stringify({userEmail, deletedTasks })
       });
+
       if (response.ok) {
-        // setPendingTaskList(pendingTaskList.filter((item) => item._id !== taskId))
-        alert('Task removed successfully', taskId);
-      } else {
+        setDeletedTasks([]);
+      }
+      else {
         alert('Failed to remove task:', response.status);
       }
+
+
+
+
     } catch (error) {
       console.error('Error removing task:', error);
     }
   };
 
-  // Function to mark the task as completed using API request
   async function completeTask(taskId) {
     try {
       const response = await fetch(`${Server_path}/api/tasks/completeTask`, {
@@ -81,13 +154,12 @@ function MainContextProvider({ children }) {
         body: JSON.stringify({ userEmail, taskId }),
       });
       if (response.ok) {
-        console.log('Before filter:', pendingTaskList);
         const completedTask = pendingTaskList.find((task) => task._id === taskId);
         const updatedTaskList = pendingTaskList.filter((task) => task._id !== taskId);
-        console.log('After filter:', updatedTaskList);
+
         setCompletedTaskList([...completedTaskList, completedTask])
         setPendingTaskList(updatedTaskList);
-        // Alert.alert('Task completed successfully');
+        Alert.alert('Task completed successfully');
       } else {
         Alert.alert('Failed to complete task:', response.status);
       }
@@ -95,24 +167,7 @@ function MainContextProvider({ children }) {
       console.error('Error completing task:', error);
     }
   };
-  // async function completeTask(taskId) {
-  //   try {
-  //     const response = await fetch(`${Server_path}/api/tasks/completeTask`, {
-  //       method: 'PUT',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ userEmail, taskId }),
-  //     });
-  //     if (response.ok) {
-  //       alert('Task completed successfully');
-  //     } else {
-  //       alert('Failed to complete task:', response.status);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error completing task:', error);
-  //   }
-  // };
+
 
   const handleOnCancel = () => {
     setSelectedTask('')
@@ -142,33 +197,13 @@ function MainContextProvider({ children }) {
   };
 
   const MainContextValues = {
-    isLoading,
-    setIsLoading,
-    setAuthenticated,
-    authenticated,
-    setUserName,
-    userName,
-    userId,
-    setUserId,
-    userEmail,
-    setUserEmail,
-    capitalizeFirstLetter,
-    setCompletedTaskList,
-    setPendingTaskList,
-    pendingTaskList,
-    completedTaskList,
-    allTasks,
-    setAllTasks,
-    userImage,
-    setUserImage,
-    deleteTask,
-    completeTask,
-    handleOnCancel,
-    handleEdit,
-    selectedTask,
-    handleEditTask,
-    isEditModalVisible
+    isLoading, setIsLoading, setAuthenticated, authenticated, setUserName, userName, userId,
+    setUserId, userEmail, setUserEmail, capitalizeFirstLetter, setCompletedTaskList,
+    setPendingTaskList, pendingTaskList, completedTaskList, allTasks, setAllTasks, userImage,
+    setUserImage, deleteTask, completeTask, handleOnCancel, handleEdit, selectedTask, handleEditTask,
+    isEditModalVisible, getTodayTasks, getCurrentWeekTasks
   }
+
   return (
     <MainContext.Provider value={MainContextValues}>
       {children}

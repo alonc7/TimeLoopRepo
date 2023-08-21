@@ -44,13 +44,18 @@ export default function Main() {
 
     const loadTasks = async (userEmail) => {
         try {
-            const [pendingResponse, completedResponse, allTasks] = await Promise.all([
-                fetch(`${Server_path}/api/tasks/getPendingTaskList/${userEmail}`),
-                fetch(`${Server_path}/api/tasks/getCompletedTaskList/${userEmail}`),
-                fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`)
-            ]);
+            const [pendingResponse, completedResponse,
+                // getRemovedTaskList,
+                allTasks] = await Promise.all([
+                    fetch(`${Server_path}/api/tasks/getPendingTaskList/${userEmail}`),
+                    fetch(`${Server_path}/api/tasks/getCompletedTaskList/${userEmail}`),
+                    // fetch(`${Server_path}/api/tasks/getRemovedTaskList/${userEmail}`),
+                    fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`)
+                ]);
 
-            if (pendingResponse.ok && completedResponse.ok && allTasks.ok) {
+            if (pendingResponse.ok && completedResponse.ok && allTasks.ok
+                // getRemovedTaskList.ok &&
+            ) {
                 const pendingData = await pendingResponse.json();
                 const completedData = await completedResponse.json();
                 const allData = await allTasks.json();

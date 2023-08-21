@@ -36,7 +36,7 @@ const TasksScreen = () => {
       priority: priority,
       userEmail: userEmail
     };
-    console.log("TaskScreen +>",taskData);
+    console.log("TaskScreen +>", taskData);
     const response = await fetch(`${Server_path}/api/tasks/addTask`, {
       method: 'POST',
       headers: {

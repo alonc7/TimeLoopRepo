@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert, StyleSheet, SafeAreaView, Dimensions } from 'react-native'; // Added Dimensions
+import { View, Text, TouchableOpacity, Image, Alert, StyleSheet, SafeAreaView, Dimensions, FlatList } from 'react-native'; // Added Dimensions
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import COLORS from '../constants/colors';
@@ -8,17 +8,19 @@ import { MainContext } from '../Components/Context/MainContextProvider';
 import TaskListModal from '../Components/Modals/TaskListModal';
 import CountdownModal from '../Components/Modals/CountDownModal';
 
-const { width, height } = Dimensions.get('window');
+const { width} = Dimensions.get('window');
 const boxWidth = width * 0.4;
 function HomeScreen() {
-    const { userName, capitalizeFirstLetter, pendingTaskList, completedTaskList } = useContext(MainContext);
+    const { userName, capitalizeFirstLetter, pendingTaskList, completedTaskList, allTasks, getTodayTasks, getCurrentWeekTasks } = useContext(MainContext);
     const [userImage, setUserImage] = useState(null);
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
     const [isCountdownModalVisible, setCountdownModalVisible] = useState(false);
 
+
     useEffect(() => {
         retrieveUserImage();
+
     }, []);
 
     const retrieveUserImage = async () => {
@@ -122,6 +124,7 @@ function HomeScreen() {
     const handleCountdownPress = () => {
         setCountdownModalVisible(true);
     };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.container}>
@@ -141,11 +144,32 @@ function HomeScreen() {
                 </View>
                 <View style={styles.bubbleContainer}>
                     <View style={styles.bubble}>
-                        <View style={styles.bubbleTextContainer}>
-                            <Text style={styles.bubbleText}>Tasks of today</Text>
-                        </View>
-                        <View style={styles.bubbleTextContainer}>
-                            <Text style={styles.bubbleText}>Tasks of this week</Text>
+                        {/* <View style={styles.bubble}> */}
+                        <FlatList
+                            data={() => getTodayTasks()}
+                            keyExtractor={(item, index) => index.toString()}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity>
+                                    <View style={[styles.box, { backgroundColor: '#7DE2D1' }]}>
+                                        <Text style={styles.boxContnentText}>{item.title}</Text>
+                                        {/* Display other task information */}
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                        />
+                        <View >
+                            <FlatList
+                                data={() => getCurrentWeekTasks()}
+                                keyExtractor={(item, index) => index.toString()}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity>
+                                        <View style={[styles.box, { backgroundColor: '#7DE2D1' }]}>
+                                            <Text style={styles.boxContnentText}>{item.title}</Text>
+                                            {/* Display other task information */}
+                                        </View>
+                                    </TouchableOpacity>
+                                )}
+                            />
                         </View>
                     </View>
                 </View>
@@ -243,6 +267,7 @@ const styles = StyleSheet.create({
         paddingRight: 10,
     },
     welcomeText: {
+        alignSelf: 'center',
         margin: 10,
         fontSize: 16,
         elevation: 15,
