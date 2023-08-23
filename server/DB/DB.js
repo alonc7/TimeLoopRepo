@@ -119,16 +119,16 @@ class DB {
         }
     }
 
-    async CompleteTask(collection, user, taskId) {
+    async CompleteTask(collection, user, tasks) {
         try {
 
-            let tasks = user.Tasks.map((task) => {
-                if (new ObjectId(taskId).equals(task._id)) {
-                    console.log(task._id);
-                    task.status = 'completed'
-                }
-                return task;
-            })
+            // let tasks = user.Tasks.map((task) => {
+            //     if (new ObjectId(taskId).equals(task._id)) {
+            //         console.log(task._id);
+            //         task.status = 'completed'
+            //     }
+            //     return task;
+            // })
 
             await this.client.connect();
             await this.client.db(this.db_name).collection(collection).updateOne(

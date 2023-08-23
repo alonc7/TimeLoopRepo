@@ -47,7 +47,7 @@ const TasksScreen = () => {
       startTime: startTime,
       dueTime: dueTime,
       priority: priority,
-      userEmail: userEmail,
+      // userEmail: userEmail,
       _id: _id // Use the temporary ID
     };
     addTask(taskData);

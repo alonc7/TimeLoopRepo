@@ -123,13 +123,18 @@ class Task {
         }
     }
 
-    static async completeTask(userEmail, taskId) {
+    static async completeTask(user, completedTasks) {
         try {
-            const user = await User.findUserByEmail(userEmail);
-            if (!user) {
-                throw new Error('User not found');
+            let tasks = [...user.Tasks];
+            for (let i = 0; i < tasks.length; i++) {
+                let task = tasks[i];
+                for (let j = 0; j < completedTasks.length; j++) {
+                    let id = completedTasks[j];
+                    if (id === task._id)
+                        task.status = 'completed';
+                }
             }
-            await new db().CompleteTask(User.collection, user, taskId);
+            await new db().CompleteTask(User.collection, user, tasks);
 
             return true;
         } catch (error) {
