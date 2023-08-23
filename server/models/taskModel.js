@@ -145,7 +145,7 @@ class Task {
                 let task = tasks[i];
                 for (let j = 0; j < deletedTasks.length; j++) {
                     let id = deletedTasks[j];
-                    if (new ObjectId(id).equals(task._id))
+                    if (id === task._id)
                         task.status = 'removed';
                 }
             }
@@ -157,6 +157,26 @@ class Task {
             throw new Error('Failed to complete task');
         }
     }
+    // static async removeTask(user, deletedTasks) {
+    //     try {
+
+    //         let tasks = [...user.Tasks];
+    //         for (let i = 0; i < tasks.length; i++) {
+    //             let task = tasks[i];
+    //             for (let j = 0; j < deletedTasks.length; j++) {
+    //                 let id = deletedTasks[j];
+    //                 if (new ObjectId(id).equals(task._id))
+    //                     task.status = 'removed';
+    //             }
+    //         }
+
+    //         await new db().RemoveTask(User.collection, user, tasks);
+
+    //         return true;
+    //     } catch (error) {
+    //         throw new Error('Failed to complete task');
+    //     }
+    // }
     // static async removeTask(userEmail, taskId) {
     //     try {
     //         const user = await User.findUserByEmail(userEmail);

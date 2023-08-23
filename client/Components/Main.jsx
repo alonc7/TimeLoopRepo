@@ -14,7 +14,7 @@ export default function Main() {
     const { authenticated, setAuthenticated, setUserName, setUserEmail, loadTasks, loadLocalTasks } = useContext(MainContext);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null); // Track errors during API requests
-
+    
     useEffect(() => {
         retrieveUserData();
     }, [setAuthenticated, setUserEmail]);
