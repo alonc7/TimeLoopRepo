@@ -11,7 +11,7 @@ import LoadingScreen from '../Pages/LoadingScreen'
 import COLORS from '../constants/colors';
 
 export default function Main() {
-    const { authenticated, setAuthenticated, setUserName, setUserEmail, setCompletedTaskList, setPendingTaskList, setAllTasks } = useContext(MainContext);
+    const { authenticated, setAuthenticated, setUserName, setUserEmail, loadTasks, loadLocalTasks } = useContext(MainContext);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null); // Track errors during API requests
 
@@ -25,10 +25,12 @@ export default function Main() {
 
             if (userDataString !== null) {
                 const userData = JSON.parse(userDataString);
-                await loadTasks(userData.email);
-                setUserEmail(userData.email);
+                setUserEmail(userData.email)
                 setUserName(userData.name);
+                await loadTasks(userData.email);
+                loadLocalTasks(); // Load tasks from local storage
                 setAuthenticated(true);
+
             } else {
                 console.log('User data not found. Redirect to login.');
                 setAuthenticated(false);
@@ -42,36 +44,7 @@ export default function Main() {
         }
     };
 
-    const loadTasks = async (userEmail) => {
-        try {
-            const [pendingResponse, completedResponse,
-                // getRemovedTaskList,
-                allTasks] = await Promise.all([
-                    fetch(`${Server_path}/api/tasks/getPendingTaskList/${userEmail}`),
-                    fetch(`${Server_path}/api/tasks/getCompletedTaskList/${userEmail}`),
-                    // fetch(`${Server_path}/api/tasks/getRemovedTaskList/${userEmail}`),
-                    fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`)
-                ]);
 
-            if (pendingResponse.ok && completedResponse.ok && allTasks.ok
-                // getRemovedTaskList.ok &&
-            ) {
-                const pendingData = await pendingResponse.json();
-                const completedData = await completedResponse.json();
-                const allData = await allTasks.json();
-                setPendingTaskList(pendingData);
-                setCompletedTaskList(completedData);
-                setAllTasks(allData);
-            } else {
-                throw new Error('Request failed');
-            }
-        } catch (error) {
-            console.error('Error loading tasks:', error);
-            setError('Error loading tasks'); // Set error state for user feedback
-        } finally {
-            setIsLoading(false); // Set loading state to false after loading tasks (regardless of success or error)
-        }
-    }
 
     const getContent = () => {
         if (isLoading) {

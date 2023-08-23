@@ -20,9 +20,9 @@ function GoalItem(props) {
   function handleDeleteItem() {
     Animated.timing(opacityAnim, {
       toValue: 0,
-      duration: 500,
+      duration: 300,
       useNativeDriver: true,
-    }).start(() => deleteTask(props.id));
+    }).start(() => props.onDeleteItem(task_id));
   };
 
   // Function to mark the task as removed using API request
@@ -79,7 +79,7 @@ function GoalItem(props) {
       Animated.sequence([
         Animated.timing(lineThroughAnim, {
           toValue: 1,
-          duration: 300,
+          duration: 0,
           useNativeDriver: false,
         }),
         Animated.timing(opacityAnim, {

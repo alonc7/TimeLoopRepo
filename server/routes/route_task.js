@@ -174,9 +174,9 @@ router.put('/delete', async (req, res) => {
 // });
 // POST create task
 router.post('/addTask', async (req, res) => {
-    const { userEmail, title, description, startDate, dueDate, startTime, dueTime, priority } = req.body;
+    const { userEmail, title, description, startDate, dueDate, startTime, dueTime, priority, _id } = req.body;
     try {
-        const task = new Task(title, description, startDate, dueDate, startTime, dueTime, priority); //
+        const task = new Task(title, description, startDate, dueDate, startTime, dueTime, priority, _id); //
         const authUser = await User.findUserByEmail(userEmail);
         if (authUser) {
             await Task.createTask(authUser, task);

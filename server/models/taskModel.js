@@ -5,7 +5,7 @@ const User = require('./userModel');
 class Task {
     static collection = 'Tasks';
 
-    constructor(title, description, startDate, dueDate, startTime, dueTime, priority) {
+    constructor(title, description, startDate, dueDate, startTime, dueTime, priority, _id) {
         this.title = title;
         this.description = description;
         this.startDate = startDate;
@@ -16,6 +16,7 @@ class Task {
         this.dueTime = dueTime;
         this.priority = priority;
         this.status = 'pending'; // Add the status field with the default value 'pending'
+        this._id = _id
     };
     // GET list of all tasks.
     static async getTaskList(userId) {
@@ -87,11 +88,28 @@ class Task {
     }
 
 
+    // static async createTask(user, task) {
+    //     try {
+    //         const query = user;
+
+    //         task._id = new ObjectId(); // Generate a unique ID for the task
+    //         if (!query.Tasks) {
+    //             query.Tasks = [];
+    //         }
+    //         // Update the user document in the database with the updated tasks array
+    //         await new db().AddTaskToUser(User.collection, query, task);
+
+    //         return task;
+    //     } catch (error) {
+    //         console.log(error);
+    //         throw new Error('Failed to create task in createTask');
+    //     }
+    // }
     static async createTask(user, task) {
         try {
             const query = user;
 
-            task._id = new ObjectId(); // Generate a unique ID for the task
+            // task._id = new ObjectId(); // Generate a unique ID for the task
             if (!query.Tasks) {
                 query.Tasks = [];
             }

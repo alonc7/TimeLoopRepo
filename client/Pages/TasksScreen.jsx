@@ -14,7 +14,7 @@ import FloatingActionBtn from '../Components/Modals/FloatingActionBtn'
 const TasksScreen = () => {
   const [modalIsVisible, setModalIsVisible] = useState(false); // boolean for visualise of the modal ( is it visual right now?)
   const [isHidden, setIsHidden] = useState(true); // boolean for setting the modal hidden or not. 
-  const { userEmail, setUserId, pendingTaskList, setPendingTaskList } = useContext(MainContext);
+  const { userEmail, setUserId, pendingTaskList, setPendingTaskList, deleteTask, storeLocalTasks, addTask } = useContext(MainContext);
 
   function toggleBtn() {
     setIsHidden(!isHidden);
@@ -23,65 +23,61 @@ const TasksScreen = () => {
   function handleModalIsVisible() {
     setModalIsVisible(!modalIsVisible);
   }
+  // Create a mapping to store temporary IDs and their corresponding MongoDB IDs
+  const idMapping = new Map();
 
+  // Function to generate temporary IDs
+  function generateTempId() {
+    const timestamp = new Date().getTime();
+    const random = Math.floor(Math.random() * 10000);
+    const tempId = `${timestamp}_${random}`;
+    // Store the temporary ID in the mapping
+    idMapping.set(tempId, null); // Initialize with no MongoDB ID
+    return tempId;
+  }
+
+  // When adding a new task
   const addTaskHandler = async (title, description, startDate, dueDate, startTime, dueTime, priority) => {
+    const _id = generateTempId();
     const taskData = {
       title: title,
       description: description,
       startDate: startDate,
-      description: description,
       dueDate: dueDate,
       startTime: startTime,
       dueTime: dueTime,
       priority: priority,
-      userEmail: userEmail
+      userEmail: userEmail,
+      _id: _id // Use the temporary ID
     };
-    console.log("TaskScreen +>", taskData);
-    const response = await fetch(`${Server_path}/api/tasks/addTask`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(taskData)
-    })
-      .then(response => {
-        if (response.ok) {
-          setPendingTaskList([...pendingTaskList, taskData])
-          Alert.alert('Task added successfully')
-        } else {
-          Alert.alert('Failed to create task:', response.status)
-        }
-      })
-      .catch(error => {
-        console.error('Error creating task:', error);
-      });
+    addTask(taskData);
+  };
 
-  }
+  // function deleteTaskHandler(id) {
+  //   // Perform the API fetch request to remove the task from the server
+  //   fetch(`${Server_path}/api/tasks/removeTask`, {
+  //     method: 'PUT',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({ userEmail, taskId: id }), // 'id' is the task ID passed from GoalItem
+  //   })
+  //     .then(response => {
+  //       if (response.ok) {
+  //         // Now update the taskList state to remove the task from the view
+  //         setPendingTaskList((currentListTasks) =>
+  //           currentListTasks.filter((task) => task._id !== id)
+  //         );
+  //         Alert.alert('Task removed successfully');
+  //       } else {
+  //         console.log('Failed to remove task:', response.status);
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.error('Error removing task:', error);
+  //     });
+  // }
 
-  function deleteTaskHandler(id) {
-    // Perform the API fetch request to remove the task from the server
-    fetch(`${Server_path}/api/tasks/removeTask`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userEmail, taskId: id }), // 'id' is the task ID passed from GoalItem
-    })
-      .then(response => {
-        if (response.ok) {
-          // Now update the taskList state to remove the task from the view
-          setPendingTaskList((currentListTasks) =>
-            currentListTasks.filter((task) => task._id !== id)
-          );
-          Alert.alert('Task removed successfully');
-        } else {
-          console.log('Failed to remove task:', response.status);
-        }
-      })
-      .catch(error => {
-        console.error('Error removing task:', error);
-      });
-  }
 
 
   const taskActions = [
@@ -124,7 +120,7 @@ const TasksScreen = () => {
                 startHour={item?.startTime}
                 endHour={item?.dueTime}
                 priority={item?.priority}
-                onDeleteItem={deleteTaskHandler}
+                onDeleteItem={deleteTask}
                 onSave={(editedTask) => {
                   handleEditTask(userEmail, editedTask);                            // Implement the onSave logic here
                   // setIsEditModalVisible(false); // Hide the EditTaskModal
