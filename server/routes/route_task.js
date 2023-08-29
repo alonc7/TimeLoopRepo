@@ -140,7 +140,7 @@ router.put('/completeTask', async (req, res) => {
         res.status(500).json({ error: 'Failed to complete task' });
     }
 });
- 
+
 router.put('/delete', async (req, res) => {
     try {
         const { userEmail, deletedTasks } = req.body;
@@ -157,21 +157,23 @@ router.put('/delete', async (req, res) => {
         res.status(500).json({ error });
     }
 });
-// router.put('/removeTask', async (req, res) => {
-//     try {
-//         const { userEmail, taskId } = req.body;
-//         const user = await User.findUserByEmail(userEmail);
-//         if (!user) {
-//             return res.status(404).json({ message: 'User not found' });
-//         }
-//         if (user) {
-//             await Task.removeTask(user.email, taskId);
-//             res.status(201).json('Task removed successfully');
-//         }
-//     } catch (error) {
-//         res.status(500).json({ error: 'Failed to complete task' });
-//     }
-// });
+
+
+router.put('/pendTask', async (req, res) => {
+    try {
+        const { userEmail, taskId } = req.body;
+        const user = await User.findUserByEmail(userEmail);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (user) {
+            await Task.pendTask(user, taskId);
+            res.status(201).json('Task pended successfully');
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to pend task' });
+    }
+});
 // POST create task
 router.post('/addTasks', async (req, res) => {
     const { userEmail, tasksToAdd } = req.body;

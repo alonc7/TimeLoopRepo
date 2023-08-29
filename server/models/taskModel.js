@@ -162,39 +162,24 @@ class Task {
             throw new Error('Failed to complete task');
         }
     }
-    // static async removeTask(user, deletedTasks) {
-    //     try {
 
-    //         let tasks = [...user.Tasks];
-    //         for (let i = 0; i < tasks.length; i++) {
-    //             let task = tasks[i];
-    //             for (let j = 0; j < deletedTasks.length; j++) {
-    //                 let id = deletedTasks[j];
-    //                 if (new ObjectId(id).equals(task._id))
-    //                     task.status = 'removed';
-    //             }
-    //         }
+    static async pendTask(user, taskId) {
+        try {
 
-    //         await new db().RemoveTask(User.collection, user, tasks);
+            let tasks = user.Tasks.map((task) => {
+                if (new ObjectId(taskId).equals(task._id)) {
+                    console.log(task._id);
+                    task.status = 'pending'
+                }
+                return task;
+            })
+            await new db().pendTask(User.collection, user, tasks);
 
-    //         return true;
-    //     } catch (error) {
-    //         throw new Error('Failed to complete task');
-    //     }
-    // }
-    // static async removeTask(userEmail, taskId) {
-    //     try {
-    //         const user = await User.findUserByEmail(userEmail);
-    //         if (!user) {
-    //             throw new Error('User not found');
-    //         }
-    //         await new db().RemoveTask(User.collection, user, taskId);
-
-    //         return true;
-    //     } catch (error) {
-    //         throw new Error('Failed to complete task');
-    //     }
-    // }
+            return true;
+        } catch (error) {
+            throw new Error('Failed to pend task');
+        }
+    }
 
 
 

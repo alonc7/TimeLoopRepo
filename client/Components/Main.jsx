@@ -5,16 +5,14 @@ import NotRegistered from './AuthComp/NotRegistered';
 import { MainContext } from './Context/MainContextProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, StyleSheet, View, Text } from 'react-native';
-import { Server_path } from '../utils/api-url';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import LoadingScreen from '../Pages/LoadingScreen'
-import COLORS from '../constants/colors';
 
+
+import COLORS from '../constants/colors';
 export default function Main() {
     const { authenticated, setAuthenticated, setUserName, setUserEmail, loadTasks, loadLocalTasks } = useContext(MainContext);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null); // Track errors during API requests
-    
+
     useEffect(() => {
         retrieveUserData();
     }, [setAuthenticated, setUserEmail]);
@@ -73,6 +71,7 @@ export default function Main() {
     return (
         <NavigationContainer>
             {getContent()}
+            {/* <NotificationComp  /> */}
             {/* <Text style={styles.messageText}>"Please wait while we gather the information. This may take a few seconds. Thank you for your patience."</Text> */}
         </NavigationContainer>
     );

@@ -13,28 +13,67 @@ function MainContextProvider({ children }) {
   const [userEmail, setUserEmail] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [allTasks, setAllTasks] = useState([]);
-  const [pendingTaskList, setPendingTaskList] = useState([]);
-  const [completedTaskList, setCompletedTaskList] = useState([]);
+  const [pendingTaskList, setPendingTaskList] = useState([]);// pending task list after modified in server 
+  const [completedTaskList, setCompletedTaskList] = useState([]); // completed task list after modified in server 
+  const [deletedTasksList, setDeletedTasks] = useState([]); //deleted task list after modifed in server
   const [userImage, setUserImage] = useState(null);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false); // State to manage the visibility of EditTaskModal
   const [selectedTask, setSelectedTask] = useState(null); // State to hold the selected task for editing
-  const [deletedTasksList, setDeletedTasks] = useState([]);
-  //Const 
-  const MAX_FOR_DELETE = 3;
-  const MAX_FOR_COMPLETE = 5;
-  const MAX_FOR_ADD = 5;
-  // Use useEffect to save deleted tasks to AsyncStorage
-  useEffect(() => {
-    async function saveDeletedTasksToStorage() {
-      try {
-        await AsyncStorage.setItem('deletedTasks', JSON.stringify(deletedTasksList));
-      } catch (error) {
-        console.error('Error saving deleted tasks to AsyncStorage:', error);
-      }
-    }
+  const [tasksToDelete, setTasksToDelete] = useState([]) // list of tasks to modifiy in the server as deleted
+  const [tasksToComplete, setTasksToComplete] = useState([]) //list of tasks to modifiy in the server as completed 
+  const [tasksToAdd, setTasksToAdd] = useState([])// list of tasks to add as a bulk in the server
+  const [showUndoMessage, setShowUndoMessage] = useState(false);
+  const [undoAction, setUndoAction] = useState('');
+  const [undoTaskData, setUndoTaskData] = useState(false);
+  const [completedTask, setCompletedTask] = useState(null);
+  const [deletedTask, setDeletedTask] = useState(null);
 
-    saveDeletedTasksToStorage();
-  }, [deletedTasksList]);
+  //Const 
+  const MAX_FOR_DELETE = 20;
+  const MAX_FOR_COMPLETE = 20;
+  const MAX_FOR_ADD = 20;
+
+  async function syncAppStorageWithDataBaseData() {
+
+    setPendingTaskList([]);
+    setCompletedTaskList([]);
+    setDeletedTasks([]);
+    setTasksToComplete([]);
+    setTasksToDelete([]);
+
+    const updatedData = await loadAllTasks();
+    setPendingTaskList(updatedData.filter(task => task.status === 'pending'));
+    setCompletedTaskList(updatedData.filter(task => task.status === 'completed'));
+    setDeletedTasks(updatedData.filter(task => task.status === 'deleted'));
+    // ... Update other state variables
+
+    await AsyncStorage.setItem('pendingTasks', JSON.stringify(pendingTaskList));
+    await AsyncStorage.setItem('completedTasks', JSON.stringify(completedTaskList));
+    await AsyncStorage.setItem('deletedTasks', JSON.stringify(deletedTasksList));
+  }
+
+
+
+// useEffect(() => {
+//   async function syncDataWithServer(){
+//     if()
+//   }
+
+  
+// }, [third])
+
+
+  // useEffect(() => {
+  //   async function saveDeletedTasksToStorage() {
+  //     try {
+  //       await AsyncStorage.setItem('deletedTasks', JSON.stringify(deletedTasksList));
+  //     } catch (error) {
+  //       console.error('Error saving deleted tasks to AsyncStorage:', error);
+  //     }
+  //   }
+
+  //   saveDeletedTasksToStorage();
+  // }, [deletedTasksList]);
 
   // Use useEffect to retrieve deleted tasks from AsyncStorage on component mount
   useEffect(() => {
@@ -75,7 +114,6 @@ function MainContextProvider({ children }) {
 
     // Calculate the day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
     const dayOfWeek = today.getDay();
-    console.log(dayOfWeek);
     // Calculate the start and end dates of the current week
     const startDate = new Date(today);
     startDate.setDate(today.getDate() - dayOfWeek); // Set to the beginning of the week (Sunday)
@@ -122,162 +160,238 @@ function MainContextProvider({ children }) {
 
   async function deleteTask(taskId) {
     try {
-      updatePendingTaskHandler(taskId);
-      let tasksToDelete = [...deletedTasksList, taskId];
-      console.log('tasksToDelete', tasksToDelete)
-      setPendingTaskList((prev) => prev.filter((task) => task._id !== taskId));
-      if (tasksToDelete.length < MAX_FOR_DELETE) {
-        //update ui
-        setDeletedTasks((prev) => [...prev, taskId]);
-        // alert('Task removed successfully', taskId);
+      const taskToDelete = pendingTaskList.find(task => task._id === taskId);
+
+      // Update UI and state
+      setDeletedTask(taskToDelete);
+      setTasksToDelete(prev => [...prev, taskId]);
+
+      // Remove the task from pendingTaskList
+      setPendingTaskList(prev => prev.filter(task => task._id !== taskId));
+
+      // Update local storage
+      const updatedDeletedTasks = [...deletedTasksList, taskToDelete];
+      await AsyncStorage.setItem('deletedTasks', JSON.stringify(updatedDeletedTasks));
+      const updatedPendingTasks = pendingTaskList.filter(task => task._id !== taskId);
+      await AsyncStorage.setItem('pendingTasks', JSON.stringify(updatedPendingTasks));
+
+      // Show the undo message
+      setShowUndoMessage(true);
+      setUndoAction('delete');
+      setUndoTaskData(taskToDelete);
+
+      // Check if batch limit reached
+      if (tasksToDelete.length >= MAX_FOR_DELETE) {
+        await performDeleteRequest(tasksToDelete);
         return;
       }
 
+      if (tasksToAdd.includes(taskId)) {
+        setTasksToAdd(prev => prev.filter(id => id !== taskId));
+      } else {
+        setTasksToDelete(prev => [...prev, taskId]);
+      }
 
-      // fetch after the bucket is full
+      // Update UI
+      setDeletedTasks(prev => [...prev, taskId]);
+    } catch (error) {
+      handleDeleteError(error);
+    }
+  }
+
+  async function performDeleteRequest(taskIds) {
+    try {
       const response = await fetch(`${Server_path}/api/tasks/delete`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ userEmail, deletedTasks: tasksToDelete })
+        body: JSON.stringify({ userEmail, deletedTasks: taskIds })
       });
 
       if (response.ok) {
-
-      }
-      else {
-        alert('Failed to remove task:', response.status);
+        setDeletedTasks(prev => [...prev, ...taskIds]);
+        setTasksToDelete([]); // Clear tasksToDelete state
+      } else {
+        console.error('Error removing task:', response.status);
       }
     } catch (error) {
       console.error('Error removing task:', error);
     }
-
-    console.log('tasksToDelete', tasksToDelete)
-
-  };
-//   async function deleteTask(taskId) {
-//     try {
-//       let tasksToDelete;
-
-//       // Check if the task has a valid MongoDB ID or not
-//       if (taskId.startsWith('temp_')) {
-//         tasksToDelete = deletedTasksList.filter(id => id !== taskId);
-//       } else {
-//         tasksToDelete = deletedTasksList.concat([taskId]);
-//       }
-// lo
-//       // Update the state with the new tasksToDelete
-//       setDeletedTasks(tasksToDelete);
-
-//       if (tasksToDelete.length == MAX_FOR_DELETE) {
-//         await sendTasksToDelete();
-//       }
-
-//       // Call the function to send tasks to the backend
-
-//     } catch (error) {
-//       console.error('Error removing task:', error);
-//     }
-//   }
-
-  // Function to send tasks to the backend for deletion
-  async function sendTasksToDelete() {
-
-    try {
-      const tasksWithMongoIds = deletedTasksList.map(taskId => {
-        if (taskId.startsWith('temp_')) {
-          // Use the mapping to get the corresponding MongoDB ID
-          const mongoId = idMapping.get(taskId);
-          return { tempId: taskId, mongoId: mongoId };
-        } else {
-          // For tasks with a MongoDB ID, send as is
-          return { mongoId: taskId };
-        }
-      });
-
-      const response = await fetch(`${Server_path}/api/tasks/delete`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ userEmail, deletedTasks: tasksWithMongoIds })
-      });
-
-      if (response.ok) {
-        // Clear the deleted tasks list
-        setDeletedTasks([]);
-      } else {
-        console.error('Failed to remove tasks:', response.status);
-      }
-    } catch (error) {
-      console.error('Error sending tasks to delete:', error);
-    }
   }
+
+  function handleDeleteError(error) {
+
+    // Add user-friendly error handling and feedback here
+  };
+
+
+  // async function deleteTask(taskId) {
+  //   try {
+  //     //handle UI
+  //     const taskToDelete = pendingTaskList.filter((task) => task._id === taskId); // hold the opbject of the releted id
+  //     setDeletedTask(taskToDelete);// updated the state if this object for use in other methods
+  //     setTasksToDelete(prev => [...prev, taskId])
+  //     setPendingTaskList((prev) => prev.filter((task) => task._id !== taskId)); // update pending list becuase this is the list im rendering , if its not there it wont be displayed.
+  //     // Update local storage with the new pending task list
+  //     const updatedDeletedTasks = [...deletedTasksList, deletedTask];
+  //     await AsyncStorage.setItem('deletedTasks', JSON.stringify(updatedDeletedTasks));
+  //     await AsyncStorage.setItem('pendingTasks', JSON.stringify(pendingTaskList));
+  //     console.log(AsyncStorage.getItem('deletedTasks'));
+  //     // Logic to determine whether to remove task from server or mark it for deletion
+
+
+  //     // Show the undo message
+  //     setShowUndoMessage(true);
+  //     setUndoAction('delete');
+  //     setUndoTaskData(taskToDelete);
+
+  //     if (tasksToDelete.length >= MAX_FOR_DELETE) {
+  //       // fetch after the bucket is full
+  //       const response = await fetch(`${Server_path}/api/tasks/delete`, {
+  //         method: 'PUT',
+  //         headers: {
+  //           'Content-Type': 'application/json'
+  //         },
+  //         body: JSON.stringify({ userEmail, deletedTasks: tasksToDelete })
+  //       });
+  //       if (response.ok) {
+  //         setDeletedTasks((prev) => [...prev, deletedTask]) // update the list of the tasks with status "removed"
+  //         setTasksToDelete([]); // Clear tasksToDelete state
+  //       }
+  //       else {
+  //         alert('Failed to remove task:', response.status);
+  //       }
+  //       return;
+  //     }
+
+  //     if (tasksToAdd.includes(taskId)) {
+  //       // If the task is in the tasksToAdd list, it means the task was added but not yet sent to the server.
+  //       // In this case, we should remove it from the tasksToAdd list.
+  //       setTasksToAdd((prev) => prev.filter((id) => id !== taskId));
+  //     } else {
+  //       // If the task is not in tasksToAdd, it means the task has already been sent to the server.
+  //       // In this case, we mark the task for deletion by adding its ID to the tasksToDelete list.
+  //       setTasksToDelete((prev) => [...prev, taskId]);
+  //     }
+
+
+  //     //update ui
+  //     setDeletedTasks((prev) => [...prev, taskId]);
+  //     // alert('Task removed successfully', taskId);
+  //   }
+
+  //   catch (error) {
+  //     console.error('Error removing task:', error);
+  //   }
+  // };
+
 
   async function completeTask(taskId) {
     try {
-      let tasksToComplete = [...completedTaskList, taskId];
-      console.log('completedTaskList', completedTaskList)
-      setPendingTaskList((prev) => prev.filter((task) => task._id !== taskId));
-      if (tasksToComplete.length < MAX_FOR_DELETE) {
-        //update ui
-        setCompletedTaskList((prev) => [...prev, taskId]);
-        // alert('Task removed successfully', taskId);
+      const taskToComplete = pendingTaskList.find(task => task._id === taskId);
+
+      // Save the completed task object using the taskId
+      const currCompletedTask = pendingTaskList.find(task => task._id === taskId);
+
+      // Add the taskId to tasksToComplete and check batch size
+      setTasksToComplete(prev => [...prev, taskId]);
+
+      // Remove the completed task from the pending list
+      setPendingTaskList(prev => prev.filter(task => task._id !== taskId));
+
+      // Show the undo message
+      setShowUndoMessage(true);
+      setUndoAction('complete');
+      setUndoTaskData(taskToComplete);
+
+      // Update completedTaskList with the current completed task
+      setCompletedTaskList(prev => [...prev, currCompletedTask]);
+
+      // Update local storage with the new completed tasks
+      const updatedCompletedTasks = [...completedTaskList, currCompletedTask];
+      await AsyncStorage.setItem('completedTasks', JSON.stringify(updatedCompletedTasks));
+      await AsyncStorage.setItem('pendingTasks', JSON.stringify(pendingTaskList));
+      storeLocalTasks();
+
+      if (tasksToComplete.length >= MAX_FOR_COMPLETE) {
+        const response = await fetch(`${Server_path}/api/tasks/completeTask`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userEmail, completedTasks: tasksToComplete }),
+        });
+
+        if (response.ok) {
+          // Clear tasksToComplete state
+          setTasksToComplete([]);
+          console.log('Tasks completed successfully');
+        } else {
+          alert('Failed to complete task:', response.status);
+        }
         return;
       }
-      const response = await fetch(`${Server_path}/api/tasks/completeTask`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userEmail, taskId }),
-      });
-      if (response.ok) {
-        const completedTask = pendingTaskList.find((task) => task._id === taskId);
-        const updatedTaskList = pendingTaskList.filter((task) => task._id !== taskId);
 
-        setCompletedTaskList([...completedTaskList, completedTask])
-        setPendingTaskList(updatedTaskList);
-        Alert.alert('Task completed successfully');
-      } else {
-        Alert.alert('Failed to complete task:', response.status);
+      if (tasksToComplete.includes(taskId)) {
+        // Task is in tasksToAdd, so remove it from the list
+        setTasksToAdd(prev => prev.filter(id => id !== taskId));
       }
+
+      //update ui
+      // alert('Task removed successfully', taskId);
     } catch (error) {
       console.error('Error completing task:', error);
     }
-  };
+  }
+
+
+
   async function addTask(taskObj) {
-    //update local storage with the new task
-    const updatedPendingTasks = [...pendingTaskList, taskObj];
-    await AsyncStorage.setItem('pendingTasks', JSON.stringify(updatedPendingTasks))
-
-    setPendingTaskList(updatedPendingTasks)
-
-    console.log(taskObj);
     try {
-      const response = await fetch(`${Server_path}/api/tasks/addTask`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(taskObj)
-      })
-        .then(response => {
-          if (response.ok) {
-            setPendingTaskList([...pendingTaskList, taskObj])
-            // Alert.alert('Task added successfully')
-          } else {
-            Alert.alert('Failed to create task:', response.status)
-          }
-        })
-        .catch(error => {
-          console.error('Error creating task:', error);
+      // Update the UI state immediately
+      setPendingTaskList(prev => [...prev, taskObj]);
+      setTasksToAdd((prev) => [...prev, taskObj]);
+
+      //Update local storage with new task
+      const updatedPendingTasks = [...pendingTaskList, taskObj];
+      await AsyncStorage.setItem('pendingTasks', JSON.stringify(updatedPendingTasks))
+
+      // Check if the batch size has reached the threshold
+      if (tasksToAdd.length + 1 >= MAX_FOR_ADD) { // +1 because we're adding a new task
+        // Send the tasks to the server
+        const response = await fetch(`${Server_path}/api/tasks/addTasks`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ userEmail, tasksToAdd })
         });
+
+        if (response.ok) {
+          // Clear the tasksToAdd state
+          setTasksToAdd([]);
+        } else {
+          console.log('Failed to create task:', response.status, response.statusText);
+        }
+
+        setPendingTaskList(updatedPendingTasks)
+
+
+      }
+      console.log('addTask +>', taskObj);
+      console.log('tasksToAdd ', tasksToAdd.length + 1);
+      console.log('tasksToAdd ', tasksToAdd.concat(taskObj));
+
+      console.log('tasksToAdd ', tasksToAdd.length);
+      console.log('tasksToAdd ', tasksToAdd);
+
+
     } catch (error) {
+      console.log('Failed to create task:', error);
 
     }
-  }
+  };
 
 
   const handleOnCancel = () => {
@@ -289,13 +403,14 @@ function MainContextProvider({ children }) {
     setSelectedTask(taskToEdit); // Set the selected task for editing
     setIsEditModalVisible(true); // Show the EditTaskModal
   };
+
   const handleEditTask = async (userEmail, updatedTask) => {
     try {
       const response = await axios.put(`${Server_path}/api/tasks/editTask`, {
         userEmail,
         updatedTask
       });
-      if (response.status === 200) {
+      if (response.status.ok) {
         setIsEditModalVisible(false); // Hide the EditTaskModal
         alert('Task updated successfully');
       } else {
@@ -393,28 +508,50 @@ function MainContextProvider({ children }) {
     }
   };
 
-  const updatePendingTaskHandler = async (taskId) => {
-    try {
-      // Filter out the task to be removed
-      const updatedPendingTasks = pendingTaskList.filter(task => task._id !== taskId);
+  // const updatePendingTaskHandler = async (taskId) => {
+  //   try {
+  //     // Filter out the task to be removed
+  //     const updatedPendingTasks = pendingTaskList.filter(task => task._id !== taskId);
 
-      // Update the local storage with the new task list
-      await AsyncStorage.setItem('pendingTasks', JSON.stringify(updatedPendingTasks));
+  //     // Update the local storage with the new task list
+  //     await AsyncStorage.setItem('pendingTasks', JSON.stringify(updatedPendingTasks));
 
-      // Update the state to reflect the removed task
-      setPendingTaskList(updatedPendingTasks);
-    } catch (error) {
-      console.error('Error removing task:', error);
-    }
+  //     // Update the state to reflect the removed task
+  //     setPendingTaskList(updatedPendingTasks);
+  //   } catch (error) {
+  //     console.error('Error removing task:', error);
+  //   }
+  // };
+
+  const undoDelete = (taskToUndo) => {
+    // Logic to add the deleted task back to the task list
+    setDeletedTasks(prevDeletedTasks => prevDeletedTasks.filter(task => task._id !== taskToUndo._id));
+    setPendingTaskList(prevPendingTasks => [...prevPendingTasks, taskToUndo]);
+
+    // Clear the undo state
+    setShowUndoMessage(false);
+    setUndoAction('');
+    setUndoTaskData(null);
   };
 
+  const undoComplete = (taskToUndo) => {
+    // Logic to mark the completed task as not completed
+    setCompletedTaskList(prevCompletedTasks => prevCompletedTasks.filter(task => task._id !== taskToUndo._id));
+    setPendingTaskList(prevPendingTasks => [...prevPendingTasks, taskToUndo]);
+    // Clear the undo state
+    setShowUndoMessage(false);
+    setUndoAction('');
+    setUndoTaskData(null);
+  };
 
   const MainContextValues = {
     isLoading, setIsLoading, setAuthenticated, authenticated, setUserName, userName, userId,
     setUserId, userEmail, setUserEmail, capitalizeFirstLetter, setCompletedTaskList,
     setPendingTaskList, pendingTaskList, completedTaskList, allTasks, setAllTasks, userImage,
     setUserImage, deleteTask, completeTask, handleOnCancel, handleEdit, selectedTask, handleEditTask,
-    isEditModalVisible, getTodayTasks, getCurrentWeekTasks, loadTasks, storeLocalTasks, loadLocalTasks, addTask
+    isEditModalVisible, getTodayTasks, getCurrentWeekTasks, loadTasks, storeLocalTasks, loadLocalTasks, addTask,
+    showUndoMessage, undoAction, undoTaskData, undoComplete, undoDelete, 
+
   }
 
   return (

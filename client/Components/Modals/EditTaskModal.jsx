@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import DatePicker from 'react-native-modern-datepicker';
 import COLORS from '../../constants/colors';
 import DropDownPicker from 'react-native-dropdown-picker';
 
@@ -59,7 +58,6 @@ function EditTaskModal(props) {
         // Update the state based on the input field
         switch (inputField) {
             case 'startDate':
-                console.log(inputField);
                 setEditedStartDate(sanitizedInput);
                 break;
             case 'dueDate':

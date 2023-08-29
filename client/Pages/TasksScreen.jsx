@@ -1,20 +1,24 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, StyleSheet, FlatList, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+
 import { FloatingAction } from "react-native-floating-action";
 import { AntDesign } from '@expo/vector-icons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import TaskInput from '../Components/Modals/TaskInput';
 import GoalItem from '../Components/GoalItem';
 import COLORS from '../constants/colors';
 import { MainContext } from '../Components/Context/MainContextProvider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Server_path } from '../utils/api-url';
 import FloatingActionBtn from '../Components/Modals/FloatingActionBtn'
+import SearchBar from '../Components/SearchBar';
+import UndoMessage from '../Components/UndoMessage';
+
 const TasksScreen = () => {
   const [modalIsVisible, setModalIsVisible] = useState(false); // boolean for visualise of the modal ( is it visual right now?)
   const [isHidden, setIsHidden] = useState(true); // boolean for setting the modal hidden or not. 
-  const { userEmail, setUserId, pendingTaskList, setPendingTaskList, deleteTask, storeLocalTasks, addTask } = useContext(MainContext);
+  const { userEmail, pendingTaskList, setPendingTaskList, addTask, handleEditTask } = useContext(MainContext);
+  const [searchQuery, setSearchQuery] = useState('');
+
+
 
   function toggleBtn() {
     setIsHidden(!isHidden);
@@ -95,6 +99,7 @@ const TasksScreen = () => {
       style={styles.container}
       colors={[COLORS.secondary, COLORS.primary]}
     >
+      <SearchBar value={searchQuery} onChangeText={(text) => setSearchQuery(text)} />
       <View style={styles.container}>
         {modalIsVisible && (
           <View>
@@ -109,7 +114,7 @@ const TasksScreen = () => {
         <View>
           <FlatList
             contentContainerStyle={{ justifyContent: 'center' }}
-            data={pendingTaskList}
+            data={pendingTaskList.filter(task => task.title.toLowerCase().includes(searchQuery.toLowerCase()))}
             renderItem={({ item }) => (
               <GoalItem
                 text={item.title}
@@ -120,7 +125,7 @@ const TasksScreen = () => {
                 startHour={item?.startTime}
                 endHour={item?.dueTime}
                 priority={item?.priority}
-                onDeleteItem={deleteTask}
+                // onDeleteItem={deleteTask}
                 onSave={(editedTask) => {
                   handleEditTask(userEmail, editedTask);                            // Implement the onSave logic here
                   // setIsEditModalVisible(false); // Hide the EditTaskModal
@@ -142,6 +147,7 @@ const TasksScreen = () => {
             onPressItem={handleModalIsVisible}
           />
           <FloatingActionBtn />
+          <UndoMessage />
         </View>
       </View>
     </LinearGradient>

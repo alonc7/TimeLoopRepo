@@ -41,8 +41,8 @@ const ScheduleScreen = () => {
                       item.priority === 'high'
                         ? COLORS.red
                         : item.priority === 'medium'
-                        ? 'orange'
-                        : COLORS.grey,
+                          ? 'orange'
+                          : COLORS.grey,
                   },
                 ]}
                 onPress={() => setExpandedItemId(expandedItemId === item._id ? null : item._id)}
@@ -66,8 +66,8 @@ const ScheduleScreen = () => {
                             item.priority === 'high'
                               ? COLORS.red
                               : item.priority === 'medium'
-                              ? 'orange'
-                              : COLORS.grey,
+                                ? 'orange'
+                                : COLORS.grey,
                         },
                       ]}
                     >

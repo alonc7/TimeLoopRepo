@@ -154,28 +154,22 @@ class DB {
             await this.client.close();
         }
     }
-    // async RemoveTask(collection, user, taskId) {
-    //     try {
+    async pendTask(collection, user, tasks) {
+        try {
 
-    //         let tasks = user.Tasks.map((task) => {
-    //             if (new ObjectId(taskId).equals(task._id)) {
-    //                 console.log(task._id);
-    //                 task.status = 'removed'
-    //             }
-    //             return task;
-    //         })
 
-    //         await this.client.connect();
-    //         await this.client.db(this.db_name).collection(collection).updateOne(
-    //             { email: user.email },
-    //             { $set: { Tasks: tasks } });
-    //     } catch (error) {
-    //         console.error('Failed to update document:', error);
-    //         throw error;
-    //     } finally {
-    //         await this.client.close();
-    //     }
-    // }
+            await this.client.connect();
+            await this.client.db(this.db_name).collection(collection).updateOne(
+                { email: user.email },
+                { $set: { Tasks: tasks } });
+                console.log(tasks);
+        } catch (error) {
+            console.error('Failed to update document:', error);
+            throw error;
+        } finally {
+            await this.client.close();
+        }
+    }
 
 
 

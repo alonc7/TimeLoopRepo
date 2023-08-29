@@ -10,9 +10,9 @@ const CalendarComponent = ({ tasks, onDayPress, selectedDate }) => {
     const [year, month, day] = dateString.split('/');
     return `${year}-${month?.padStart(2, '0')}-${day?.padStart(2, '0')}`; // padStart = method in JS strings. helps with placing 0 in single digit field.
   };
-
   const markDates = () => {
     const markedDates = {};
+    const MAX_DOTS_PER_DATE = 3;
 
     tasks.forEach((task) => {
       const { startDate, priority } = task;
@@ -21,11 +21,14 @@ const CalendarComponent = ({ tasks, onDayPress, selectedDate }) => {
       // Create a new array of dots or initialize an empty array
       markedDates[convertedDate] = markedDates[convertedDate] || { dots: [] };
 
-      // Add the dot for the current task's priority to the dots array
-      markedDates[convertedDate].dots.push({
-        key: task._id,
-        color: getColorByPriority(priority),
-      });
+      if (markedDates[convertedDate].dots.length < MAX_DOTS_PER_DATE) {
+
+        // Add the dot for the current task's priority to the dots array
+        markedDates[convertedDate].dots.push({
+          key: task._id,
+          color: getColorByPriority(priority),
+        });
+      }
     });
 
     // Add the selected date to the markedDates object
@@ -35,7 +38,6 @@ const CalendarComponent = ({ tasks, onDayPress, selectedDate }) => {
       markedDates[convertedSelectedDate].selected = true;
       markedDates[convertedSelectedDate].selectedColor = 'lightblue';
     }
-
     return markedDates;
   };
 

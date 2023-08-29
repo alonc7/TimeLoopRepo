@@ -76,6 +76,7 @@ function TaskListModal({ isVisible, taskList, onClose, isPendingTasks }) {
                                                     : 'grey',
                                     },
                                 ]}
+                                keyExtractor={item => item._id} // Use the unique identifier of each task as the key
                                 onPress={() => setExpandedItemId(expandedItemId === item._id ? null : item._id)}
                             >
                                 <View style={styles.taskDetails}>
@@ -121,9 +122,9 @@ function TaskListModal({ isVisible, taskList, onClose, isPendingTasks }) {
                         visible={isEditModalVisible}
                         task={selectedTask}
                         onSave={(editedTask) => {
-                            handleEditTask(userEmail, editedTask);                            // Implement the onSave logic here
+                            handleEditTask(userEmail, editedTask);                           
                         }}
-                        onCancel={() => handleOnCancel()} // Hide the EditTaskModal
+                        onCancel={() => handleOnCancel()} // basically hide the EditTaskModal
                     />
                 )}
             </View>

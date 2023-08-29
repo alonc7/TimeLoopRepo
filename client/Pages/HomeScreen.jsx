@@ -8,7 +8,7 @@ import { MainContext } from '../Components/Context/MainContextProvider';
 import TaskListModal from '../Components/Modals/TaskListModal';
 import CountdownModal from '../Components/Modals/CountDownModal';
 
-const { width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 const boxWidth = width * 0.4;
 function HomeScreen() {
     const { userName, capitalizeFirstLetter, pendingTaskList, completedTaskList, allTasks, getTodayTasks, getCurrentWeekTasks } = useContext(MainContext);
@@ -16,13 +16,20 @@ function HomeScreen() {
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
     const [isCountdownModalVisible, setCountdownModalVisible] = useState(false);
-
+    const [showTodayTasks, setShowTodayTasks] = useState(false);
+    const [showCurrWeekTasks, setShowCurrWeekTasks] = useState(false);
 
     useEffect(() => {
         retrieveUserImage();
 
     }, []);
 
+    const toggleTodayTasks = () => {
+        setShowTodayTasks(!showTodayTasks);
+    }
+    const toggleCurrWeekTasks = () => {
+        setShowCurrWeekTasks(!showCurrWeekTasks);
+    }
     const retrieveUserImage = async () => {
         try {
             const imageUri = await AsyncStorage.getItem('userImage');
@@ -119,6 +126,7 @@ function HomeScreen() {
 
     const handleCompletedTasksPress = () => {
         setSelectedTask(completedTaskList);
+        console.log(completedTaskList);
         handleModalVisible();
     };
     const handleCountdownPress = () => {
@@ -144,19 +152,38 @@ function HomeScreen() {
                 </View>
                 <View style={styles.bubbleContainer}>
                     <View style={styles.bubble}>
-                        {/* <View style={styles.bubble}> */}
-                        <FlatList
-                            data={() => getTodayTasks()}
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity>
-                                    <View style={[styles.box, { backgroundColor: '#7DE2D1' }]}>
-                                        <Text style={styles.boxContnentText}>{item.title}</Text>
-                                        {/* Display other task information */}
-                                    </View>
-                                </TouchableOpacity>
-                            )}
-                        />
+                        <TouchableOpacity on onPress={toggleTodayTasks} style={styles.toggleButton}>
+                            <Text>Today's Tasks:{showTodayTasks ? '▲' : '▼'}</Text>
+                        </TouchableOpacity>
+                        {showTodayTasks && (
+                            <FlatList // this flat list is to dispay tasks of today. 
+                                data={getTodayTasks()}
+                                keyExtractor={(item, index) => index.toString()}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity>
+                                        <View style={[styles.box, { backgroundColor: '#7DE2D1' }]}>
+                                            <Text style={styles.boxContnentText}>{item.title}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                )}
+                            />
+                        )}
+                        <TouchableOpacity on onPress={toggleCurrWeekTasks} style={styles.toggleButton}>
+                            <Text>This Week Tasks:{showCurrWeekTasks ? '▲' : '▼'}</Text>
+                        </TouchableOpacity>
+                        {showCurrWeekTasks && (
+                            <FlatList // this flat list is to dispay tasks of today. 
+                                data={getCurrentWeekTasks()}
+                                keyExtractor={(item, index) => index.toString()}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity>
+                                        <View style={[styles.box, { backgroundColor: '#7DE2D1' }]}>
+                                            <Text style={styles.boxContnentText}>{item.title}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                )}
+                            />
+                        )}
                         <View >
                             <FlatList
                                 data={() => getCurrentWeekTasks()}
@@ -281,7 +308,7 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
     },
     bubble: {
-        backgroundColor: COLORS.primary,
+        backgroundColor: COLORS.white,
         borderRadius: 20,
         padding: 10,
         flexDirection: 'column', // Changed from 'row' to 'column'
@@ -292,7 +319,7 @@ const styles = StyleSheet.create({
     //     marginBottom: 10, // Added margin between bubble text items
     // },
     bubbleText: {
-        color: COLORS.white,
+        color: 'COLORS.white',
         fontSize: 14,
         fontWeight: 'bold',
     },
@@ -357,7 +384,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center', // Center-align horizontally
         letterSpacing: 1,
     },
-    // ... (other styles)
+    toggleButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: 'white'
+    }
 });
 
 
