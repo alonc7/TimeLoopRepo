@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext,useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MainContext } from './Context/MainContextProvider'; // Make sure to import from the correct path
 import COLORS from '../constants/colors';
@@ -9,14 +9,14 @@ export default function UndoMessage() {
         undoAction,
         undoTaskData,
         undoDelete,
-        undoComplete
+        undoComplete,
+        setShowUndoMessage
     } = useContext(MainContext);
 
     const [isVisible, setIsVisible] = useState(false);
-    const [num, setNum] = useState(1);
 
     useEffect(() => {
-        
+
         if (showUndoMessage && undoTaskData) {
             setIsVisible(true);
 
@@ -29,8 +29,8 @@ export default function UndoMessage() {
                 } else if (showUndoMessage === 'complete') {
                     undoComplete(undoTaskData);
                 }
+                setShowUndoMessage(false); // Do no show message after each render incase the user decides not to undo action.
             }, 2000); // 2 seconds
-
             return () => {
                 clearTimeout(timeoutId); // Clear the timeout when the component unmounts
             };

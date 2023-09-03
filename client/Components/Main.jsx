@@ -26,7 +26,7 @@ export default function Main() {
                 setUserEmail(userData.email)
                 setUserName(userData.name);
                 await loadTasks(userData.email);
-                loadLocalTasks(); // Load tasks from local storage
+                // loadLocalTasks(); // Load tasks from local storage
                 setAuthenticated(true);
 
             } else {
@@ -69,11 +69,13 @@ export default function Main() {
     };
 
     return (
-        <NavigationContainer>
+        // <NavigationContainer>
+        <>
             {getContent()}
-            {/* <NotificationComp  /> */}
-            {/* <Text style={styles.messageText}>"Please wait while we gather the information. This may take a few seconds. Thank you for your patience."</Text> */}
-        </NavigationContainer>
+        </>
+        // {/* <NotificationComp  /> */}
+        // {/* <Text style={styles.messageText}>"Please wait while we gather the information. This may take a few seconds. Thank you for your patience."</Text> */}
+        // </NavigationContainer>
     );
 }
 

@@ -4,6 +4,7 @@ import { Button } from 'react-native-paper';
 import DatePicker from 'react-native-modern-datepicker';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../../constants/colors';
+import RepeatTaskModal from './RepeatTaskModal';
 
 function TaskInput(props) {
   const [enteredTaskText, setEnteredTaskText] = useState('');
@@ -21,6 +22,7 @@ function TaskInput(props) {
   const [isPriorityVisible, setPriorityVisible] = useState(false);
   const [isStartTimeSelected, setIsStartTimeSelected] = useState(false)
   const [isDueTimeSelected, setDueTimeSelected] = useState(false)
+  const [isRepeatTaskVissible, setIsRepeatTaskVissible] = useState(false)
 
   // const [isInfoVisible, setInfoVisible] = useState(true); // New state for the info message
 
@@ -118,6 +120,10 @@ function TaskInput(props) {
     props.onClose();
   };
 
+  const handleToggleRepeat = () => {
+    setIsRepeatTaskVissible(!isRepeatTaskVissible);
+  };
+
   const handleToggleCalendar = () => {
     if (isPriorityVisible) {
       setPriorityVisible(!isPriorityVisible);
@@ -138,6 +144,13 @@ function TaskInput(props) {
     setPriorityVisible(false);
   };
 
+  const handleRepeatTaskSave = (repeatOption) => {
+    // Handle saving repetition settings in your task data or logic
+    console.log('Repeat Option:', repeatOption);
+
+    // Close the RepeatTaskModal
+    setIsRepeatTaskVissible(false);
+  };
   const priorityOptions = (
     <View style={styles.priorityOptionsContainer}>
       <Text style={styles.instructionText}>Set priority of task</Text>
@@ -195,6 +208,7 @@ function TaskInput(props) {
     </View>
   );
 
+
   return (
 
     <Modal visible={props.visible} animationType="slide" transparent={true}>
@@ -209,14 +223,6 @@ function TaskInput(props) {
             <View style={styles.modalContent}>
               {/* Close Button */}
 
-
-              <TouchableOpacity onPress={() => {
-                Vibration.vibrate(1)
-                handleClose()
-              }
-              } style={styles.closeButton}>
-                <Ionicons name="close" size={19} color={COLORS.black} />
-              </TouchableOpacity>
 
               <TextInput
                 placeholderTextColor={COLORS.grey}
@@ -249,12 +255,18 @@ function TaskInput(props) {
                 <TouchableOpacity style={styles.iconButton} onPress={handleToggleCalendar}>
                   <Ionicons name="calendar" size={40} style={[{ color: COLORS.primary, }]} />
                   <View style={styles.iconLabelContainer}>
-                    <Text style={styles.iconLabel}>Open Calendar</Text>
+                    <Text style={styles.iconLabel}>Calendar</Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton} onPress={handleToggleRepeat}>
+                  <Ionicons name="repeat" size={40} style={[{ color: COLORS.primary, }]} />
+                  <View style={styles.iconLabelContainer}>
+                    <Text style={styles.iconLabel}>Repeat</Text>
                   </View>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconButton} onPress={handleTogglePriority}>
                   <Ionicons name="md-options" size={40} color={COLORS.primary} />
-                  <Text style={styles.iconLabel}>Open Priority</Text>
+                  <Text style={styles.iconLabel}>Priority</Text>
                   <View style={styles.iconLabelContainer}>
 
                   </View>
@@ -316,7 +328,15 @@ function TaskInput(props) {
                   options={Keyboard}
                 />
               )}
+
               {isPriorityVisible && priorityOptions}
+              {isRepeatTaskVissible && (
+                <RepeatTaskModal
+                  visible={isRepeatTaskVissible}
+                  onSave={handleRepeatTaskSave}
+                  onClose={handleToggleRepeat}
+                />
+              )}
             </View>
           </View>
         </KeyboardAvoidingView>

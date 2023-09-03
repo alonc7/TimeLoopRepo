@@ -87,7 +87,7 @@ const TasksScreen = () => {
   const taskActions = [
     {
       text: 'Scheduled Task',
-      icon: <AntDesign name="pluscircleo" size={20} color="white" />,
+      icon: <AntDesign name="pluscircleo" size={34} color="white" />,
       name: 'add_task',
       position: 1,
     },
@@ -140,7 +140,7 @@ const TasksScreen = () => {
           <FloatingAction
             color={COLORS.secondary}
             position={'left'}
-            buttonSize={30}
+            buttonSize={34}
             overrideWithAction={true}
             showBackground={false}
             actions={taskActions}
@@ -164,18 +164,6 @@ const styles = StyleSheet.create({
   tasksContainer: {
     flex: 1
   },
-  // buttonText: {
-  //   flexDirection: 'row',
-  //   color: '#B2A4FF',
-  //   fontSize: 18,
-  //   textDecorationLine: 'underline',
-  //   fontWeight: 'bold',
-  //   marginBottom: 40,
-  //   justifyContent: 'center',
-  // },
-  // btnHide: {
-  //   display: 'none'
-  // }
 });
 
 export default TasksScreen;

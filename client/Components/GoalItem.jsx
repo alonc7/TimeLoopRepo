@@ -18,60 +18,8 @@ function GoalItem(props) {
   const opacityAnim = useRef(new Animated.Value(1)).current;
 
   function handleDeleteItem() {
-    Animated.timing(opacityAnim, {
-      toValue: 0,
-      duration: 0,
-      useNativeDriver: true,
-      // }).start(() => props.onDeleteItem(task_id));
-    }).start(() => deleteTask(task_id));
+    deleteTask(task_id);
   };
-
-  // Function to mark the task as removed using API request
-  // async function deleteTask(taskId) {
-  //   try {
-  //     const response = await fetch(`${Server_path}/api/tasks/removeTask`, {
-  //       method: 'PUT',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ userEmail, taskId }),
-  //     });
-  //     if (response.ok) {
-  //       setPendingTaskList((currentListTasks) =>
-  //         currentListTasks.filter((task) => task._id !== taskId)
-  //       );
-  //       Alert.alert('Task removed successfully');
-  //     } else {
-  //       console.log('Failed to remove task:', response.status);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error removing task:', error);
-  //   }
-  // };
-
-  // Function to mark the task as completed using API request
-
-  // async function completeTask(taskId) {
-  //   try {
-  //     const response = await fetch(`${Server_path}/api/tasks/completeTask`, {
-  //       method: 'PUT',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ userEmail, taskId }),
-  //     });
-  //     if (response.ok) {
-  //       console.log('Before filter:', pendingTaskList);
-  //       const updatedTaskList = pendingTaskList.filter((task) => task._id !== taskId);
-  //       console.log('After filter:', updatedTaskList); setPendingTaskList(updatedTaskList);
-  //       // Alert.alert('Task completed successfully');
-  //     } else {
-  //       Alert.alert('Failed to complete task:', response.status);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error completing task:', error);
-  //   }
-  // };
 
   // Function to handle the completion toggle
   function toggleCompletion() {
@@ -79,17 +27,17 @@ function GoalItem(props) {
     if (!completed) {
       Animated.sequence([
         Animated.timing(lineThroughAnim, {
-          toValue: 1,
+          toValue: 100,
           duration: 0,
           useNativeDriver: false,
         }),
         Animated.timing(opacityAnim, {
-          toValue: 0,
-          duration: 500,
+          toValue: 100,
+          duration: 0,
           useNativeDriver: true,
         }),
       ]).start(() => {
-        completeTask(props.task_id); // Call the API function with the task ID (props.id)
+        completeTask(task_id); // Call the API function with the task ID (props.id)
       });
     } else {
       Animated.sequence([

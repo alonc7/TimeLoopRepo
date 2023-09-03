@@ -35,13 +35,13 @@ export default function FloatingActionBtn() {
   const actions = [
     {
       text: 'Sort by Priority',
-      icon: <MaterialIcons name="sort" size={20} color={COLORS.primary} />,
+      icon: <MaterialIcons name="category" size={20} color={COLORS.white} />,
       name: 'Priority',
       position: 2,
     },
     {
       text: 'Sort by Date',
-      icon: <MaterialIcons name="sort" size={20} color={COLORS.primary} />,
+      icon: <MaterialIcons name="schedule" size={20} color={COLORS.white} />,
       name: 'Date',
       position: 1,
     },
@@ -53,9 +53,9 @@ export default function FloatingActionBtn() {
       <FloatingAction
         color={COLORS.secondary}
         position={'right'}
-        buttonSize={30}
+        buttonSize={34}
 
-        floatingIcon={<MaterialIcons name="sort" size={20} color={COLORS.primary} />}
+        floatingIcon={<MaterialIcons name="list" size={34} color={COLORS.white} />}
         actions={actions}
         onPressItem={name => {
           switch (name) {
