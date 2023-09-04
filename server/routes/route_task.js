@@ -183,8 +183,10 @@ router.post('/addTasks', async (req, res) => {
         if (!authUser) {
             return res.status(403).json('You are unauthorized');
         }
-
         const createdTasks = await Promise.all(tasksToAdd.map(async taskData => {
+            console.log(taskData._id, taskData.selectedTime);
+
+            // Use the correct property name here (selectedTime)
             const task = new Task(
                 taskData.title,
                 taskData.description,
@@ -193,10 +195,17 @@ router.post('/addTasks', async (req, res) => {
                 taskData.startTime,
                 taskData.dueTime,
                 taskData.priority,
-                taskData._id
+                taskData.isRepeat,
+                taskData.repeatOption,
+                taskData.selectedDays,
+                taskData.selectedTime, // Pass the selectedTime
+                taskData._id // Pass the _id as the last argument
             );
 
+
             await Task.createTask(authUser, task);
+            console.log(task);
+
             return task;
         }));
 

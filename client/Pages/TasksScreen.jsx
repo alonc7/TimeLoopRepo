@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, StyleSheet, FlatList, Alert } from 'react-native';
+import { View, StyleSheet, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { FloatingAction } from "react-native-floating-action";
@@ -18,6 +18,7 @@ const TasksScreen = () => {
   const { userEmail, pendingTaskList, setPendingTaskList, addTask, handleEditTask } = useContext(MainContext);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const [selectedDays, setSelectedDays] = useState([]);
 
 
   function toggleBtn() {
@@ -41,7 +42,7 @@ const TasksScreen = () => {
   }
 
   // When adding a new task
-  const addTaskHandler = async (title, description, startDate, dueDate, startTime, dueTime, priority) => {
+  const addTaskHandler = async (title, description, startDate, dueDate, startTime, dueTime, priority, isRepeat, repeatOption, selectedDays, repeatSelectedTime) => {
     const _id = generateTempId();
     const taskData = {
       title: title,
@@ -51,10 +52,14 @@ const TasksScreen = () => {
       startTime: startTime,
       dueTime: dueTime,
       priority: priority,
-      // userEmail: userEmail,
-      _id: _id // Use the temporary ID
+      isRepeat: isRepeat,
+      repeatOption: repeatOption,
+      selectedDays: selectedDays,
+      repeatSelectedTime: repeatSelectedTime,
+      _id: _id
     };
     addTask(taskData);
+    console.log(taskData);
   };
 
   // function deleteTaskHandler(id) {
@@ -109,6 +114,8 @@ const TasksScreen = () => {
               onClose={handleModalIsVisible}
               toggleBtn={toggleBtn}
               setTasks={setPendingTaskList}
+              selectedDays={selectedDays} // Pass selectedDays as a prop
+
             />
           </View>)}
         <View>

@@ -32,6 +32,10 @@ export default function NotificationComp() {
         const formattedToday = formatDate(today);
         const formattedTomorrow = formatDate(tomorrow);
 
+        // Filter tasks with repeatTask set to true
+        const repeatTaskList = pendingTaskList.filter(task => task.isReapet);
+
+
         pendingTaskList.forEach(task => {
             if (!task.startDate || !task.dueDate) {
                 // Skip tasks with null dates
@@ -56,6 +60,25 @@ export default function NotificationComp() {
                 scheduleNotificationHandler(task._id, 'Task Starting Tomorrow', `"${task.title}" is starting tomorrow`);
             }
         });
+
+        repeatTaskList.forEach(task => {
+            // Check if the task has repeatOption set to 'daily'
+            if (task.repeatOption === 'daily') {
+                scheduleNotificationHandler(task._id, 'Daily Reminder', `"${task.title}"`, task.selectedTime)
+            };
+
+
+            // Check if the task has repeatOption set to 'custome' and it's the due/start date
+            if (task.repeatOption === "custome") {
+                const currentDay = now.getDay();
+                const currentTime = task.selectedTime;
+
+                if (task.selectedDays.includes(currentDay) && now === task.selectedTime) {
+                    scheduleNotificationHandler(task._id, 'Costume reminder', `"${task.title}"`, task.selectedTime)
+                }
+            };
+        })
+
     }
 
 

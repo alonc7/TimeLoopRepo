@@ -4,20 +4,26 @@ const User = require('./userModel');
 
 class Task {
     static collection = 'Tasks';
+    // Modify Task Data Structure:
 
-    constructor(title, description, startDate, dueDate, startTime, dueTime, priority, _id) {
+    // Update your task data structure to include information about repeated tasks. You can add fields like isRepeated, repeatOption, selectedDays, selectedTime, startDate, and endDate to your task objects.
+    constructor(title, description, startDate, dueDate, startTime, dueTime, priority, isRepeat, repeatOption = 'none', selectedDays = [], selectedTime, _id) {
         this.title = title;
         this.description = description;
         this.startDate = startDate;
         this.dueDate = dueDate;
-        // this.IsOnDate=true; // task that is still not after due of due Date
-        // this.IsOnTime=true; // task that is still not after due of dueTime .
         this.startTime = startTime;
         this.dueTime = dueTime;
         this.priority = priority;
+        // this.isOnTime = isOnTime; // task that is still not after due of dueTime .
+        // this.isRepeated = isRepeated; // Indicates if the task is repeated
+        this.isRepeat = isRepeat;
+        this.repeatOption = repeatOption; // Options: 'none', 'daily', 'weekly', 'monthly', etc.
+        this.selectedDays = selectedDays; // Array of selected days for weekly or monthly repetition
+        this.selectedTime = selectedTime; // Time of day for the task
+        this._id = _id;
         this.status = 'pending'; // Add the status field with the default value 'pending'
-        this._id = _id
-    };
+    }
     // GET list of all tasks.
     static async getTaskList(userId) {
         try {

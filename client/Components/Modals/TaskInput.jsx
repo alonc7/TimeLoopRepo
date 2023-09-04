@@ -23,7 +23,10 @@ function TaskInput(props) {
   const [isStartTimeSelected, setIsStartTimeSelected] = useState(false)
   const [isDueTimeSelected, setDueTimeSelected] = useState(false)
   const [isRepeatTaskVissible, setIsRepeatTaskVissible] = useState(false)
-
+  const [repeatTaskSaved, setRepeatTaskSaved] = useState(false);
+  const [repeatOption, setRepeatOption] = useState(null);
+  const [selectedDays, setSelectedDays] = useState([]);
+  const [repeatSelectedTime, setRepeatSelectedTime] = useState(null)
   // const [isInfoVisible, setInfoVisible] = useState(true); // New state for the info message
 
   const taskInputHandler = (enteredText) => {
@@ -51,17 +54,34 @@ function TaskInput(props) {
       setDueDate(selectedDate);
       setDueTime(selectedTime);
       setDueTimeSelected(true);
-      setDueTimeSelected(true)
+      setDueTimeSelected(true);
 
-      props.onAddTask(
-        enteredTaskText,
-        enteredDescription,
-        startDate,
-        selectedDate,
-        startTime,
-        selectedTime,
-        selectedPriority
-      );
+      // Check if it's a repeated task based on repeatTaskSaved
+      if (repeatTaskSaved) {
+        props.onAddTask(
+          enteredTaskText,
+          enteredDescription,
+          startDate,
+          selectedDate,
+          startTime,
+          selectedTime,
+          selectedPriority,
+          repeatTaskSaved, // Send current state of repteadTaskSaved ( saved \ not saved) -- Boolean
+          repeatOption, // Pass the repeat option from the modal
+          selectedDays, // Pass the selected days from the modal
+          repeatSelectedTime
+        );
+      } else {
+        props.onAddTask(
+          enteredTaskText,
+          enteredDescription,
+          startDate,
+          selectedDate,
+          startTime,
+          selectedTime,
+          selectedPriority
+        );
+      }
 
       setEnteredTaskText('');
       setEnteredDescription('');
@@ -69,10 +89,12 @@ function TaskInput(props) {
       setisStartDateSelected(false);
       setIsStartTimeSelected(false);
       setDueTimeSelected(false);
+      setRepeatTaskSaved(false); // Reset the flag for the next task
 
       props.toggleBtn();
     }
   };
+
 
   const addQuickTaskHandler = () => {
     if (!enteredTaskText) {
@@ -145,12 +167,17 @@ function TaskInput(props) {
   };
 
   const handleRepeatTaskSave = (repeatOption) => {
+    setRepeatSelectedTime(repeatOption.selectedTime.toLocaleTimeString())
+    setRepeatOption(repeatOption.repeatOption);
+    setSelectedDays(repeatOption.selectedDays);
     // Handle saving repetition settings in your task data or logic
     console.log('Repeat Option:', repeatOption);
 
-    // Close the RepeatTaskModal
+    // Close the RepeatTaskModal and set repeatTaskSaved to true
     setIsRepeatTaskVissible(false);
+    setRepeatTaskSaved(true);
   };
+
   const priorityOptions = (
     <View style={styles.priorityOptionsContainer}>
       <Text style={styles.instructionText}>Set priority of task</Text>
@@ -335,6 +362,7 @@ function TaskInput(props) {
                   visible={isRepeatTaskVissible}
                   onSave={handleRepeatTaskSave}
                   onClose={handleToggleRepeat}
+
                 />
               )}
             </View>
