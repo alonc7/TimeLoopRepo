@@ -16,7 +16,6 @@ class Task {
         this.dueTime = dueTime;
         this.priority = priority;
         // this.isOnTime = isOnTime; // task that is still not after due of dueTime .
-        // this.isRepeated = isRepeated; // Indicates if the task is repeated
         this.isRepeat = isRepeat;
         this.repeatOption = repeatOption; // Options: 'none', 'daily', 'weekly', 'monthly', etc.
         this.selectedDays = selectedDays; // Array of selected days for weekly or monthly repetition
@@ -173,8 +172,7 @@ class Task {
         try {
 
             let tasks = user.Tasks.map((task) => {
-                if (new ObjectId(taskId).equals(task._id)) {
-                    console.log(task._id);
+                if (taskId === (task._id)) {
                     task.status = 'pending'
                 }
                 return task;
@@ -186,6 +184,24 @@ class Task {
             throw new Error('Failed to pend task');
         }
     }
+
+    // static async pendTask(user, taskId) {
+    //     try {
+
+    //         let tasks = user.Tasks.map((task) => {
+    //             if (new ObjectId(taskId).equals(task._id)) {
+    //                 console.log(task._id);
+    //                 task.status = 'pending'
+    //             }
+    //             return task;
+    //         })
+    //         await new db().pendTask(User.collection, user, tasks);
+
+    //         return true;
+    //     } catch (error) {
+    //         throw new Error('Failed to pend task');
+    //     }
+    // }
 
 
 

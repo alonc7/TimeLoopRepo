@@ -6,37 +6,15 @@ import moment from 'moment'; // Import moment.js library
 
 function RepeatTaskModal(props) {
     // State variables
-    const [repeatOption, setRepeatOption] = useState('none');
-    const [selectedDays, setSelectedDays] = useState([]);
-    const [selectedTime, setSelectedTime] = useState(new Date());
-    // const [startOption, setStartOption] = useState(new Date());
-    // const [endOption, setEndOption] = useState('never');
-    // const [endDate, setEndDate] = useState(new Date());
-    // const [occurrences, setOccurrences] = useState(1);
-    const [selectedOnEndDate, setSelectedOnEndDate] = useState(new Date()); // Initialize with a default date
-    // const [selectedOnStartDate, setSelectedOnStartDate] = useState(new Date()); // Initialize with a default date
-    const [startDate, setStartDate] = useState(new Date())
-    // State variables for visibility control
+    const { repeatOption, selectedDays, repeatSelectedTime, updateRepeatOption, updateSelectedDays, updateRepeatSelectedTime } = props;
     const [isTimePickerVisible, setIsTimePickerVisible] = useState(false);
-    const [isEndDateVisible, setIsEndDateVisible] = useState(false);
-    // const [isOccurrencesVisible, setIsOccurrencesVisible] = useState(false);
-    // const [isStartDateVisible, setIsStartDateVisible] = useState(false);
-
     const DAYS_SELECT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
     // Handle changing the repeat option
     const handleRepeatOptionChange = (option) => {
-        setRepeatOption(option);
-
+        updateRepeatOption(option);
         // Reset visibility and values when changing repeat option
         setIsTimePickerVisible(false);
-        setIsEndDateVisible(false);
-        // setIsOccurrencesVisible(false);
-
-        // Additional logic based on the selected option
-        if (option === 'daily') {
-            // Implement any specific logic for the 'daily' option here
-        }
     };
 
     // Handle day selection
@@ -44,83 +22,37 @@ function RepeatTaskModal(props) {
         const updatedDays = selectedDays.includes(day)
             ? selectedDays.filter((selectedDay) => selectedDay !== day)
             : [...selectedDays, day];
-        setSelectedDays(updatedDays);
+        updateSelectedDays(updatedDays);
     };
 
     // Handle changing the time
     const handleTimeChange = (event, selectedDate) => {
+        let formattedTime = formatTimeTo24Hour(selectedDate?.toLocaleTimeString());
         if (event.type === 'set') {
-            setSelectedTime(selectedDate);
+            updateRepeatSelectedTime(formattedTime);
             setIsTimePickerVisible(false); // Close the time picker on 'OK'
         }
     };
 
-    // Handle changing the end option
-    // const handleEndOptionChange = (option) => {
-    //     setEndOption(option);
-
-    //     // Reset visibility and values when changing end option
-    //     setIsEndDateVisible(false);
-    //     setIsOccurrencesVisible(false);
-
-    //     if (option === 'on') {
-    //         // Show the date picker for "On"
-    //         setIsEndDateVisible(true);
-    //     } else if (option === 'occurrences') {
-    //         setIsOccurrencesVisible(true); // Show the occurrences picker
-    //     } else {
-    //         setSelectedOnEndDate(new Date()); // Reset the selected "On" date for other options
-    //     }
-    // };
-
-
-    // Handle changing the end date
-    // const handleEndDateChange = (event, selectedDate) => {
-    //     if (event.type === 'set') {
-    //         setEndDate(selectedDate);
-    //         setIsEndDateVisible(false); // Close the end date picker on 'OK'
-    //     }
-    // };
-    // Handle changing the start date
-    // const handleStartDateChange = (event, selectedDate) => {
-    //     if (event.type === 'set') {
-    //         setStartDate(selectedDate);
-    //         setIsStartDateVisible(false); // Close the end date picker on 'OK'
-    //     }
-    // };
-
-    // Handle changing the number of occurrences
-    // const handleOccurrencesChange = (value) => {
-    //     setOccurrences(value);
-    //     setIsOccurrencesVisible(false); // Close the occurrences picker on 'OK'
-    // };
     // Function to format time to 24-hour format
     const formatTimeTo24Hour = (time) => {
         // Assuming the input time is in "h:mm:ss A" format
         return moment(time, 'h:mm:ss A').format('HH:mm:ss');
     };
+
     // Handle saving the selected options
     const handleSave = () => {
-        // Format the selectedTime to 24-hour format before sending
-        const formattedTime = formatTimeTo24Hour(selectedTime.toLocaleTimeString());
+        // const formattedTime = formatTimeTo24Hour(repeatSelectedTime?.toLocaleTimeString());
+
         // Pass the selected options to the parent component
         props.onSave({
             repeatOption,
             selectedDays,
-            selectedTime: formattedTime, // Use the formatted time
-            // startOption, // Include start option
-            // startDate, // Include start date
-            // endOption,
-            // endDate,
-            // occurrences,
+            repeatSelectedTime,
+
         });
     };
 
-    //Handle changing the start option
-    // const handleStartOptionChange = (option) => {
-    //     setStartOption(option);
-    //     setIsStartDateVisible(option === 'on'); // Show the date picker when the option is set to 'on'
-    // };
 
     return (
         <Modal visible={props.visible} animationType="slide" transparent={true}>
@@ -141,7 +73,7 @@ function RepeatTaskModal(props) {
                     </View>
 
                     {/* Day Selection */}
-                    {repeatOption === 'Custome' && (
+                    {repeatOption === 'custome' && (
 
                         <View style={styles.daySelectionContainer}>
                             {DAYS_SELECT.map((day, index) => (
@@ -159,55 +91,6 @@ function RepeatTaskModal(props) {
                         </View>
                     )}
 
-                    {/*Starts */}
-                    {/* <Text style={styles.startsLabel}>Starts:</Text>
-                    <View style={styles.endOptionsContainer}>
-                        <TouchableOpacity
-                            style={[
-                                styles.endOptionButton,
-                                startOption === 'now' && styles.selectedEndOption,
-                            ]}
-                            onPress={() => handleStartOptionChange('now')}
-                        >
-                            <Text>Now</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[
-                                styles.endOptionButton,
-                                startOption === 'on' && styles.selectedEndOption,
-                            ]}
-                            onPress={() => handleStartOptionChange('on')}
-                        >
-                            <Text>On</Text>
-                        </TouchableOpacity>
-                    </View> */}
-
-                    {/* Start Date */}
-                    {/* {startOption === 'on' && (
-                        <>
-                            <Text style={styles.endDateLabel}>Select Start Date:</Text>
-                            <Pressable onPress={() => setIsStartDateVisible(true)}>
-                                <TextInput
-                                    value={selectedOnStartDate.toDateString()}
-                                    style={{ fontWeight: 'bold' }}
-                                    editable={false}
-                                />
-                            </Pressable>
-                            {isStartDateVisible && (
-                                <DateTimePicker
-                                    value={selectedOnStartDate}
-                                    mode="date"
-                                    onChange={(event, selectedDate) => {
-                                        setIsStartDateVisible(false);
-                                        setSelectedOnEndDate(selectedDate || selectedOnEndDate);
-                                        handleStartDateChange(event, selectedDate);
-                                    }}
-                                />
-                            )}
-                        </>
-                    )} */}
-
-
                     {/* Time Picker */}
                     <Text
                         onPress={() => setIsTimePickerVisible(true)}
@@ -215,106 +98,23 @@ function RepeatTaskModal(props) {
                     >
                         Select Time:
                     </Text>
-                    <TextInput
-                        value={selectedTime.toLocaleTimeString()}
-                        style={{ fontWeight: 'bold' }}
-                        editable={false}
-                    />
+                    {repeatSelectedTime && (
+                        <TextInput
+                            value={repeatSelectedTime}
+                            style={{ fontWeight: 'bold' }}
+                            editable={false}
+                        />
+                    )}
                     {isTimePickerVisible && (
+                        console.log(repeatSelectedTime),
                         <DateTimePicker
-                            value={selectedTime}
+                            value={repeatSelectedTime ? (new Date(repeatSelectedTime)) : new Date()}
                             mode="time"
                             onChange={handleTimeChange}
                         />
                     )}
 
-                    {/* Ends */}
-                    {/* <Text style={styles.endsLabel}>Ends:</Text>
-                    <View style={styles.endOptionsContainer}>
-                        <TouchableOpacity
-                            style={[
-                                styles.endOptionButton,
-                                endOption === 'never' && styles.selectedEndOption,
-                            ]}
-                            onPress={() => handleEndOptionChange('never')}
-                        >
-                            <Text>Never</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[
-                                styles.endOptionButton,
-                                endOption === 'on' && styles.selectedEndOption,
-                            ]}
-                            onPress={() => handleEndOptionChange('on')}
-                        >
-                            <Text>On</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[
-                                styles.endOptionButton,
-                                endOption === 'occurrences' && styles.selectedEndOption,
-                            ]}
-                            onPress={() => handleEndOptionChange('occurrences')}
-                        >
-                            <Text>After</Text>
-                        </TouchableOpacity>
-                    </View> */}
 
-                    {/* End Date */}
-                    {/* {isEndDateVisible && (
-                        <>
-                            <Text style={styles.endDateLabel}>Select End Date:</Text>
-                            {endOption === 'on' && (
-                                <>
-                                    <DateTimePicker
-                                        value={selectedOnEndDate}
-                                        mode="date"
-                                        onChange={(event, selectedDate) => {
-                                            setIsEndDateVisible(false);
-                                            setSelectedOnEndDate(selectedDate || selectedOnEndDate);
-                                            handleEndDateChange(event, selectedDate)
-                                        }}
-                                    />
-                                </>
-                            )}
-
-                        </>
-                    )} */}
-
-                    {/* <TextInput
-                        value={selectedOnEndDate.toDateString()}
-                        style={{ fontWeight: 'bold' }}
-                        editable={false}
-                    /> */}
-
-                    {/* Occurrences */}
-                    {/* {} */}
-                    {/* // isOccurrencesVisible &&  */}
-                    {/* // ( */}
-                    {/* //     <> */}
-                    {/* //         <Text style={styles.occurrencesLabel}>Number of Occurrences:</Text> */}
-                    {/* //         <TextInput */}
-                    {/* //             value={String(occurrences)} */}
-                    {/* //             editable={false} */}
-                    {/* //         /> */}
-                    {/* //         Implement custom input or picker for occurrences */}
-                    {/* //         <Picker */}
-                    {/* //             selectedValue={occurrences} */}
-                    {/* //             onValueChange={(itemValue) => handleOccurrencesChange(itemValue)} */}
-                    {/* //         > */}
-                    {/* //             {Array.from({ length: 10 }, (_, i) => ( */}
-                    {/* //                 <Picker.Item key={i} label={String(i + 1)} value={i + 1} /> */}
-                    {/* //             ))} */}
-                    {/* //         </Picker> */}
-                    {/* //     </> */}
-                    {/* // )} */}
-                    {/* {endOption === 'on' && (
-                        <TextInput
-                            value={selectedTime.toLocaleTimeString()}
-                            style={{ fontWeight: 'bold' }}
-                            editable={false}
-                        />
-                    )} */}
                     {/* Save and Cancel Buttons */}
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
@@ -324,7 +124,6 @@ function RepeatTaskModal(props) {
                             <Text style={styles.buttonText}>Cancel</Text>
                         </TouchableOpacity>
                     </View>
-
                 </View>
             </View>
         </Modal >

@@ -125,15 +125,6 @@ const Login = ({ navigation }) => {
           </View>
         </View>
 
-        <View style={styles.checkboxContainer}>
-          <Checkbox
-            style={styles.checkbox}
-            value={isChecked}
-            onValueChange={setIsChecked}
-            color={isChecked ? COLORS.primary : undefined}
-          />
-          <Text style={styles.checkboxLabel}>Remember Me</Text>
-        </View>
 
         <Button
           onPress={() => handleLogin(email, password)}
@@ -142,27 +133,6 @@ const Login = ({ navigation }) => {
           style={styles.button}
         />
 
-        <View style={styles.dividerContainer}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>Or Login with</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        <View style={styles.socialLoginContainer}>
-          <TouchableOpacity
-            onPress={() => console.log("Pressed")}
-            style={styles.socialLoginButton}
-          >
-            <Text>Facebook</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => console.log("Pressed")}
-            style={styles.socialLoginButton}
-          >
-            <Text>Google</Text>
-          </TouchableOpacity>
-        </View>
 
         <View style={styles.registerContainer}>
           <Text style={styles.registerText}>Don't have an account?</Text>

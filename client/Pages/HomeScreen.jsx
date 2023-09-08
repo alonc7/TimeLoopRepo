@@ -1,35 +1,66 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert, StyleSheet, SafeAreaView, Dimensions, FlatList } from 'react-native'; // Added Dimensions
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import * as ImagePicker from 'expo-image-picker';
-import COLORS from '../constants/colors';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MainContext } from '../Components/Context/MainContextProvider';
-import TaskListModal from '../Components/Modals/TaskListModal';
-import CountdownModal from '../Components/Modals/CountDownModal';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    Image,
+    Alert,
+    StyleSheet,
+    SafeAreaView,
+    Dimensions,
+    FlatList
+} from 'react-native'; // Import necessary components from React Native
+import Ionicons from 'react-native-vector-icons/Ionicons'; // Import Ionicons for icons
+import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker from Expo
+import COLORS from '../constants/colors'; // Import custom color constants
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage for data storage
+import { MainContext } from '../Components/Context/MainContextProvider'; // Import MainContext from a custom context provider
+import TaskListModal from '../Components/Modals/TaskListModal'; // Import a custom TaskListModal component
+import CountdownModal from '../Components/Modals/CountDownModal'; // Import a custom CountdownModal component
 
+// Get the device screen width and define a box width as a fraction of it
 const { width } = Dimensions.get('window');
 const boxWidth = width * 0.4;
+
+// Define the HomeScreen component
 function HomeScreen() {
-    const { userName, capitalizeFirstLetter, pendingTaskList, completedTaskList, allTasks, getTodayTasks, getCurrentWeekTasks } = useContext(MainContext);
-    const [userImage, setUserImage] = useState(null);
-    const [isModalVisible, setModalVisible] = useState(false);
-    const [selectedTask, setSelectedTask] = useState(null);
-    const [isCountdownModalVisible, setCountdownModalVisible] = useState(false);
-    const [showTodayTasks, setShowTodayTasks] = useState(false);
-    const [showCurrWeekTasks, setShowCurrWeekTasks] = useState(false);
+    // Context API: Access data and functions from the MainContextProvider
+    const {
+        userName,
+        capitalizeFirstLetter,
+        pendingTaskList,
+        completedTaskList,
+        getTodayTasks,
+        getCurrentWeekTasks
+    } = useContext(MainContext);
+
+    // State variables used in the component
+    const [userImage, setUserImage] = useState(null); // User's profile image
+    const [isModalVisible, setModalVisible] = useState(false); // Modal visibility
+    const [selectedTask, setSelectedTask] = useState(null); // Selected task data
+    const [isCountdownModalVisible, setCountdownModalVisible] = useState(false); // Countdown modal visibility
+    const [showTodayTasks, setShowTodayTasks] = useState(false); // Toggle display of today's tasks
+    const [showCurrWeekTasks, setShowCurrWeekTasks] = useState(false); // Toggle display of current week's tasks
 
     useEffect(() => {
+        // Load the user's profile image when the component mounts
         retrieveUserImage();
+    }, [userImage]);
 
-    }, []);
-
+    // Function: toggleTodayTasks
+    // Purpose: Toggles the display of today's tasks in the component.
     const toggleTodayTasks = () => {
         setShowTodayTasks(!showTodayTasks);
     }
+
+    // Function: toggleCurrWeekTasks
+    // Purpose: Toggles the display of current week's tasks in the component.
     const toggleCurrWeekTasks = () => {
         setShowCurrWeekTasks(!showCurrWeekTasks);
     }
+
+    // Function: retrieveUserImage
+    // Purpose: Retrieves the user's profile image from AsyncStorage and sets it in the component's state.
     const retrieveUserImage = async () => {
         try {
             const imageUri = await AsyncStorage.getItem('userImage');
@@ -41,11 +72,13 @@ function HomeScreen() {
         }
     };
 
-    const saveUserImage = async () => {
+    // Function: saveUserImage
+    // Purpose: Saves the user's profile image in AsyncStorage and displays an alert upon successful save.
+    const saveUserImage = async (newImageUri) => {
         try {
-            if (userImage) {
-                await AsyncStorage.setItem('userImage', userImage);
-                Alert.alert('image saved successfully')
+            if (newImageUri) {
+                await AsyncStorage.setItem('userImage', newImageUri);
+                Alert.alert('Image saved successfully')
             } else {
                 await AsyncStorage.removeItem('userImage');
             }
@@ -53,9 +86,11 @@ function HomeScreen() {
             console.log('Error saving user image', error);
         }
     };
-
+    // Function: openImagePicker
+    // Purpose: Opens the image picker, allowing the user to select an image from the gallery.
     const openImagePicker = async () => {
         try {
+            // Request permission to access the device's media library.
             const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
             if (!permissionResult.granted) {
@@ -63,19 +98,24 @@ function HomeScreen() {
                 return;
             }
 
+            // Launch the image picker and set the selected image as the user's profile image.
             const pickerResult = await ImagePicker.launchImageLibraryAsync();
 
             if (!pickerResult.canceled) {
-                setUserImage(pickerResult.assets[0].uri);
                 saveUserImage(pickerResult.assets[0].uri);
+                setUserImage(pickerResult.assets[0].uri);
+                console.log('Successfully saved user image from Gallery');
             }
         } catch (error) {
             console.log('Error picking an image:', error);
         }
     };
 
+    // Function: openCamera
+    // Purpose: Opens the device's camera, allowing the user to take a photo.
     const openCamera = async () => {
         try {
+            // Request permission to access the device's camera.
             const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
             if (!permissionResult.granted) {
@@ -83,18 +123,20 @@ function HomeScreen() {
                 return;
             }
 
+            // Launch the camera and set the captured image as the user's profile image.
             const cameraResult = await ImagePicker.launchCameraAsync();
 
             if (!cameraResult.canceled) {
                 setUserImage(cameraResult.assets[0].uri);
                 saveUserImage(cameraResult.assets[0].uri);
-                console.log('gets to saveUserImage');
             }
         } catch (error) {
             console.log('Error taking a photo:', error);
         }
     };
 
+    // Function: handleImageSelection
+    // Purpose: Displays an alert to let the user choose between selecting an image from the gallery or taking a photo with the camera.
     const handleImageSelection = () => {
         Alert.alert(
             'Choose Image Source',
@@ -112,26 +154,36 @@ function HomeScreen() {
                     text: 'Camera',
                     onPress: openCamera,
                 },
-
             ],
         );
     };
+
+    // Function: handleModalVisible
+    // Purpose: Toggles the visibility of a modal in the component.
     const handleModalVisible = () => {
         setModalVisible(!isModalVisible);
     };
+
+    // Function: handlePendingTasksPress
+    // Purpose: Sets the selected task list to pending tasks and toggles the visibility of a modal in the component.
     const handlePendingTasksPress = () => {
         setSelectedTask(pendingTaskList);
         handleModalVisible();
     };
 
+    // Function: handleCompletedTasksPress
+    // Purpose: Sets the selected task list to completed tasks and toggles the visibility of a modal in the component.
     const handleCompletedTasksPress = () => {
         setSelectedTask(completedTaskList);
-        console.log(completedTaskList);
         handleModalVisible();
     };
+
+    // Function: handleCountdownPress
+    // Purpose: Opens a countdown modal in the component.
     const handleCountdownPress = () => {
         setCountdownModalVisible(true);
     };
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -148,6 +200,7 @@ function HomeScreen() {
                                 <Ionicons name="person-circle-outline" size={80} color={COLORS.grey} />
                             )}
                         </View>
+
                     </TouchableOpacity>
                 </View>
                 <View style={styles.bubbleContainer}>

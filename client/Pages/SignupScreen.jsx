@@ -1,4 +1,4 @@
-import React ,{ useState } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -234,7 +234,7 @@ const Signup = ({ navigation }) => {
                                 )}
                             </View>
 
-                            <View style={styles.inputContainer}>
+                            {/* <View style={styles.inputContainer}>
                                 <Text style={styles.inputLabel}>Birthdate</Text>
                                 <View style={styles.inputWrapper}>
                                     <Ionicons
@@ -258,10 +258,10 @@ const Signup = ({ navigation }) => {
                                 {touched.birthdate && errors.birthdate && (
                                     <Text style={styles.errorText}>{errors.birthdate}</Text>
                                 )}
-                            </View>
+                            </View> */}
 
                             <View style={styles.checkboxContainer}>
-                                <TouchableOpacity onPress={() => setChecked(!checked)}>
+                                <TouchableOpacity onPress={() => setChecked(!checked)} style={styles.checkboxWrapper}>
                                     <Checkbox
                                         style={styles.checkbox}
                                         value={checked}
@@ -275,33 +275,12 @@ const Signup = ({ navigation }) => {
                             </View>
 
                             <Button
-                                title="Sign Up"
+                                title="SIGN UP"
                                 onPress={handleSubmit}
-                                filled
+                                // filled
                                 style={styles.signupButton}
                             />
 
-                            <View style={styles.dividerContainer}>
-                                <View style={styles.divider} />
-                                <Text style={styles.dividerText}>Or Sign up with</Text>
-                                <View style={styles.divider} />
-                            </View>
-
-                            <View style={styles.socialSignupContainer}>
-                                <TouchableOpacity
-                                    onPress={() => console.log('Pressed')}
-                                    style={styles.socialSignupButton}
-                                >
-                                    <Text>Facebook</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    onPress={() => console.log('Pressed')}
-                                    style={styles.socialSignupButton}
-                                >
-                                    <Text>Google</Text>
-                                </TouchableOpacity>
-                            </View>
                             <View style={styles.loginContainer}>
                                 <Text style={styles.loginText}>Already have an account? </Text>
                                 <Pressable onPress={() => navigation.navigate('Login')}>
@@ -378,9 +357,9 @@ const styles = StyleSheet.create({
         right: 12,
     },
     checkboxContainer: {
-        flexDirection: 'column',
-        marginVertical: 4,
-        alignItems: 'flex-start',
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 14,
     },
     checkboxWrapper: {
         flexDirection: 'row',
@@ -393,6 +372,7 @@ const styles = StyleSheet.create({
         fontSize: 11,
         color: COLORS.black,
     },
+
     signupButton: {
         marginTop: 18,
         marginBottom: 4,

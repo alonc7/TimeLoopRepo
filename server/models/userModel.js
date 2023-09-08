@@ -3,13 +3,12 @@ const bcrypt = require('bcrypt');
 
 class User {
     static collection = 'users';
-  
-    constructor(email, firstName, lastName, password, birthdate) {
+
+    constructor(email, firstName, lastName, password, ) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.password = password;
-        this.birthdate = birthdate;
         // Initialize the tasks field as an empty array
     }
 

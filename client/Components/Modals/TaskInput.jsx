@@ -6,7 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../../constants/colors';
 import RepeatTaskModal from './RepeatTaskModal';
 
+
 function TaskInput(props) {
+  const [repeatOption, setRepeatOption] = useState(null)
+  const [selectedDays, setSelectedDays] = useState([])
+  const [repeatSelectedTime, setRepeatSelectedTime] = useState(null)
   const [enteredTaskText, setEnteredTaskText] = useState('');
   const [enteredDescription, setEnteredDescription] = useState('');
   const [selectedDate, setSelectedDate] = useState(null);
@@ -23,10 +27,8 @@ function TaskInput(props) {
   const [isStartTimeSelected, setIsStartTimeSelected] = useState(false)
   const [isDueTimeSelected, setDueTimeSelected] = useState(false)
   const [isRepeatTaskVissible, setIsRepeatTaskVissible] = useState(false)
-  const [repeatTaskSaved, setRepeatTaskSaved] = useState(false);
-  const [repeatOption, setRepeatOption] = useState(null);
-  const [selectedDays, setSelectedDays] = useState([]);
-  const [repeatSelectedTime, setRepeatSelectedTime] = useState(null)
+  const [isRepeatTask, setisRepeatTask] = useState(false);
+
   // const [isInfoVisible, setInfoVisible] = useState(true); // New state for the info message
 
   const taskInputHandler = (enteredText) => {
@@ -56,8 +58,8 @@ function TaskInput(props) {
       setDueTimeSelected(true);
       setDueTimeSelected(true);
 
-      // Check if it's a repeated task based on repeatTaskSaved
-      if (repeatTaskSaved) {
+      // Check if it's a repeated task based on isRepeatTask
+      if (isRepeatTask) {
         props.onAddTask(
           enteredTaskText,
           enteredDescription,
@@ -66,7 +68,7 @@ function TaskInput(props) {
           startTime,
           selectedTime,
           selectedPriority,
-          repeatTaskSaved, // Send current state of repteadTaskSaved ( saved \ not saved) -- Boolean
+          isRepeatTask, // Send current state of repteadTaskSaved ( saved \ not saved) -- Boolean
           repeatOption, // Pass the repeat option from the modal
           selectedDays, // Pass the selected days from the modal
           repeatSelectedTime
@@ -89,7 +91,7 @@ function TaskInput(props) {
       setisStartDateSelected(false);
       setIsStartTimeSelected(false);
       setDueTimeSelected(false);
-      setRepeatTaskSaved(false); // Reset the flag for the next task
+      setisRepeatTask(false); // Reset the flag for the next task
 
       props.toggleBtn();
     }
@@ -102,6 +104,13 @@ function TaskInput(props) {
     }
 
     console.log(enteredTaskText, enteredDescription, startDate, selectedDate, startTime, selectedTime, selectedPriority);
+    // console.log('enteredTaskText', enteredTaskText)
+    // console.log('enteredDescription', enteredDescription)
+    // console.log('startDate', startDate)
+    // console.log('selectedDate', selectedDate)
+    // console.log('startTime', startTime)
+    // console.log('selectedTime', selectedTime)
+    // console.log('selectedPriority', selectedPriority)
     props.onAddTask(
       enteredTaskText,
       enteredDescription,
@@ -134,7 +143,7 @@ function TaskInput(props) {
   };
 
   const handleTimeChange = (time) => {
-    setSelectedTime(time.toString());
+    setSelectedTime(time);
 
   };
 
@@ -167,15 +176,15 @@ function TaskInput(props) {
   };
 
   const handleRepeatTaskSave = (repeatOption) => {
-    setRepeatSelectedTime(repeatOption.selectedTime.toLocaleTimeString())
-    setRepeatOption(repeatOption.repeatOption);
-    setSelectedDays(repeatOption.selectedDays);
+    // setRepeatSelectedTime(repeatOption.selectedTime)
+    // setRepeatOption(repeatOption.repeatOption);
+    // setSelectedDays(repeatOption.selectedDays);
     // Handle saving repetition settings in your task data or logic
     console.log('Repeat Option:', repeatOption);
 
-    // Close the RepeatTaskModal and set repeatTaskSaved to true
+    // Close the RepeatTaskModal and set isRepeatTask to true
     setIsRepeatTaskVissible(false);
-    setRepeatTaskSaved(true);
+    setisRepeatTask(true);
   };
 
   const priorityOptions = (
@@ -235,6 +244,21 @@ function TaskInput(props) {
     </View>
   );
 
+  // Define functions to update the state
+  const updateRepeatOption = (option) => {
+    console.log(option);
+    setRepeatOption(option);
+  };
+
+  const updateSelectedDays = (days) => {
+    console.log(days);
+    setSelectedDays(days);
+  };
+
+  const updateRepeatSelectedTime = (time) => {
+    console.log(time);
+    setRepeatSelectedTime(time);
+  };
 
   return (
 
@@ -362,7 +386,18 @@ function TaskInput(props) {
                   visible={isRepeatTaskVissible}
                   onSave={handleRepeatTaskSave}
                   onClose={handleToggleRepeat}
-
+                  //---------------------//
+                  repeatOption={repeatOption}
+                  updateRepeatOption={updateRepeatOption}
+                  // setRepeatOption={setRepeatOption}
+                  //---------------------//
+                  selectedDays={selectedDays}
+                  // setSelectedDays={setSelectedDays}
+                  updateSelectedDays={updateSelectedDays}
+                  //---------------------//
+                  repeatSelectedTime={repeatSelectedTime}
+                  // setRepeatSelectedTime={setRepeatSelectedTime}
+                  updateRepeatSelectedTime={updateRepeatSelectedTime}
                 />
               )}
             </View>

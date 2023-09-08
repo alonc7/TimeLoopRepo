@@ -79,7 +79,6 @@ router.put('/editTask', async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         const updatedUser = await Task.updateTask(user, updatedTask);
-
         if (updatedUser) {
             res.status(200).json({ message: 'Task updated successfully' });
         } else {

@@ -95,25 +95,25 @@ function EditTaskModal(props) {
                         style={styles.textInput}
                         onChangeText={(value) => handleInputChange(value, 'startDate')}
                         value={editedStartDate}
-                        placeholder="Start Date: _/_/_"
+                        placeholder="Start Date: YYYY/MM/DD"
                     />
                     <TextInput
                         style={styles.textInput}
                         onChangeText={(value) => handleInputChange(value, 'startTime')}
                         value={editedStartTime}
-                        placeholder="Start Time: _:_"
+                        placeholder="Start Time: HH:MM"
                     />
                     <TextInput
                         style={styles.textInput}
                         onChangeText={(value) => handleInputChange(value, 'dueDate')}
                         value={editedDueDate}
-                        placeholder="Due Date: _/_/_"
+                        placeholder="Due Date: YYYY/MM/DD"
                     />
                     <TextInput
                         style={styles.textInput}
                         onChangeText={(value) => handleInputChange(value, 'dueTime')}
                         value={editedDueTime}
-                        placeholder="Due Time: _:_"
+                        placeholder="Due Time: HH:MM"
                     />
 
 

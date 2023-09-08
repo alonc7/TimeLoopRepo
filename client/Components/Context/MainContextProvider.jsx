@@ -2,7 +2,6 @@ import React, { createContext, useEffect, useState, useRef } from 'react'
 import { Server_path } from '../../utils/api-url';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
 import { AppState } from 'react-native';
 
 export const MainContext = createContext()
@@ -32,7 +31,8 @@ function MainContextProvider({ children }) {
   const [completedTask, setCompletedTask] = useState(null);
   const [isListenerActive, setIsListenerActive] = useState(true);
 
-  // const [deletedTask, setDeletedTask] = useState(null);
+
+
 
   //Const 
   const MAX_FOR_DELETE = 20;
@@ -133,8 +133,16 @@ function MainContextProvider({ children }) {
       console.log(tasksToDelete.length);
       performDeleteRequest(tasksToDelete);
     }
+    if (tasksToComplete.length >= MAX_FOR_COMPLETE) {
+      console.log(tasksToComplete.length);
+      performCompleteRequest(tasksToComplete);
+    }
+    if (tasksToAdd.length >= MAX_FOR_ADD) {
+      console.log(tasksToAdd.length);
+      performAddRequest(tasksToAdd);
+    }
 
-  }, [tasksToDelete])
+  }, [tasksToDelete, tasksToComplete, tasksToAdd])
 
 
   // useEffect(() => {
@@ -216,7 +224,6 @@ function MainContextProvider({ children }) {
 
   }
 
-
   const loadAllTasks = async (userEmail) => {
     try {
       const response = await fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`);
@@ -233,9 +240,9 @@ function MainContextProvider({ children }) {
   };
 
   /**
- * Deletes a task from the pending task list and sends a request to delete it on the server.
- * @param {string} taskId - The unique identifier of the task to delete.
- */
+  * Deletes a task from the pending task list and sends a request to delete it on the server.
+  * @param {string} taskId - The unique identifier of the task to delete.
+  */
   async function deleteTask(taskId) {
     try {
       // Find the task to delete
@@ -290,10 +297,10 @@ function MainContextProvider({ children }) {
   };
 
   /**
- * Adds a task to the list of tasks to delete.
- * Removes the task from the pendingTaskList.
- * @param {string} taskId - The unique identifier of the task to delete.
- */
+  * Adds a task to the list of tasks to delete.
+  * Removes the task from the pendingTaskList.
+  * @param {string} taskId - The unique identifier of the task to delete.
+  */
   const addToTasksToDelete = (taskId) => {
     setTasksToDelete(prevTasks => [...prevTasks, taskId]);
     // Remove the task from pendingTaskList
@@ -416,8 +423,32 @@ function MainContextProvider({ children }) {
         console.error('Error adding tasks:', error)
       }
     }
-  }
+  };
 
+  const handleEditTask = (userEmail, updatedTask) => {
+    // Update the task locally in the pendingTaskList first
+    const updatedTaskId = updatedTask._id;
+    setPendingTaskList((prevTasks) =>
+      prevTasks.map((task) =>
+        task._id === updatedTaskId ? updatedTask : task
+      )
+    );
+    // Check if the edited task is already in tasksToAdd
+    const isTaskInTasksToAdd = tasksToAdd.some((task) => task._id === updatedTaskId);
+    if (isTaskInTasksToAdd) {
+      // Update the existing task within tasksToAdd
+      setTasksToAdd((prevTasksToAdd) =>
+        prevTasksToAdd.map((task) =>
+          task._id === updatedTaskId ? updatedTask : task
+        )
+      );
+    } else {
+      // Send the API request to update the task in the database
+      performEditRequest(userEmail, updatedTask);
+    }
+
+    setIsEditModalVisible(false); // Hide the EditTaskModal
+  };
 
   const handleOnCancel = () => {
     setSelectedTask('')
@@ -429,8 +460,95 @@ function MainContextProvider({ children }) {
     setIsEditModalVisible(true); // Show the EditTaskModal
   };
 
-  const handleEditTask = async (userEmail, updatedTask) => {
+  /**
+ * Function to mark a task as incomplete
+ * @param {object} unCompleteTask - The task to be marked as incomplete
+ */
+  async function unComplete(unCompleteTask) {
+    // Store the ID of the task to be marked as incomplete
+    const unCompleteTaskId = unCompleteTask._id;
+
+    // Update the task locally in the pendingTaskList first
+    setCompletedTaskList((prevList) => prevList.filter((task) => task._id !== unCompleteTaskId))
+    setTasksToAdd((prevList) => [...prevList, unCompleteTask])
+    setPendingTaskList((prevList) => [...prevList, unCompleteTask])
+    
+    // Check if the edited task is already in tasksToComplete or tasksToDelete
+    const isTaskInTaskToComplete = tasksToComplete.some((task) => task._id === unCompleteTaskId);
+    const isTaskInTaskToDelete = tasksToDelete.some((task) => task._id === unCompleteTaskId);
+
+    if (isTaskInTaskToComplete) {
+      // Update the existing task within tasksToComplete
+      setTasksToComplete((prevTasksToComplete) =>
+        prevTasksToComplete.map((task) =>
+          task._id === unCompleteTaskId ? updatedTask : task
+        )
+      );
+    } else if (isTaskInTaskToDelete) {
+      // Update the existing task within tasksToDelete
+      setTasksToDelete((prevTasksToDelete) =>
+        prevTasksToDelete.map((task) =>
+          task._id === unCompleteTaskId ? updatedTask : task
+        )
+      );
+    } else {
+      // Send the API request to update the task in the database
+      await performPendTask(unCompleteTaskId);
+    }
+  }
+
+  /**
+   * Function to perform the actual pending action by making an API request
+   * @param {string} updatedTaskId - The ID of the task to be marked as incomplete
+   */
+  const performPendTask = async (updatedTaskId) => {
     try {
+      // Make a PUT request to the server to mark the task as pending
+      const response = await fetch(`${Server_path}/api/tasks/pendTask`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userEmail, updatedTaskId }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to mark the task as pending:', response.status);
+      }
+    } catch (error) {
+      console.error('An error occurred while marking the task as pending:', error);
+    }
+  };
+
+
+  // const handleEditTask = async (userEmail, updatedTask) => {
+  //   try {
+  //     // Update the task locally in the pendingTaskList first
+  //     const updatedTaskId = updatedTask._id;
+  //     setPendingTaskList((prevTasks) =>
+  //       prevTasks.map((task) =>
+  //         task._id === updatedTaskId ? updatedTask : task
+  //       )
+  //     );
+
+  //     const response = await axios.put(`${Server_path}/api/tasks/editTask`, {
+  //       userEmail,
+  //       updatedTask
+  //     });
+  //     if (response.status.ok) {
+  //       setIsEditModalVisible(false); // Hide the EditTaskModal
+  //       alert('Task updated successfully');
+  //     } else {
+  //       alert('Something went wrong with task updating');
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert('Something went wrong with task updating');
+  //   }
+  // };
+  const performEditRequest = async (userEmail, updatedTask) => {
+    try {
+
       const response = await axios.put(`${Server_path}/api/tasks/editTask`, {
         userEmail,
         updatedTask
@@ -443,10 +561,9 @@ function MainContextProvider({ children }) {
       }
     } catch (error) {
       console.error(error);
-      alert('Something went wrong with task updating');
+      alert('Something went wrong with task updating', error);
     }
   };
-
   const loadTasks = async (userEmail) => {
     try {
       const [pendingResponse, completedResponse, allTasksResponse] = await Promise.all([
@@ -502,7 +619,8 @@ function MainContextProvider({ children }) {
     setPendingTaskList, pendingTaskList, completedTaskList, allTasks, setAllTasks, userImage,
     setUserImage, deleteTask, completeTask, handleOnCancel, handleEdit, selectedTask, handleEditTask,
     isEditModalVisible, getTodayTasks, getCurrentWeekTasks, loadTasks, addTask,
-    showUndoMessage, undoAction, undoTaskData, undoComplete, undoDelete, setShowUndoMessage
+    showUndoMessage, undoAction, undoTaskData, undoComplete, undoDelete, setShowUndoMessage, unComplete
+
     // storeLocalTasks, loadLocalTasks
 
   }

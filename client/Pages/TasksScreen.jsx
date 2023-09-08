@@ -59,7 +59,6 @@ const TasksScreen = () => {
       _id: _id
     };
     addTask(taskData);
-    console.log(taskData);
   };
 
   // function deleteTaskHandler(id) {

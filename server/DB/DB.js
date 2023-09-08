@@ -162,7 +162,6 @@ class DB {
             await this.client.db(this.db_name).collection(collection).updateOne(
                 { email: user.email },
                 { $set: { Tasks: tasks } });
-                console.log(tasks);
         } catch (error) {
             console.error('Failed to update document:', error);
             throw error;

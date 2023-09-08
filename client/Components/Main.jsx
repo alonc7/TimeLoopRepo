@@ -9,7 +9,7 @@ import { ActivityIndicator, StyleSheet, View, Text } from 'react-native';
 
 import COLORS from '../constants/colors';
 export default function Main() {
-    const { authenticated, setAuthenticated, setUserName, setUserEmail, loadTasks, loadLocalTasks } = useContext(MainContext);
+    const { authenticated, setAuthenticated, setUserName, setUserEmail, loadTasks } = useContext(MainContext);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null); // Track errors during API requests
 
@@ -23,10 +23,9 @@ export default function Main() {
 
             if (userDataString !== null) {
                 const userData = JSON.parse(userDataString);
-                setUserEmail(userData.email)
+                setUserEmail(userData.email);
                 setUserName(userData.name);
                 await loadTasks(userData.email);
-                // loadLocalTasks(); // Load tasks from local storage
                 setAuthenticated(true);
 
             } else {
@@ -41,7 +40,19 @@ export default function Main() {
             setIsLoading(false); // Regardless of success or error, set loading state to false
         }
     };
-
+    const logout = async () => {
+        try {
+            // Remove the user data from AsyncStorage
+            await AsyncStorage.removeItem('userData');
+            // Set authenticated state to false and clear user details
+            setAuthenticated(false);
+            setUserName(null);
+            setUserEmail(null);
+        } catch (error) {
+            console.log('Error logging out:', error);
+            // You can handle the error here (e.g., show an error message)
+        }
+    };
 
 
     const getContent = () => {
@@ -72,8 +83,8 @@ export default function Main() {
         // <NavigationContainer>
         <>
             {getContent()}
+            {/* <NotificationComp /> */}
         </>
-        // {/* <NotificationComp  /> */}
         // {/* <Text style={styles.messageText}>"Please wait while we gather the information. This may take a few seconds. Thank you for your patience."</Text> */}
         // </NavigationContainer>
     );
