@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { StyleSheet, View, Text, TextInput, Modal, TouchableOpacity, Keyboard, KeyboardAvoidingView, Pressable, ScrollView, Vibration } from 'react-native';
+import { StyleSheet, ToastAndroid, View, Text, TextInput, Modal, TouchableOpacity, Keyboard, KeyboardAvoidingView, Pressable, ScrollView, Vibration, Alert } from 'react-native';
 import { Button } from 'react-native-paper';
 import DatePicker from 'react-native-modern-datepicker';
 import { Ionicons } from '@expo/vector-icons';
@@ -53,6 +53,15 @@ function TaskInput(props) {
       setisStartDateSelected(true);
       setIsStartTimeSelected(true);
     } else {
+      // Check if due date and time are valid
+      if (
+        selectedDate < startDate ||
+        (selectedDate === startDate && selectedTime < startTime)
+      ) {
+        // Show an error message 
+        ToastAndroid.show('Due date and time cannot be earlier than the start date and time', ToastAndroid.SHORT);
+        return;
+      }
       setDueDate(selectedDate);
       setDueTime(selectedTime);
       setDueTimeSelected(true);

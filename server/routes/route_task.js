@@ -36,14 +36,13 @@ router.get('/getPendingTaskList/:userEmail', async (req, res) => {
 });
 router.get('/getRemovedTaskList/:userEmail', async (req, res) => {
     try {
-        console.log('removed+>', userEmail);
         const { userEmail } = req.params;
         const user = await User.findUserByEmail(userEmail);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        const pendingTaskList = await Task.getPendingTaskList(userEmail);
-        res.json(pendingTaskList);
+        const deletedTaskList = await Task.getRemovedTaskList(userEmail);
+        res.json(deletedTaskList);
 
     } catch (error) {
         console.error(error);

@@ -81,13 +81,7 @@ export default function NotificationComp() {
         const today = formattedDateToday;
         const tomorrow = formattedDateTomorrow;
 
-        // Log current time and formatted dates for debugging
-        // console.log('NOW', now);
-        // console.log('Formatted Date today:', today);
-        // console.log('Formatted Date tomorrow:', tomorrow);
-        // console.log('Formatted Date today:', today);
-
-
+        
         // Loop through pending tasks
         pendingTaskList.forEach(task => {
             if (!task.startDate || !task.dueDate) {
@@ -97,13 +91,7 @@ export default function NotificationComp() {
 
             const taskStartDate = task.startDate;
             const taskDueDate = task.dueDate;
-            // console.log('taskDueDate', taskDueDate);
-            // console.log('today', today);
-            // console.log('tomorrow', tomorrow);
-            // console.log(taskDueDate === today);
-            // console.log(taskStartDate === tomorrow);
-            // console.log(taskStartDate);
-            // console.log(tomorrow);
+
 
             let randomUpliftingTitle = getRandomMessage(startDateTasksUpliftingTitles);
             let randomTaskDueMessage = getRandomMessage(taskDueMessages);

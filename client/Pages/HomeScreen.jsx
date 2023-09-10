@@ -30,8 +30,10 @@ function HomeScreen() {
         capitalizeFirstLetter,
         pendingTaskList,
         completedTaskList,
+        deletedTasksList,
         getTodayTasks,
-        getCurrentWeekTasks
+        getCurrentWeekTasks,
+        getTaskListType
     } = useContext(MainContext);
 
     // State variables used in the component
@@ -41,6 +43,7 @@ function HomeScreen() {
     const [isCountdownModalVisible, setCountdownModalVisible] = useState(false); // Countdown modal visibility
     const [showTodayTasks, setShowTodayTasks] = useState(false); // Toggle display of today's tasks
     const [showCurrWeekTasks, setShowCurrWeekTasks] = useState(false); // Toggle display of current week's tasks
+    const taskListType = getTaskListType(selectedTask, pendingTaskList, completedTaskList, deletedTasksList);
 
     useEffect(() => {
         // Load the user's profile image when the component mounts
@@ -178,6 +181,12 @@ function HomeScreen() {
         handleModalVisible();
     };
 
+    const handleDeletedTaskPress = () => {
+        setSelectedTask(deletedTasksList);
+        handleModalVisible();
+
+    }
+
     // Function: handleCountdownPress
     // Purpose: Opens a countdown modal in the component.
     const handleCountdownPress = () => {
@@ -277,10 +286,10 @@ function HomeScreen() {
                                 <Text style={styles.boxText}>3</Text>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={handleDeletedTaskPress}>
                             <View style={[styles.box, { backgroundColor: '#7DE2D1' }]}>
-                                <Text style={styles.boxContnentText}>Tasks Completed On Time</Text>
-                                <Text style={styles.boxText}>7</Text>
+                                <Text style={styles.boxContnentText}>Tasks  Deleted</Text>
+                                <Text style={styles.boxText}>{deletedTasksList.length}</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -302,7 +311,7 @@ function HomeScreen() {
                             isVisible={isModalVisible}
                             taskList={selectedTask}
                             onClose={handleModalVisible}
-                            isPendingTasks={selectedTask === pendingTaskList} // Pass this prop
+                            taskListType={taskListType}
                         />
                     </View>
                 )}

@@ -18,7 +18,7 @@ function MainContextProvider({ children }) {
   const [allTasks, setAllTasks] = useState([]);
   const [pendingTaskList, setPendingTaskList] = useState([]);// pending task list after modified in server 
   const [completedTaskList, setCompletedTaskList] = useState([]); // completed task list after modified in server 
-  const [deletedTasksList, setDeletedTasks] = useState([]); //deleted task list after modifed in server
+  const [deletedTasksList, setDeletedTasksList] = useState([]); //deleted task list after modifed in server
   const [userImage, setUserImage] = useState(null);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false); // State to manage the visibility of EditTaskModal
   const [selectedTask, setSelectedTask] = useState(null); // State to hold the selected task for editing
@@ -39,51 +39,6 @@ function MainContextProvider({ children }) {
   const MAX_FOR_COMPLETE = 20;
   const MAX_FOR_ADD = 20;
 
-
-
-  // async function syncAppStorageWithDataBaseData() {
-
-  //   setPendingTaskList([]);
-  //   setCompletedTaskList([]);
-  //   setDeletedTasks([]);
-  //   setTasksToComplete([]);
-  //   setTasksToDelete([]);
-
-  //   const updatedData = await loadAllTasks();
-  //   setPendingTaskList(updatedData.filter(task => task.status === 'pending'));
-  //   setCompletedTaskList(updatedData.filter(task => task.status === 'completed'));
-  //   setDeletedTasks(updatedData.filter(task => task.status === 'deleted'));
-  //   // ... Update other state variables
-
-  //   await AsyncStorage.setItem('pendingTasks', JSON.stringify(pendingTaskList));
-  //   await AsyncStorage.setItem('completedTasks', JSON.stringify(completedTaskList));
-  //   await AsyncStorage.setItem('deletedTasks', JSON.stringify(deletedTasksList));
-  // };
-
-
-  // // Function to sync data with the server
-  // const syncDataWithServer = async () => {
-  //   try {
-  //     if (authenticated) {
-  //       await performDeleteRequest(tasksToDelete);
-  //       await performCompleteRequest(tasksToComplete);
-  //       await performAddRequest(tasksToAdd);
-
-  //       setTasksToDelete([]);
-  //       setTasksToComplete([]);
-  //       setTasksToAdd([]);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error syncing data with server:', error);
-  //   }
-  // };
-
-  // // // Use focus effect to run syncDataWithServer when leaving the screen
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     syncDataWithServer();
-  //   }, [tasksToDelete, tasksToComplete, tasksToAdd])
-  // );
 
   const handleAppStateChange = async (newState) => {
     try {
@@ -163,7 +118,7 @@ function MainContextProvider({ children }) {
   //     try {
   //       const storedDeletedTasks = await AsyncStorage.getItem('deletedTasksList');
   //       if (storedDeletedTasks) {
-  //         setDeletedTasks(JSON.parse(storedDeletedTasks));
+  //         setDeletedTasksList(JSON.parse(storedDeletedTasks));
   //       }
   //     } catch (error) {
   //       console.error('Error retrieving deleted tasks from AsyncStorage:', error);
@@ -249,7 +204,7 @@ function MainContextProvider({ children }) {
       const taskToDelete = pendingTaskList.find(task => task._id === taskId);
 
       // Update the list of tasks to delete
-      setDeletedTasks(prev => [...prev, ...tasksToDelete]);
+      setDeletedTasksList(prev => [...prev, ...tasksToDelete]);
 
       // Add the task to the list of tasks to delete
       addToTasksToDelete(taskId);
@@ -266,7 +221,7 @@ function MainContextProvider({ children }) {
       }
 
       // Perform UI updates (if needed)
-      // setDeletedTasks(prev => [...prev, taskId]);
+      // setDeletedTasksList(prev => [...prev, taskId]);
     } catch (error) {
       console.error('Error in deleteTask:', error);
     }
@@ -472,7 +427,7 @@ function MainContextProvider({ children }) {
     setCompletedTaskList((prevList) => prevList.filter((task) => task._id !== unCompleteTaskId))
     setTasksToAdd((prevList) => [...prevList, unCompleteTask])
     setPendingTaskList((prevList) => [...prevList, unCompleteTask])
-    
+
     // Check if the edited task is already in tasksToComplete or tasksToDelete
     const isTaskInTaskToComplete = tasksToComplete.some((task) => task._id === unCompleteTaskId);
     const isTaskInTaskToDelete = tasksToDelete.some((task) => task._id === unCompleteTaskId);
@@ -519,7 +474,19 @@ function MainContextProvider({ children }) {
       console.error('An error occurred while marking the task as pending:', error);
     }
   };
-
+  // Define a function to determine the task list type
+  function getTaskListType(selectedTask, pendingTaskList, completedTaskList, deletedTaskList) {
+    if (selectedTask === pendingTaskList) {
+      return "Pending Tasks";
+    } else if (selectedTask === completedTaskList) {
+      return "Completed Tasks";
+    } else if (selectedTask === deletedTaskList) {
+      return "Deleted Tasks";
+    } else {
+      // Handle any other cases or return a default value
+      return "Unknown";
+    }
+  }
 
   // const handleEditTask = async (userEmail, updatedTask) => {
   //   try {
@@ -566,21 +533,24 @@ function MainContextProvider({ children }) {
   };
   const loadTasks = async (userEmail) => {
     try {
-      const [pendingResponse, completedResponse, allTasksResponse] = await Promise.all([
+      const [pendingResponse, completedResponse, allTasksResponse, deletedResponse] = await Promise.all([
         fetch(`${Server_path}/api/tasks/getPendingTaskList/${userEmail}`),
         fetch(`${Server_path}/api/tasks/getCompletedTaskList/${userEmail}`),
-        fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`)
+        fetch(`${Server_path}/api/tasks/allTasks/${userEmail}`),
+        fetch(`${Server_path}/api/tasks/getRemovedTaskList/${userEmail}`)
       ]);
 
-      if (pendingResponse.ok && completedResponse.ok && allTasksResponse.ok) {
+      if (pendingResponse.ok && completedResponse.ok && allTasksResponse.ok && deletedResponse.ok) {
         const pendingData = await pendingResponse.json();
         const completedData = await completedResponse.json();
         const allData = await allTasksResponse.json();
+        const deletedData = await deletedResponse.json();
 
         // Update local tasks
         setPendingTaskList(pendingData);
         setCompletedTaskList(completedData);
         setAllTasks(allData);
+        setDeletedTasksList(deletedData);
       } else {
         throw new Error('Request failed');
       }
@@ -594,7 +564,7 @@ function MainContextProvider({ children }) {
 
   const undoDelete = (taskToUndo) => {
     // Logic to add the deleted task back to the task list
-    setDeletedTasks(prevDeletedTasks => prevDeletedTasks.filter(task => task._id !== taskToUndo._id));
+    setDeletedTasksList(prevDeletedTasks => prevDeletedTasks.filter(task => task._id !== taskToUndo._id));
     setPendingTaskList(prevPendingTasks => [...prevPendingTasks, taskToUndo]);
 
     // Clear the undo state
@@ -616,10 +586,10 @@ function MainContextProvider({ children }) {
   const MainContextValues = {
     isLoading, setIsLoading, setAuthenticated, authenticated, setUserName, userName, userId,
     setUserId, userEmail, setUserEmail, capitalizeFirstLetter, setCompletedTaskList,
-    setPendingTaskList, pendingTaskList, completedTaskList, allTasks, setAllTasks, userImage,
+    setPendingTaskList, pendingTaskList, deletedTasksList, completedTaskList, allTasks, setAllTasks, userImage,
     setUserImage, deleteTask, completeTask, handleOnCancel, handleEdit, selectedTask, handleEditTask,
     isEditModalVisible, getTodayTasks, getCurrentWeekTasks, loadTasks, addTask,
-    showUndoMessage, undoAction, undoTaskData, undoComplete, undoDelete, setShowUndoMessage, unComplete
+    showUndoMessage, undoAction, undoTaskData, undoComplete, undoDelete, setShowUndoMessage, unComplete, getTaskListType
 
     // storeLocalTasks, loadLocalTasks
 

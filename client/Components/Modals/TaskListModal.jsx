@@ -6,7 +6,7 @@ import { MainContext } from '../Context/MainContextProvider';
 import EditTaskModal from './EditTaskModal';
 import COLORS from '../../constants/colors';
 
-function TaskListModal({ isVisible, taskList, onClose, isPendingTasks }) {
+function TaskListModal({ isVisible, taskList, onClose, taskListType }) {
   const { deleteTask, completeTask, unComplete } = useContext(MainContext);
   const [expandedItemId, setExpandedItemId] = useState(null);
 
@@ -21,7 +21,7 @@ function TaskListModal({ isVisible, taskList, onClose, isPendingTasks }) {
             <Ionicons name="close-circle" size={24} color={COLORS.secondary} />
           </TouchableOpacity>
           <Text style={styles.header}>
-            {isPendingTasks ? 'Pending Tasks' : 'Completed Tasks'}
+            {taskListType}
           </Text>
           <FlatList
             data={taskList}
@@ -99,6 +99,7 @@ function TaskListModal({ isVisible, taskList, onClose, isPendingTasks }) {
                       // <Ionicons name="md-create" size={24} onPress={() => handleEdit(item._id)} color={COLORS.secondary} style={styles.iconContainer} />
                       <Text style={styles.emoji} onPress={() => {
                         Vibration.vibrate(5);
+
                         // Add logic here to move the task back to pending tasks
                         // This is where you would call a function to change the task status
                       }} >📝</Text>
