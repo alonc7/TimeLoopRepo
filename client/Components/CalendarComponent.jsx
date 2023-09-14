@@ -1,3 +1,21 @@
+/**
+ * CalendarComponent Component
+ *
+ * This component displays a calendar with marked dates representing tasks.
+ *
+ * @component
+ * @example
+ * // Example Usage:
+ * import CalendarComponent from './CalendarComponent';
+ * // ...
+ * <CalendarComponent tasks={[]} onDayPress={() => {}} selectedDate="2023-09-10" />
+ *
+ * @param {object} tasks - An array of tasks with start dates and priorities.
+ * @param {function} onDayPress - A function to handle day press events.
+ * @param {string} selectedDate - The currently selected date.
+ *
+ * @returns {JSX.Element} A React component that displays the CalendarComponent.
+ */
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Calendar } from 'react-native-calendars';
@@ -5,11 +23,13 @@ import COLORS from '../constants/colors';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const CalendarComponent = ({ tasks, onDayPress, selectedDate }) => {
-  // Thank god for Helper function to convert date format from F***ing "YYYY/MM/DD" to WHAT-F***ing-difference-"YYYY-MM-DD"
+  // Function to convert date format from "YYYY/MM/DD" to "YYYY-MM-DD"
   const convertDateFormat = (dateString) => {
     const [year, month, day] = dateString.split('/');
-    return `${year}-${month?.padStart(2, '0')}-${day?.padStart(2, '0')}`; // padStart = method in JS strings. helps with placing 0 in single digit field.
+    return `${year}-${month?.padStart(2, '0')}-${day?.padStart(2, '0')}`;
   };
+
+  // Function to mark dates with tasks
   const markDates = () => {
     const markedDates = {};
     const MAX_DOTS_PER_DATE = 3;
@@ -22,7 +42,6 @@ const CalendarComponent = ({ tasks, onDayPress, selectedDate }) => {
       markedDates[convertedDate] = markedDates[convertedDate] || { dots: [] };
 
       if (markedDates[convertedDate].dots.length < MAX_DOTS_PER_DATE) {
-
         // Add the dot for the current task's priority to the dots array
         markedDates[convertedDate].dots.push({
           key: task._id,
@@ -67,17 +86,14 @@ const CalendarComponent = ({ tasks, onDayPress, selectedDate }) => {
         markedDates={markDates()}
         // Handler for day press
         onDayPress={onDayPress}
-        style={styles.CalendarContainer}
+        style={styles.calendarContainer}
       />
     </View>
   );
 };
 
-export default CalendarComponent;
-
 const styles = StyleSheet.create({
-
-  CalendarContainer: {
+  calendarContainer: {
     marginTop: 25,
     padding: 15,
     marginBottom: 15,
@@ -86,5 +102,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderColor: "lightblue",
     borderWidth: 3,
-  }
-})
+  },
+});
+
+export default CalendarComponent;

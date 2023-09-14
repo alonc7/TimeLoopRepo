@@ -1,26 +1,71 @@
-import React, { useRef, useState, useContext } from 'react';
-import { StyleSheet, View, Text, Pressable, SafeAreaView, Animated, Alert } from 'react-native';
+/**
+ * GoalItem component displays task details, allows task completion, and editing.
+ * @param {Object} props - Component props containing task details.
+ * @returns {JSX.Element} A React component rendering a task item.
+ */
+
+import React, { useRef, useState, useContext, useEffect } from 'react';
+import { StyleSheet, View, Text, Pressable, SafeAreaView, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
 import { MainContext } from '../Components/Context/MainContextProvider';
-import { Server_path } from '../utils/api-url';
 import { LinearGradient } from 'expo-linear-gradient';
 import EditTaskModal from './Modals/EditTaskModal';
 
 // import AnimatedText from 'react-native-paper/lib/typescript/src/components/Typography/AnimatedText';
 
 function GoalItem(props) {
-  const { task_id, text, description, startDate, endDate, startHour, endHour } = props;
+  // Destructure props
+  const { task_id, text, description, startDate, endDate, startHour, endHour, showLocalUndoMessageInParent } = props;
+
+  // States and context
   const [completed, setCompleted] = useState(false);
   const { userEmail, setPendingTaskList, completeTask, deleteTask, handleOnCancel, handleEdit, selectedTask, handleEditTask, isEditModalVisible } = useContext(MainContext);
 
+  const [showLocalUndoMessageTimer, setShowLocalUndoMessageTimer] = useState(null);
+
+  // Animations
   const lineThroughAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
 
+  // Handles the deletion of a task.//
   function handleDeleteItem() {
+    // showLocalUndoMessageInParent(); // Call the function to trigger the message in parent
     deleteTask(task_id);
   };
 
+
+  // Function to start the timer when the delete button is pressed
+  // function handleDeleteItem() {
+  //   showLocalUndoMessageInParent(); // Call the function to trigger the message in parent
+
+  //   // Start a timer to hide the message after a duration (2000 milliseconds)
+  //   const timer = setTimeout(() => {
+  //     setShowLocalUndoMessageTimer(null); // Clear the timer
+  //   }, 2000); // Adjust the duration as needed (2000ms = 2 seconds)
+
+  //   // // Save the timer reference in state
+  //   // setShowLocalUndoMessageTimer(timer);
+  //   // console.log(showLocalUndoMessageTimer);
+  //   deleteTask(task_id)
+  // };
+  // Add a useEffect to clear the timer when the component unmounts or when showLocalUndoMessageTimer changes
+  // useEffect(() => {
+  //   if (!showLocalUndoMessageTimer) {
+  //     showLocalUndoMessageInParent(); // Call the function to trigger the message in parent
+
+  //     // Clear the timer when showLocalUndoMessageTimer is null or undefined
+  //     clearTimeout(showLocalUndoMessageTimer);
+  //     return
+  //   }
+
+  // Cleanup function
+  //   return () => {
+  //     if (showLocalUndoMessageTimer) {
+  //       clearTimeout(showLocalUndoMessageTimer);
+  //     }
+  //   };
+  // }, [showLocalUndoMessageTimer]);
   // Function to handle the completion toggle
   function toggleCompletion() {
     setCompleted(!completed);
@@ -57,7 +102,7 @@ function GoalItem(props) {
 
 
 
-
+  // Set border color based on priority
   let borderColor;
   switch (props.priority) {
     case 'high':

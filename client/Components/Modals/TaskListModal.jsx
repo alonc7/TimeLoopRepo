@@ -5,11 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { MainContext } from '../Context/MainContextProvider';
 import EditTaskModal from './EditTaskModal';
 import COLORS from '../../constants/colors';
-
 function TaskListModal({ isVisible, taskList, onClose, taskListType }) {
-  const { deleteTask, completeTask, unComplete } = useContext(MainContext);
+  const { deleteTask, completeTask, unComplete, unDelete } = useContext(MainContext);
   const [expandedItemId, setExpandedItemId] = useState(null);
 
+  const isCompletedTasks = taskListType === 'Completed Tasks';
+  const isDeletedTasks = taskListType === 'Deleted Tasks';
   return (
     <Modal visible={isVisible} animationType="slide" onDismiss={onClose} transparent={true} onRequestClose={onClose}>
       <View style={styles.modalBackground}>
@@ -55,57 +56,53 @@ function TaskListModal({ isVisible, taskList, onClose, taskListType }) {
                   )}
                 </View>
                 <View style={styles.taskFooter}>
-                  <TouchableOpacity style={styles.iconContainer}>
-                    {item.status === 'completed' ? (
+                  {taskListType === 'Pending Tasks' && (
+                    <>
+                      <TouchableOpacity style={styles.iconContainer}>
+                        <Text onPress={() => {
+                          Vibration.vibrate(50);
+                          completeTask(item._id);
+                        }} style={styles.emoji}>✅</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.iconContainer}>
+                        <Text onPress={() => {
+                          Vibration.vibrate(50);
+                          deleteTask(item._id)
+                        }} style={styles.emoji}>🗑️</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.iconContainer} onPress={() => handleEdit(item._id)} >
+
+
+                        <Text onPress={() => {
+                          Vibration.vibrate(50);
+                          // Add logic for pending tasks
+
+                        }} style={styles.emoji}>📝</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+
+                  {isCompletedTasks && (
+                    <TouchableOpacity style={styles.iconContainer}>
                       <Text onPress={() => {
                         Vibration.vibrate(5);
                         unComplete(item);
-                        const message = item.status === 'completed' ? 'Task reverted to pending' : 'Task completed';
-                        ToastAndroid.show(message, ToastAndroid.SHORT);
+                        ToastAndroid.show('Task reverted to pending', ToastAndroid.SHORT);
                       }} style={styles.emoji}>↩️</Text>
-                    ) : (
+                    </TouchableOpacity>
+                  )}
+
+                  {isDeletedTasks && (
+                    <TouchableOpacity style={styles.iconContainer}>
                       <Text onPress={() => {
                         Vibration.vibrate(5);
-                        completeTask(item._id);
-                      }} style={styles.emoji}>✅</Text>
-                    )}
-                  </TouchableOpacity>
-                  <TouchableOpacity>
-                    {item.status === 'completed' ? (
-                      <Text style={styles.emoji} onPress={() => {
-                        Vibration.vibrate(50);
-                        unComplete(item)
-
-                        // Add logic here to move the task back to pending tasks
-                        // This is where you would call a function to change the task status
-                      }} >♻️</Text>)
-                      // <AntDesign name="back" size={24} color={COLORS.secondary} 
-                      : (
-                        <Text style={styles.emoji} onPress={() => {
-                          Vibration.vibrate(5);
-                          deleteTask(item._id);
-
-                          // Add logic here to move the task back to pending tasks
-                          // This is where you would call a function to change the task status
-                        }} >🗑️</Text>
-                        // <Ionicons name="trash" size={24} color={COLORS.secondary} onPress={() => {
-                        //   Vibration.vibrate(5);
-                        //   deleteTask(item._id);
-                        // }} />
-                      )}
-                  </TouchableOpacity>
-                  <TouchableOpacity>
-                    {item.status === 'completed' ? null : (
-                      // <Ionicons name="md-create" size={24} onPress={() => handleEdit(item._id)} color={COLORS.secondary} style={styles.iconContainer} />
-                      <Text style={styles.emoji} onPress={() => {
-                        Vibration.vibrate(5);
-
-                        // Add logic here to move the task back to pending tasks
-                        // This is where you would call a function to change the task status
-                      }} >📝</Text>
-                    )}
-                  </TouchableOpacity>
+                        unDelete(item)
+                        ToastAndroid.show('Task reverted to pending', ToastAndroid.SHORT);
+                      }} style={styles.emoji}>♻️</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
+
               </TouchableOpacity>
             )}
             keyExtractor={(item) => item._id}

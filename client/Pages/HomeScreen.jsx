@@ -56,6 +56,9 @@ function HomeScreen() {
         setShowTodayTasks(!showTodayTasks);
     }
 
+
+
+
     // Function: toggleCurrWeekTasks
     // Purpose: Toggles the display of current week's tasks in the component.
     const toggleCurrWeekTasks = () => {
@@ -220,7 +223,7 @@ function HomeScreen() {
                         {showTodayTasks && (
                             <FlatList // this flat list is to dispay tasks of today. 
                                 data={getTodayTasks()}
-                                keyExtractor={(item, index) => index.toString()}
+                                keyExtractor={(index) => index.toString()}
                                 renderItem={({ item }) => (
                                     <TouchableOpacity>
                                         <View style={[styles.box, { backgroundColor: '#7DE2D1' }]}>
@@ -236,7 +239,7 @@ function HomeScreen() {
                         {showCurrWeekTasks && (
                             <FlatList // this flat list is to dispay tasks of today. 
                                 data={getCurrentWeekTasks()}
-                                keyExtractor={(item, index) => index.toString()}
+                                keyExtractor={(item, index) => item._id || index.toString()}
                                 renderItem={({ item }) => (
                                     <TouchableOpacity>
                                         <View style={[styles.box, { backgroundColor: '#7DE2D1' }]}>
@@ -249,7 +252,7 @@ function HomeScreen() {
                         <View >
                             <FlatList
                                 data={() => getCurrentWeekTasks()}
-                                keyExtractor={(item, index) => index.toString()}
+                                keyExtractor={(item, index) => item._id || index.toString()}
                                 renderItem={({ item }) => (
                                     <TouchableOpacity>
                                         <View style={[styles.box, { backgroundColor: '#7DE2D1' }]}>

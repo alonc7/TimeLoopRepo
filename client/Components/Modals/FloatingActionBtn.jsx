@@ -49,11 +49,11 @@ export default function FloatingActionBtn() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.example}>Floating Action example</Text>
       <FloatingAction
         color={COLORS.secondary}
         position={'right'}
         buttonSize={34}
+        overlayColor="transparent" // Set overlayColor to "transparent" to remove background color
 
         floatingIcon={<MaterialIcons name="list" size={34} color={COLORS.white} />}
         actions={actions}

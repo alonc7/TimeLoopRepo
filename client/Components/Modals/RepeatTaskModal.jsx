@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, TextInput, Pressable } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import moment from 'moment'; // Import moment.js library
-
+import moment from 'moment';
+import COLORS from '../../constants/colors';
 function RepeatTaskModal(props) {
-    // State variables
     const { repeatOption, selectedDays, repeatSelectedTime, updateRepeatOption, updateSelectedDays, updateRepeatSelectedTime } = props;
     const [isTimePickerVisible, setIsTimePickerVisible] = useState(false);
     const DAYS_SELECT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-    // Handle changing the repeat option
     const handleRepeatOptionChange = (option) => {
         updateRepeatOption(option);
-        // Reset visibility and values when changing repeat option
         setIsTimePickerVisible(false);
     };
 
-    // Handle day selection
     const handleDaySelection = (day) => {
         const updatedDays = selectedDays.includes(day)
             ? selectedDays.filter((selectedDay) => selectedDay !== day)
@@ -25,42 +21,32 @@ function RepeatTaskModal(props) {
         updateSelectedDays(updatedDays);
     };
 
-    // Handle changing the time
     const handleTimeChange = (event, selectedDate) => {
         let formattedTime = formatTimeTo24Hour(selectedDate?.toLocaleTimeString());
         if (event.type === 'set') {
             updateRepeatSelectedTime(formattedTime);
-            setIsTimePickerVisible(false); // Close the time picker on 'OK'
+            setIsTimePickerVisible(false);
         }
     };
 
-    // Function to format time to 24-hour format
     const formatTimeTo24Hour = (time) => {
-        // Assuming the input time is in "h:mm:ss A" format
         return moment(time, 'h:mm:ss A').format('HH:mm:ss');
     };
 
-    // Handle saving the selected options
     const handleSave = () => {
-        // const formattedTime = formatTimeTo24Hour(repeatSelectedTime?.toLocaleTimeString());
-
-        // Pass the selected options to the parent component
         props.onSave({
             repeatOption,
             selectedDays,
             repeatSelectedTime,
-
         });
     };
 
-
     return (
         <Modal visible={props.visible} animationType="slide" transparent={true}>
-            <View style={styles.modalContainer}>
+            <View style={styles.modalBackground}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalHeader}>Repeat Task</Text>
 
-                    {/* Repeat Options Dropdown */}
                     <View style={styles.dropdownContainer}>
                         <Picker
                             selectedValue={repeatOption}
@@ -68,13 +54,11 @@ function RepeatTaskModal(props) {
                         >
                             <Picker.Item label="none" value="none" />
                             <Picker.Item label="Daily" value="daily" />
-                            <Picker.Item label="Custome" value="custome" />
+                            <Picker.Item label="Custom" value="custom" />
                         </Picker>
                     </View>
 
-                    {/* Day Selection */}
-                    {repeatOption === 'custome' && (
-
+                    {repeatOption === 'custom' && (
                         <View style={styles.daySelectionContainer}>
                             {DAYS_SELECT.map((day, index) => (
                                 <Pressable
@@ -91,7 +75,6 @@ function RepeatTaskModal(props) {
                         </View>
                     )}
 
-                    {/* Time Picker */}
                     <Text
                         onPress={() => setIsTimePickerVisible(true)}
                         style={styles.timeLabel}
@@ -106,16 +89,13 @@ function RepeatTaskModal(props) {
                         />
                     )}
                     {isTimePickerVisible && (
-                        console.log(repeatSelectedTime),
                         <DateTimePicker
-                            value={repeatSelectedTime ? (new Date(repeatSelectedTime)) : new Date()}
+                            value={repeatSelectedTime ? new Date(repeatSelectedTime) : new Date()}
                             mode="time"
                             onChange={handleTimeChange}
                         />
                     )}
 
-
-                    {/* Save and Cancel Buttons */}
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
                             <Text style={styles.buttonText}>Save</Text>
@@ -126,24 +106,23 @@ function RepeatTaskModal(props) {
                     </View>
                 </View>
             </View>
-        </Modal >
+        </Modal>
     );
 }
 
-export default RepeatTaskModal;
-
-const styles = {
-    modalContainer: {
+const styles = StyleSheet.create({
+    modalBackground: {
         flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
         backgroundColor: 'white',
+        borderRadius: 12,
         padding: 20,
-        borderRadius: 10,
         width: '80%',
+        maxHeight: '80%',
     },
     modalHeader: {
         fontSize: 18,
@@ -152,7 +131,7 @@ const styles = {
     },
     dropdownContainer: {
         borderWidth: 1,
-        borderColor: 'lightgray',
+        borderColor: COLORS.secondary,
         borderRadius: 5,
     },
     daySelectionContainer: {
@@ -168,7 +147,6 @@ const styles = {
         height: 40,
         justifyContent: 'center',
         alignItems: 'center',
-
     },
     selectedDayButton: {
         backgroundColor: 'lightblue',
@@ -180,49 +158,20 @@ const styles = {
         marginTop: 10,
         fontSize: 16,
     },
-    endsLabel: {
-        marginTop: 10,
-        fontSize: 16,
-    },
-    endOptionsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        marginVertical: 10,
-    },
-    endOptionButton: {
-        borderWidth: 1,
-        borderColor: 'lightgray',
-        borderRadius: 5,
-        padding: 5,
-        width: 60,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    selectedEndOption: {
-        backgroundColor: 'lightblue',
-    },
-    endDateLabel: {
-        marginTop: 10,
-        fontSize: 16,
-    },
-    occurrencesLabel: {
-        marginTop: 10,
-        fontSize: 16,
-    },
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 20,
     },
     saveButton: {
-        backgroundColor: 'blue',
+        backgroundColor: COLORS.primary,
         padding: 10,
         borderRadius: 5,
         flex: 1,
         alignItems: 'center',
     },
     cancelButton: {
-        backgroundColor: 'gray',
+        backgroundColor: COLORS.secondary,
         padding: 10,
         borderRadius: 5,
         flex: 1,
@@ -233,4 +182,6 @@ const styles = {
         color: 'white',
         fontWeight: 'bold',
     },
-};
+});
+
+export default RepeatTaskModal;

@@ -5,6 +5,7 @@ import NotRegistered from './AuthComp/NotRegistered';
 import { MainContext } from './Context/MainContextProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, StyleSheet, View, Text } from 'react-native';
+import LottieView from 'lottie-react-native';
 
 
 import COLORS from '../constants/colors';
@@ -40,31 +41,27 @@ export default function Main() {
             setIsLoading(false); // Regardless of success or error, set loading state to false
         }
     };
-    const logout = async () => {
-        try {
-            // Remove the user data from AsyncStorage
-            await AsyncStorage.removeItem('userData');
-            // Set authenticated state to false and clear user details
-            setAuthenticated(false);
-            setUserName(null);
-            setUserEmail(null);
-        } catch (error) {
-            console.log('Error logging out:', error);
-            // You can handle the error here (e.g., show an error message)
-        }
-    };
+
 
 
     const getContent = () => {
         if (isLoading) {
             return (
                 <View style={styles.loadingContainer}>
-                    <View style={styles.loadingMessageContainer}>
-                        <ActivityIndicator size="large" color={COLORS.red} />
-                        <Text style={styles.messageText}>
-                            Loading data{'\n'}{'\n'} this might take a few seconds
-                        </Text>
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginBottom: '30%' }}>
+                        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', marginBottom: '30%' }}>
+                            <LottieView style={{ width: '80%', height: '80%', aspectRatio: 1, alignItems: 'center', justifyContent: 'center' }}
+                                source={require('../assets/Lottie/loading.json')}
+                                autoPlay
+                                loop
+                            />
+                            <Text style={styles.messageText}>
+                                Loading data{'\n'}{'\n'} this might take a few seconds
+                            </Text>
+                        </View>
+
                     </View>
+                    {/* </View> */}
                 </View>
             );
         } else if (error) {
@@ -83,6 +80,7 @@ export default function Main() {
         // <NavigationContainer>
         <>
             {getContent()}
+
             {/* <NotificationComp /> */}
         </>
         // {/* <Text style={styles.messageText}>"Please wait while we gather the information. This may take a few seconds. Thank you for your patience."</Text> */}
@@ -119,7 +117,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '900',
         textAlign: 'center',
-        color: COLORS.white
+        color: COLORS.primary
     },
     loadingContainer: {
         flex: 1,

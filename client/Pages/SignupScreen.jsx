@@ -1,3 +1,18 @@
+/**
+ * Signup Component
+ *
+ * This component provides a user interface for user registration, including form validation and error handling.
+ *
+ * @component
+ * @example
+ * // Example Usage:
+ * import Signup from './Signup';
+ * // ...
+ * <Signup />
+ *
+ * @param {Object} navigation - The navigation object for routing between screens.
+ * @returns {JSX.Element} A React component that displays the Signup screen.
+ */
 import React, { useState } from 'react';
 import {
     View,
@@ -6,6 +21,7 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
+    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -53,8 +69,7 @@ const Signup = ({ navigation }) => {
                 navigation.navigate('Login');
             } else {
                 const data = await response.json();
-                console.log(data);
-                // setSignInStatus(data.message);
+                Alert.alert(data)
             }
         } catch (error) {
             // Handle network errors or other exceptions

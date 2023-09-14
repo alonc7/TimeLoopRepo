@@ -1,3 +1,17 @@
+/**
+ * ScheduleScreen Component
+ *
+ * This component displays a calendar and tasks associated with selected dates.
+ *
+ * @component
+ * @example
+ * // Example Usage:
+ * import ScheduleScreen from './ScheduleScreen';
+ * // ...
+ * <ScheduleScreen />
+ *
+ * @returns {JSX.Element} A React component that displays the ScheduleScreen.
+ */
 import React, { useState, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import CalendarComponent from '../Components/CalendarComponent';

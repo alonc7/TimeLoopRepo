@@ -159,13 +159,13 @@ router.put('/delete', async (req, res) => {
 
 router.put('/pendTask', async (req, res) => {
     try {
-        const { userEmail, taskId } = req.body;
+        const { userEmail, updatedTaskId } = req.body;
         const user = await User.findUserByEmail(userEmail);
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
         if (user) {
-            await Task.pendTask(user, taskId);
+            await Task.pendTask(user, updatedTaskId);
             res.status(201).json('Task pended successfully');
         }
     } catch (error) {

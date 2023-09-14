@@ -189,8 +189,6 @@ function TaskInput(props) {
     // setRepeatOption(repeatOption.repeatOption);
     // setSelectedDays(repeatOption.selectedDays);
     // Handle saving repetition settings in your task data or logic
-    console.log('Repeat Option:', repeatOption);
-
     // Close the RepeatTaskModal and set isRepeatTask to true
     setIsRepeatTaskVissible(false);
     setisRepeatTask(true);
@@ -255,17 +253,14 @@ function TaskInput(props) {
 
   // Define functions to update the state
   const updateRepeatOption = (option) => {
-    console.log(option);
     setRepeatOption(option);
   };
 
   const updateSelectedDays = (days) => {
-    console.log(days);
     setSelectedDays(days);
   };
 
   const updateRepeatSelectedTime = (time) => {
-    console.log(time);
     setRepeatSelectedTime(time);
   };
 
@@ -398,14 +393,11 @@ function TaskInput(props) {
                   //---------------------//
                   repeatOption={repeatOption}
                   updateRepeatOption={updateRepeatOption}
-                  // setRepeatOption={setRepeatOption}
                   //---------------------//
                   selectedDays={selectedDays}
-                  // setSelectedDays={setSelectedDays}
                   updateSelectedDays={updateSelectedDays}
                   //---------------------//
                   repeatSelectedTime={repeatSelectedTime}
-                  // setRepeatSelectedTime={setRepeatSelectedTime}
                   updateRepeatSelectedTime={updateRepeatSelectedTime}
                 />
               )}

@@ -12,7 +12,7 @@ function EditTaskModal(props) {
     const [editedStartTime, setEditedStartTime] = useState(task?.startTime);
     const [editedDueTime, setEditedDueTime] = useState(task?.dueTime);
     const [selectedPriority, setSelectedPriority] = useState(task?.priority); // State for selected priority
-    const [isDropDownOpen, setIsDropDownOpen] = useState(false); // State for selected priority
+    const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
     const priorityOptions = [
         { label: 'High', value: 'high' },
