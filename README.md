@@ -1,4 +1,3 @@
-TimeLoop
 TimeLoop is a simple and efficient time tracking tool designed to help individuals and teams keep track of their tasks, projects, and time management. With TimeLoop, you can easily monitor your activities, analyze your productivity, and make more informed decisions to optimize your time.
 
 Technologies
